@@ -1,11 +1,5 @@
 package com.example.medlinkapp.model
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.medlinkapp.data.AuthRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 enum class UserRole {
     PATIENT, DOCTOR, CAREGIVER
 }
@@ -17,24 +11,37 @@ sealed class LoginState {
     data class Error(val message: String) : LoginState()
 }
 
-class LoginViewModel(private val repository: AuthRepository = AuthRepository()) : ViewModel() {
 
-    private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
-    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
+// Represents the data needed for PatientEntryForm and PatientScreen
+data class Patient(
+    val patientId: String,
+    val name: String,
+    val dateOfBirth: String,
+    val medicalHistory: List<String> = emptyList()
+)
 
-    fun login(email: String, password: String) {
-        _loginState.value = LoginState.Loading
+// Represents data from DrugRegistrationManager and ManagePrescription
+data class Prescription(
+    val drugName: String,
+    val drugDosage: Int, // e.g., in mg
+    val drugFreq: Int,   // e.g., times per day
+    val drugDuration: Int, // e.g., in days
+    val drugStock: Int
+)
 
-        viewModelScope.launch {
-            val result = repository.authenticateUser(email, password)
+// Represents data from AppointmentForm
+data class Appointment(
+    val appointmentId: String,
+    val patientId: String,
+    val doctorName: String,
+    val date: LocalDateTime,
+    val reason: String
+)
 
-            result.onSuccess { role ->
-                // In a real app, save the token to EncryptedSharedPreferences here
-                _loginState.value = LoginState.Success(role, "mock_jwt_token_123")
-            }.onFailure { exception ->
-                _loginState.value = LoginState.Error(exception.message ?: "An unknown error occurred")
-            }
-        }
-    }
-
-}
+// Represents data for DeviceManager and PatientComplianceStatusScreen
+data class DeviceData(
+    val deviceId: String,
+    val measurementValue: Int,
+    val measurementType: String,
+    val timestamp: LocalDateTime
+)

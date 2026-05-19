@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.medlinkapp.model.UserRole // Adjust import based on your structure
 import com.example.medlinkapp.ui.login.LoginScreen // Adjust import based on your structure
+import com.example.medlinkapp.ui.patient.PatientDashboardScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,9 +68,23 @@ fun AppNavigation() {
             Text(text = "Doctor Dashboard") // Replace with actual DoctorScreen() later
         }
 
-        // 3. Patient Dashboard (Placeholder)
+// 3. Patient Dashboard
         composable("patient_dashboard") {
-            Text(text = "Patient Dashboard") // Replace with actual PatientScreen() later
+            PatientDashboardScreen(
+                onNavigateToMedications = { navController.navigate("medications_screen") },
+                onNavigateToAppointments = { navController.navigate("appointments_screen") },
+                onNavigateToResults = { /* Navigate to results */ },
+                onNavigateToMessages = { /* Navigate to messages */ },
+                onTriggerSOS = {
+                    // In a real app, this would trigger an Alert Dialog or call the ViewModel
+                    println("SOS Triggered!")
+                }
+            )
+        }
+
+        // Placeholder for the next screen we build
+        composable("medications_screen") {
+            Text("Medications Detail Screen coming soon...")
         }
 
         // 4. Caregiver Dashboard (Placeholder)
