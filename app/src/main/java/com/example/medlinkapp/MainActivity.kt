@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.medlinkapp.model.UserRole // Adjust import based on your structure
 import com.example.medlinkapp.ui.login.LoginScreen // Adjust import based on your structure
+import com.example.medlinkapp.ui.medication.MedicationManagerScreen
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
 
 class MainActivity : ComponentActivity() {
@@ -82,9 +83,10 @@ fun AppNavigation() {
             )
         }
 
-        // Placeholder for the next screen we build
         composable("medications_screen") {
-            Text("Medications Detail Screen coming soon...")
+            MedicationManagerScreen(
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         // 4. Caregiver Dashboard (Placeholder)
