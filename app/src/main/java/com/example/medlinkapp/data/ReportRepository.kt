@@ -3,7 +3,7 @@ package com.example.medlinkapp.data
 import com.example.medlinkapp.model.*
 import java.time.LocalDateTime
 
-class ReportRepository(private val dbManager: DBManager) {
+class ReportRepository(private val dbManager: DBManager = MockDBManager()) {
 
     suspend fun getPatient(patientId: String): Result<Patient> {
         return dbManager.getPatientInformation(patientId)

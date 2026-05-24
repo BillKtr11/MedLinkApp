@@ -23,7 +23,7 @@ enum class ReportStep {
     PATIENT_SEARCH, DATE_SELECTION, REPORT_READY
 }
 
-class ReportViewModel(private val repository: ReportRepository) : ViewModel() {
+class ReportViewModel(private val repository: ReportRepository = ReportRepository()) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ReportUiState>(ReportUiState.Idle)
     val uiState: StateFlow<ReportUiState> = _uiState.asStateFlow()
