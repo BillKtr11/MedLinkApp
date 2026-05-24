@@ -1,12 +1,11 @@
 package com.example.medlinkapp.ui.medication
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import androidx.lifecycle.viewModelScope
+import com.example.medlinkapp.data.DBManager
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-// Data model for the UI state
 data class MedicationUiModel(
     val id: String,
     val name: String,
@@ -19,33 +18,29 @@ data class MedicationUiModel(
 
 class MedicationViewModel : ViewModel() {
 
-    // Mock initial data - in production, fetch this from DBManager
-    private val _medications = MutableStateFlow(
-        listOf(
-            MedicationUiModel("1", "Metformin", "500mg", 14),
-            MedicationUiModel("2", "Lisinopril", "10mg", 5, 7), // Already low stock
-            MedicationUiModel("3", "Simvastatin", "20mg", 30)
+    val medications: StateFlow<List<MedicationUiModel>> = DBManager.medications
+        .map { list ->
+            list.map { 
+                MedicationUiModel(it.id, it.name, it.dosage, it.stockCount, it.lowStockThreshold)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
         )
-    )
-    val medications: StateFlow<List<MedicationUiModel>> = _medications.asStateFlow()
 
     fun takeDose(medId: String) {
-        _medications.update { currentList ->
-            currentList.map { med ->
-                if (med.id == medId && med.stockCount > 0) {
-                    med.copy(stockCount = med.stockCount - 1)
-                } else med
-            }
+        val currentMed = medications.value.find { it.id == medId }
+        if (currentMed != null && currentMed.stockCount > 0) {
+            DBManager.updateStock(medId, currentMed.stockCount - 1)
         }
     }
 
     fun restock(medId: String, amount: Int = 30) {
-        _medications.update { currentList ->
-            currentList.map { med ->
-                if (med.id == medId) {
-                    med.copy(stockCount = med.stockCount + amount)
-                } else med
-            }
+        val currentMed = medications.value.find { it.id == medId }
+        if (currentMed != null) {
+            DBManager.updateStock(medId, currentMed.stockCount + amount)
         }
     }
 }

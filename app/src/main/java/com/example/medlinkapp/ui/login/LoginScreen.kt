@@ -15,18 +15,17 @@ import com.example.medlinkapp.model.UserRole
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (UserRole) -> Unit, // Callback to navigate based on role
+    onLoginSuccess: (UserRole) -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val loginState by viewModel.loginState.collectAsState()
 
-    // Handle navigation when login is successful
     LaunchedEffect(loginState) {
         if (loginState is LoginState.Success) {
             val role = (loginState as LoginState.Success).role
-            onLoginSuccess(role) // e.g., navigate to DoctorScreen or PatientScreen
+            onLoginSuccess(role)
         }
     }
 
@@ -66,7 +65,6 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Show Error Message if present
         if (loginState is LoginState.Error) {
             Text(
                 text = (loginState as LoginState.Error).message,
@@ -75,7 +73,6 @@ fun LoginScreen(
             )
         }
 
-        // Login Button or Loading Indicator
         if (loginState is LoginState.Loading) {
             CircularProgressIndicator()
         } else {

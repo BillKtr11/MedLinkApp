@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,24 +14,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicationManagerScreen(
     viewModel: MedicationViewModel = viewModel(),
-    onBackClick: () -> Boolean
+    onBackClick: () -> Unit
 ) {
     val medications by viewModel.medications.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("My Medications", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(medications) { med ->
-                MedicationCard(
-                    medication = med,
-                    onTakeDose = { viewModel.takeDose(med.id) },
-                    onRestock = { viewModel.restock(med.id, 30) } // Default refill of 30
-                )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("My Medications") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(medications) { med ->
+                    MedicationCard(
+                        medication = med,
+                        onTakeDose = { viewModel.takeDose(med.id) },
+                        onRestock = { viewModel.restock(med.id, 30) }
+                    )
+                }
             }
         }
     }
@@ -42,7 +59,6 @@ fun MedicationCard(
     onTakeDose: () -> Unit,
     onRestock: () -> Unit
 ) {
-    // Change card color slightly if low stock
     val cardColor = if (medication.isLowStock)
         MaterialTheme.colorScheme.errorContainer
     else
@@ -63,7 +79,6 @@ fun MedicationCard(
                     Text(text = medication.dosage, style = MaterialTheme.typography.bodyMedium)
                 }
 
-                // Stock Badge
                 Surface(
                     shape = MaterialTheme.shapes.small,
                     color = if (medication.isLowStock) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
@@ -78,7 +93,6 @@ fun MedicationCard(
                 }
             }
 
-            // Low Stock Warning Alert
             if (medication.isLowStock) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -90,7 +104,6 @@ fun MedicationCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Action Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -102,7 +115,7 @@ fun MedicationCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = onTakeDose,
-                    enabled = medication.stockCount > 0 // Disable if out of stock
+                    enabled = medication.stockCount > 0
                 ) {
                     Text("Take 1 Dose")
                 }
