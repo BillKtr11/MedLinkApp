@@ -1,15 +1,18 @@
 package com.example.medlinkapp.ui.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.medlinkapp.R
 import com.example.medlinkapp.model.LoginState
 import com.example.medlinkapp.model.UserRole
 
@@ -36,6 +39,13 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.medlink),
+            contentDescription = "MedLink Logo",
+            modifier = Modifier
+                .size(150.dp)
+                .padding(bottom = 24.dp)
+        )
         Text(
             text = "Welcome Back",
             style = MaterialTheme.typography.headlineMedium,

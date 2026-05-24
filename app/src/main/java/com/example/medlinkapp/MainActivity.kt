@@ -83,6 +83,11 @@ fun AppNavigation() {
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
                 onTriggerSOS = {
                     println("SOS Triggered!")
+                },
+                onLogout = {
+                    navController.navigate("login_screen") {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
