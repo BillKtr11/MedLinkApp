@@ -132,7 +132,6 @@ fun AddMedicationScreen(
                     Text("Επιβεβαίωση Καταχώρησης")
                 }
             } else {
-                // Success State
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
@@ -160,7 +159,6 @@ fun AddMedicationScreen(
                     TextButton(onClick = {
                         showStockWarning = false
                         viewModel.addMedication(name, dosage, stock.toInt())
-                        // Logic for reminder could be added to DBManager
                         showSuccess = true
                     }) {
                         Text("Ναι")
