@@ -43,4 +43,8 @@ class MedicationViewModel : ViewModel() {
             DBManager.updateStock(medId, currentMed.stockCount + amount)
         }
     }
+
+    fun addMedication(name: String, dosage: String, stock: Int) {
+        DBManager.addMedication(name, dosage, stock)
+    }
 }

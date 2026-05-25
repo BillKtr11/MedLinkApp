@@ -18,13 +18,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.medlinkapp.model.UserRole
 import com.example.medlinkapp.ui.login.LoginScreen
 import com.example.medlinkapp.data.DBManager
-import com.example.medlinkapp.model.UserRole // Adjust import based on your structure
 import com.example.medlinkapp.ui.Screen
-import com.example.medlinkapp.ui.login.LoginScreen // Adjust import based on your structure
 import com.example.medlinkapp.ui.measurement.MeasurementViewModel
 import com.example.medlinkapp.ui.measurement.NewMeasurementScreen
 import com.example.medlinkapp.ui.measurement.MeasurementHistoryScreen
 import com.example.medlinkapp.ui.medication.MedicationManagerScreen
+import com.example.medlinkapp.ui.medication.AddMedicationScreen
+import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
  import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
  import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
@@ -136,7 +136,18 @@ fun AppNavigation() {
         }
         composable("medications_screen") {
             MedicationManagerScreen(
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                onNavigateToAddMedication = { navController.navigate(Screen.AddMedication.route) }
+            )
+        }
+        composable(route = Screen.AddMedication.route) {
+            val medViewModel: MedicationViewModel = viewModel()
+            AddMedicationScreen(
+                viewModel = medViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateHome = {
+                    navController.popBackStack("patient_dashboard", inclusive = false)
+                }
             )
         }
         composable(route = Screen.NewMeasurement.route) {
