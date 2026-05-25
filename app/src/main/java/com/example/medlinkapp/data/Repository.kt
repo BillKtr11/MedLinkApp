@@ -4,7 +4,6 @@ import kotlinx.coroutines.delay
 
 class AuthRepository {
     suspend fun authenticateUser(email: String, password: String): Result<UserRole> {
-        delay(1500) // latency
 
         return when {
             email.isEmpty() || password.isEmpty() -> {

@@ -15,6 +15,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.medlinkapp.model.UserRole
+import com.example.medlinkapp.ui.login.LoginScreen
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.model.UserRole // Adjust import based on your structure
 import com.example.medlinkapp.ui.Screen
@@ -24,6 +26,11 @@ import com.example.medlinkapp.ui.measurement.NewMeasurementScreen
 import com.example.medlinkapp.ui.measurement.MeasurementHistoryScreen
 import com.example.medlinkapp.ui.medication.MedicationManagerScreen
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
+ import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
+ import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
+ import com.example.medlinkapp.ui.doctor.DoctorViewModel
+import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +55,9 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     val navController = rememberNavController()
 
+    // Δημιουργούμε το ViewModel για τις οθόνες του γιατρού
+    val doctorViewModel: DoctorViewModel = viewModel()
+
     NavHost(navController = navController, startDestination = "login_screen") {
 
         // 1. Login Screen
@@ -68,12 +78,45 @@ fun AppNavigation() {
                 }
             )
         }
-// 2. Doctor Dashboard
+
+        // 2. Doctor Dashboard
         composable("doctor_dashboard") {
-            Text(text = "Doctor Dashboard")
+            DoctorDashboardScreen(
+                onNavigateToSearch = {
+                    navController.navigate("doctor_search_screen")
+                },
+                onLogout = {
+                    navController.navigate("login_screen") {
+                        popUpTo("doctor_dashboard") { inclusive = true }
+                    }
+                }
+            )
         }
 
-// 3. Patient Dashboard
+        // 2.1 Αναζήτηση Ασθενή
+        composable("doctor_search_screen") {
+            DoctorSearchScreen(
+                viewModel = doctorViewModel,
+                onPatientSelected = {
+                    navController.navigate("patient_history_screen")
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // 2.2 Ιστορικό Ασθενή
+        composable("patient_history_screen") {
+            PatientHistoryScreen(
+                viewModel = doctorViewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // 3. Patient Dashboard
         composable("patient_dashboard") {
             PatientDashboardScreen(
                 onNavigateToMedications = { navController.navigate("medications_screen") },
