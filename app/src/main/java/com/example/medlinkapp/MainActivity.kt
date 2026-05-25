@@ -15,8 +15,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.medlinkapp.model.LoginState
 import com.example.medlinkapp.model.UserRole
+import com.example.medlinkapp.model.UserData
 import com.example.medlinkapp.ui.login.LoginScreen
+import com.example.medlinkapp.ui.login.RegisterScreen
+import com.example.medlinkapp.ui.login.LoginViewModel
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.ui.Screen
 import com.example.medlinkapp.ui.measurement.MeasurementViewModel
@@ -26,11 +32,10 @@ import com.example.medlinkapp.ui.medication.MedicationManagerScreen
 import com.example.medlinkapp.ui.medication.AddMedicationScreen
 import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
- import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
- import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
- import com.example.medlinkapp.ui.doctor.DoctorViewModel
+import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
+import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
+import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,15 +59,16 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-
-    // Δημιουργούμε το ViewModel για τις οθόνες του γιατρού
+    val loginViewModel: LoginViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
+    
+    val loginState by loginViewModel.loginState.collectAsState()
 
     NavHost(navController = navController, startDestination = "login_screen") {
 
-        // 1. Login Screen
         composable("login_screen") {
             LoginScreen(
+                viewModel = loginViewModel,
                 onLoginSuccess = { role ->
                     when (role) {
                         UserRole.DOCTOR -> navController.navigate("doctor_dashboard") {
@@ -75,25 +81,54 @@ fun AppNavigation() {
                             popUpTo("login_screen") { inclusive = true }
                         }
                     }
+                },
+                onNavigateToRegister = {
+                    loginViewModel.resetState()
+                    navController.navigate("register_screen")
                 }
             )
         }
 
-        // 2. Doctor Dashboard
+        composable("register_screen") {
+            RegisterScreen(
+                viewModel = loginViewModel,
+                onRegisterSuccess = {
+                    val role = (loginViewModel.loginState.value as? LoginState.Success)?.role
+                    when (role) {
+                        UserRole.DOCTOR -> navController.navigate("doctor_dashboard") {
+                            popUpTo("login_screen") { inclusive = true }
+                        }
+                        else -> navController.navigate("patient_dashboard") {
+                            popUpTo("login_screen") { inclusive = true }
+                        }
+                    }
+                },
+                onBackToLogin = {
+                    loginViewModel.resetState()
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable("doctor_dashboard") {
+            val doctorName = (loginState as? LoginState.Success)?.let { success ->
+                DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
+            } ?: "Doctor"
+
             DoctorDashboardScreen(
+                doctorName = doctorName,
                 onNavigateToSearch = {
                     navController.navigate("doctor_search_screen")
                 },
                 onLogout = {
+                    loginViewModel.logout()
                     navController.navigate("login_screen") {
-                        popUpTo("doctor_dashboard") { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
 
-        // 2.1 Αναζήτηση Ασθενή
         composable("doctor_search_screen") {
             DoctorSearchScreen(
                 viewModel = doctorViewModel,
@@ -106,7 +141,6 @@ fun AppNavigation() {
             )
         }
 
-        // 2.2 Ιστορικό Ασθενή
         composable("patient_history_screen") {
             PatientHistoryScreen(
                 viewModel = doctorViewModel,
@@ -116,9 +150,13 @@ fun AppNavigation() {
             )
         }
 
-        // 3. Patient Dashboard
         composable("patient_dashboard") {
+            val patientName = (loginState as? LoginState.Success)?.let { success ->
+                DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
+            } ?: "Patient"
+
             PatientDashboardScreen(
+                patientName = patientName,
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
                 onNavigateToResults = { /* Navigate to results */ },
@@ -128,18 +166,21 @@ fun AppNavigation() {
                     println("SOS Triggered!")
                 },
                 onLogout = {
+                    loginViewModel.logout()
                     navController.navigate("login_screen") {
                         popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
+
         composable("medications_screen") {
             MedicationManagerScreen(
                 onBackClick = { navController.popBackStack() },
                 onNavigateToAddMedication = { navController.navigate(Screen.AddMedication.route) }
             )
         }
+
         composable(route = Screen.AddMedication.route) {
             val medViewModel: MedicationViewModel = viewModel()
             AddMedicationScreen(
@@ -150,6 +191,7 @@ fun AppNavigation() {
                 }
             )
         }
+
         composable(route = Screen.NewMeasurement.route) {
             val measurementViewModel: MeasurementViewModel = viewModel(
                 factory = object : ViewModelProvider.Factory {
@@ -172,12 +214,20 @@ fun AppNavigation() {
         }
 
         composable(route = Screen.History.route) {
+            val measurementViewModel: MeasurementViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        @Suppress("UNCHECKED_CAST")
+                        return MeasurementViewModel(DBManager) as T
+                    }
+                }
+            )
             MeasurementHistoryScreen(
+                viewModel = measurementViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        // 4. Caregiver Dashboard (Placeholder)
         composable("caregiver_dashboard") {
             Text(text = "Caregiver Dashboard")
         }

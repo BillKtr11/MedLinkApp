@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.model.DeviceData
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -22,12 +20,22 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
     private val _uiState = MutableStateFlow<MeasurementState>(MeasurementState.Idle)
     val uiState: StateFlow<MeasurementState> = _uiState.asStateFlow()
 
+    // Filter measurements by current user
+    val measurements: StateFlow<List<DeviceData>> = dbManager.measurements
+        .map { list -> 
+            val amka = dbManager.getCurrentUserAmka()
+            list.filter { it.patientAmka == amka }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     fun submitMeasurement(type: String, valueStr: String, method: String) {
         val value = valueStr.toIntOrNull()
         if (value == null) {
             _uiState.value = MeasurementState.Error("Παρακαλώ εισάγετε μια έγκυρη τιμή.")
             return
         }
+
+        val amka = dbManager.getCurrentUserAmka() ?: return
 
         viewModelScope.launch {
             _uiState.value = MeasurementState.Loading
@@ -44,7 +52,8 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
                 deviceId = if (method == "Bluetooth") "BT_DEVICE_01" else "MANUAL_ENTRY",
                 measurementValue = value,
                 measurementType = type,
-                timestamp = LocalDateTime.now()
+                timestamp = LocalDateTime.now(),
+                patientAmka = amka
             )
 
             val result = dbManager.saveMeasurement(deviceData)

@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun DoctorDashboardScreen(
+    doctorName: String = "",
     onNavigateToSearch: () -> Unit,
     onLogout: () -> Unit
 ) {
@@ -20,7 +21,7 @@ fun DoctorDashboardScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Κεντρικό Μενού Γιατρού",
+            text = "Welcome, $doctorName",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary
         )

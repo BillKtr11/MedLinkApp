@@ -14,15 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.medlinkapp.data.DBManager
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeasurementHistoryScreen(
+    viewModel: MeasurementViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val measurements by DBManager.measurements.collectAsState()
+    val measurements by viewModel.measurements.collectAsState()
     val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
 
     Scaffold(
@@ -43,6 +43,7 @@ fun MeasurementHistoryScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Table Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -71,6 +72,7 @@ fun MeasurementHistoryScreen(
 
             HorizontalDivider()
 
+            // Table Rows
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(measurements.asReversed()) { measurement ->
                     Row(
