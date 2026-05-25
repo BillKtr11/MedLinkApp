@@ -12,7 +12,6 @@ sealed class LoginState {
 }
 
 
-// Represents the data needed for PatientEntryForm and PatientScreen
 data class Patient(
     val patientId: String,
     val name: String,
@@ -20,7 +19,6 @@ data class Patient(
     val medicalHistory: List<String> = emptyList()
 )
 
-// Represents data from DrugRegistrationManager and ManagePrescription
 data class Prescription(
     val drugName: String,
     val drugDosage: Int, // e.g., in mg
@@ -29,7 +27,6 @@ data class Prescription(
     val drugStock: Int
 )
 
-// Represents data from AppointmentForm
 data class Appointment(
     val appointmentId: String,
     val patientId: String,
@@ -38,7 +35,6 @@ data class Appointment(
     val reason: String
 )
 
-// Represents data for DeviceManager and PatientComplianceStatusScreen
 data class DeviceData(
     val deviceId: String,
     val measurementValue: Int,

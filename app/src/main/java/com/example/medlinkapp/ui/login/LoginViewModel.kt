@@ -21,7 +21,6 @@ class LoginViewModel(private val repository: AuthRepository = AuthRepository()) 
             val result = repository.authenticateUser(email, password)
 
             result.onSuccess { role ->
-                // In a real app, save the token to EncryptedSharedPreferences here
                 _loginState.value = LoginState.Success(role, "mock_jwt_token_123")
             }.onFailure { exception ->
                 _loginState.value = LoginState.Error(exception.message ?: "An unknown error occurred")

@@ -9,10 +9,10 @@ class AuthRepository {
             email.isEmpty() || password.isEmpty() -> {
                 Result.failure(Exception("Fields cannot be empty"))
             }
-            email == "doctor@hospital.com" && password == "password123" -> {
+            email == "doctor" && password == "123" -> {
                 Result.success(UserRole.DOCTOR)
             }
-            email == "patient@clinic.com" && password == "password123" -> {
+            email == "patient" && password == "123" -> {
                 Result.success(UserRole.PATIENT)
             }
             else -> {
