@@ -19,6 +19,7 @@ import com.example.medlinkapp.model.UserRole
 @Composable
 fun LoginScreen(
     onLoginSuccess: (UserRole) -> Unit,
+    onNavigateToRegister: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
     var email by remember { mutableStateOf("") }
@@ -93,6 +94,12 @@ fun LoginScreen(
                     .height(50.dp)
             ) {
                 Text("Login")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = onNavigateToRegister) {
+                Text("Don't have an account? Register")
             }
         }
     }

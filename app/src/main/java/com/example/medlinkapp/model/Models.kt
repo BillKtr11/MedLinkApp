@@ -1,5 +1,6 @@
 package com.example.medlinkapp.model
 import java.time.LocalDateTime
+
 enum class UserRole {
     PATIENT, DOCTOR, CAREGIVER
 }
@@ -7,10 +8,9 @@ enum class UserRole {
 sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
-    data class Success(val role: UserRole, val token: String) : LoginState()
+    data class Success(val role: UserRole, val token: String, val userAmka: String = "") : LoginState()
     data class Error(val message: String) : LoginState()
 }
-
 
 data class Patient(
     val patientId: String,
@@ -21,9 +21,9 @@ data class Patient(
 
 data class Prescription(
     val drugName: String,
-    val drugDosage: Int, // e.g., in mg
-    val drugFreq: Int,   // e.g., times per day
-    val drugDuration: Int, // e.g., in days
+    val drugDosage: Int,
+    val drugFreq: Int,
+    val drugDuration: Int,
     val drugStock: Int
 )
 
@@ -39,5 +39,25 @@ data class DeviceData(
     val deviceId: String,
     val measurementValue: Int,
     val measurementType: String,
-    val timestamp: LocalDateTime
+    val timestamp: LocalDateTime,
+    val patientAmka: String
+)
+
+data class MedicationData(
+    val id: String,
+    val name: String,
+    val dosage: String,
+    val stockCount: Int,
+    val lowStockThreshold: Int = 10,
+    val patientAmka: String
+)
+
+data class UserData(
+    val name: String,
+    val surname: String,
+    val amka: String,
+    val email: String,
+    val password: String,
+    val role: UserRole = UserRole.PATIENT,
+    val assignedDoctorAmka: String? = null
 )

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 data class MedicationUiModel(
     val id: String,
@@ -18,11 +17,14 @@ data class MedicationUiModel(
 
 class MedicationViewModel : ViewModel() {
 
+    // Fetching data from the persistent singleton DBManager, filtered by user
     val medications: StateFlow<List<MedicationUiModel>> = DBManager.medications
         .map { list ->
-            list.map { 
-                MedicationUiModel(it.id, it.name, it.dosage, it.stockCount, it.lowStockThreshold)
-            }
+            val amka = DBManager.getCurrentUserAmka()
+            list.filter { it.patientAmka == amka }
+                .map { 
+                    MedicationUiModel(it.id, it.name, it.dosage, it.stockCount, it.lowStockThreshold)
+                }
         }
         .stateIn(
             scope = viewModelScope,
@@ -45,6 +47,7 @@ class MedicationViewModel : ViewModel() {
     }
 
     fun addMedication(name: String, dosage: String, stock: Int) {
-        DBManager.addMedication(name, dosage, stock)
+        val amka = DBManager.getCurrentUserAmka() ?: return
+        DBManager.addMedication(name, dosage, stock, amka)
     }
 }
