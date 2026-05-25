@@ -81,6 +81,17 @@ object DBManager {
         saveMedications()
     }
 
+    fun addMedication(name: String, dosage: String, stock: Int) {
+        val newMed = MedicationData(
+            id = (System.currentTimeMillis()).toString(),
+            name = name,
+            dosage = dosage,
+            stockCount = stock
+        )
+        _medications.update { it + newMed }
+        saveMedications()
+    }
+
     private val _measurements = MutableStateFlow<List<DeviceData>>(emptyList())
     val measurements: StateFlow<List<DeviceData>> = _measurements.asStateFlow()
 
