@@ -26,6 +26,8 @@ import com.example.medlinkapp.ui.medication.MedicationManagerScreen
 import com.example.medlinkapp.ui.medication.AddMedicationScreen
 import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
+import com.example.medlinkapp.ui.patient.ReportSymptomScreen
+import com.example.medlinkapp.ui.patient.SideEffectViewModel
  import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
  import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
  import com.example.medlinkapp.ui.doctor.DoctorViewModel
@@ -42,7 +44,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     AppNavigation()
                 }
@@ -79,18 +81,16 @@ fun AppNavigation() {
             )
         }
 
-        // 2. Doctor Dashboard
         composable("doctor_dashboard") {
             DoctorDashboardScreen(
                 onNavigateToSearch = {
                     navController.navigate("doctor_search_screen")
                 },
-                onLogout = {
-                    navController.navigate("login_screen") {
-                        popUpTo("doctor_dashboard") { inclusive = true }
-                    }
+            ) {
+                navController.navigate("login_screen") {
+                    popUpTo("doctor_dashboard") { inclusive = true }
                 }
-            )
+            }
         }
 
         // 2.1 Αναζήτηση Ασθενή
@@ -124,6 +124,7 @@ fun AppNavigation() {
                 onNavigateToResults = { /* Navigate to results */ },
                 onNavigateToMessages = { /* Navigate to messages */ },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
+                onNavigateToReportSymptom = { navController.navigate(Screen.ReportSymptom.route) },
                 onTriggerSOS = {
                     println("SOS Triggered!")
                 },
@@ -173,6 +174,14 @@ fun AppNavigation() {
 
         composable(route = Screen.History.route) {
             MeasurementHistoryScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.ReportSymptom.route) {
+            val sideEffectViewModel: SideEffectViewModel = viewModel()
+            ReportSymptomScreen(
+                viewModel = sideEffectViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
