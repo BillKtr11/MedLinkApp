@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientDashboardScreen(
@@ -22,14 +21,15 @@ fun PatientDashboardScreen(
     onNavigateToAppointments: () -> Unit,
     onNavigateToResults: () -> Unit,
     onNavigateToMessages: () -> Unit,
-    onTriggerSOS: () -> Unit
+    onTriggerSOS: () -> Unit,
+    onLogout: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Welcome, $patientName") },
                 actions = {
-                    // Emergency SOS Button (ManageEmergencySOS from your diagram)
+                    // Emergency SOS Button
                     Button(
                         onClick = onTriggerSOS,
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
@@ -38,6 +38,10 @@ fun PatientDashboardScreen(
                         Icon(Icons.Default.Warning, contentDescription = "SOS", modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("SOS")
+                    }
+                    // LOGOUT BUTTON
+                    IconButton(onClick = onLogout){
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
                     }
                 }
             )

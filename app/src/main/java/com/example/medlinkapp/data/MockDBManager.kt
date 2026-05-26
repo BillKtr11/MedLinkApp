@@ -2,10 +2,18 @@ package com.example.medlinkapp.data
 
 import com.example.medlinkapp.model.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.update
 import java.time.LocalDateTime
+import android.util.Log
 
 class MockDBManager : DBManager {
+
+    private val _activeAlerts = MutableStateFlow<List<EmergencyAlert>>(emptyList())
+    override val activeAlerts: StateFlow<List<EmergencyAlert>> = _activeAlerts.asStateFlow()
 
     private val mockPatients = mapOf(
         "1" to Patient(
@@ -92,7 +100,42 @@ class MockDBManager : DBManager {
     }
 
     override suspend fun saveMeasurement(data: DeviceData): Result<Unit> {
+        Log.d("MEDLINK_DEBUG","saveMeasurement called with value: ${data.measurementValue}")
+        // SOS Logic for Mock
+        val isCritical = when(data.measurementType){
+            "Blood glucose" -> data.measurementValue > 180 || data.measurementValue < 70
+            "Oxygen Saturation" -> data.measurementValue < 92
+            "Systolic Blood pressure" -> data.measurementValue > 140
+            else -> false
+        }
+
+        if(isCritical){
+            Log.d("MEDLINK_DEBUG","CRITICAL VALUE DETECTED! Triggering SOS...")
+            val newAlert = EmergencyAlert(
+                id = System.currentTimeMillis().toString(),
+                patientId = data.deviceId,
+                patientName = "Alex Ferguson", 
+                measurementType = data.measurementType,
+                value = data.measurementValue,
+                timestamp = LocalDateTime.now()
+            )
+            _activeAlerts.update{it + newAlert}
+            Log.d("MEDLINK_DEBUG","Alert added to _activeAlerts. Current count: ${_activeAlerts.value.size}")
+        }
+        
         return Result.success(Unit)
+    }
+
+    override fun respondToAlert(alertId:String,instructions:String){
+        _activeAlerts.update{alerts ->
+            alerts.map{alert ->
+                if(alert.id == alertId){
+                    alert.copy(status = "RESPONDED",doctorInstructions = instructions)
+                }else{
+                    alert
+                }
+            }.filter{it.status == "PENDING"}
+        }
     }
 
     override suspend fun triggerEmergencySOS(patientId: String, data: String): Result<String> {
