@@ -33,10 +33,15 @@ import com.example.medlinkapp.ui.medication.AddMedicationScreen
 import com.example.medlinkapp.ui.medication.IntakeScreen
 import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
+import com.example.medlinkapp.ui.patient.PatientAppointmentsScreen
+import com.example.medlinkapp.ui.patient.PatientMessagesScreen
 import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
 import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
 import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
+import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
+import com.example.medlinkapp.ui.doctor.AssignPatientScreen
+import com.example.medlinkapp.ui.doctor.ScheduledAppointmentsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,11 +126,47 @@ fun AppNavigation() {
                 onNavigateToSearch = {
                     navController.navigate("doctor_search_screen")
                 },
+                onNavigateToAddAppointment = {
+                    navController.navigate("add_appointment_screen")
+                },
+                onNavigateToRegisterPatient = {
+                    navController.navigate("assign_patient_screen")
+                },
+                onNavigateToAppointments = {
+                    navController.navigate("scheduled_appointments_screen")
+                },
                 onLogout = {
                     loginViewModel.logout()
                     navController.navigate("login_screen") {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable("add_appointment_screen") {
+            AddAppointmentScreen(
+                viewModel = doctorViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateHome = {
+                    navController.popBackStack("doctor_dashboard", inclusive = false)
+                }
+            )
+        }
+
+        composable("scheduled_appointments_screen") {
+            ScheduledAppointmentsScreen(
+                viewModel = doctorViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("assign_patient_screen") {
+            AssignPatientScreen(
+                viewModel = doctorViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateHome = {
+                    navController.popBackStack("doctor_dashboard", inclusive = false)
                 }
             )
         }
@@ -161,7 +202,7 @@ fun AppNavigation() {
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
                 onNavigateToResults = { /* Navigate to results */ },
-                onNavigateToMessages = { /* Navigate to messages */ },
+                onNavigateToMessages = { navController.navigate("messages_screen") },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
                 onNavigateToTakeMedication = { medId ->
                     navController.navigate("intake_screen/$medId")
@@ -175,6 +216,18 @@ fun AppNavigation() {
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable("appointments_screen") {
+            PatientAppointmentsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("messages_screen") {
+            PatientMessagesScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
 
