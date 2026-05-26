@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,17 +15,23 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medlinkapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorDashboardScreen(
     doctorName: String = "Dr. Smith",
+    viewModel: DoctorViewModel = viewModel(),
     onNavigateToSearch: () -> Unit,
     onNavigateToAddAppointment: () -> Unit,
     onNavigateToRegisterPatient: () -> Unit,
+    onNavigateToAppointments: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val myPatients by viewModel.myPatients.collectAsState()
+    val appointments by viewModel.appointments.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,7 +71,10 @@ fun DoctorDashboardScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                DoctorStatsCard()
+                DoctorStatsCard(
+                    patientCount = myPatients.size,
+                    appointmentCount = appointments.size
+                )
             }
 
             item {
@@ -74,6 +83,15 @@ fun DoctorDashboardScreen(
                     icon = Icons.Default.DateRange,
                     summaryText = "Προγραμματισμός νέας επίσκεψη για τους ασθενείς σας",
                     onClick = onNavigateToAddAppointment
+                )
+            }
+
+            item {
+                DoctorActionCard(
+                    title = "Πρόγραμμα Ραντεβού",
+                    icon = Icons.Default.List,
+                    summaryText = "Προβολή όλων των προγραμματισμένων ραντεβού σας",
+                    onClick = onNavigateToAppointments
                 )
             }
 
@@ -108,7 +126,7 @@ fun DoctorDashboardScreen(
 }
 
 @Composable
-fun DoctorStatsCard() {
+fun DoctorStatsCard(patientCount: Int, appointmentCount: Int) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -120,8 +138,8 @@ fun DoctorStatsCard() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Appointments Today: 5")
-                Text("Assigned Patients: Live")
+                Text("Appointments: $appointmentCount")
+                Text("Assigned Patients: $patientCount")
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text("Updated just now", style = MaterialTheme.typography.labelSmall, color = Color.Gray)

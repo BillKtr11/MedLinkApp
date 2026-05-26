@@ -54,7 +54,8 @@ object DBManager {
     val appointments: StateFlow<List<Appointment>> = _appointments.asStateFlow()
 
     // Current Session
-    private var currentUserAmka: String? = null
+    private val _currentUserAmka = MutableStateFlow<String?>(null)
+    val currentUserAmka: StateFlow<String?> = _currentUserAmka.asStateFlow()
 
     fun init(context: Context) {
         if (prefs == null) {
@@ -68,12 +69,12 @@ object DBManager {
     }
 
     fun setCurrentUser(amka: String) {
-        currentUserAmka = amka
+        _currentUserAmka.value = amka
     }
 
-    fun getCurrentUserAmka(): String? = currentUserAmka
+    fun getCurrentUserAmka(): String? = _currentUserAmka.value
 
-    fun getCurrentUser(): UserData? = _users.value.find { it.amka == currentUserAmka }
+    fun getCurrentUser(): UserData? = _users.value.find { it.amka == _currentUserAmka.value }
 
     // --- Users ---
     private fun loadUsers() {

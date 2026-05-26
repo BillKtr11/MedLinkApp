@@ -30,16 +30,14 @@ class DoctorViewModel : ViewModel() {
         )
 
     // Patients specifically assigned to this doctor (for search and appointments)
-    val myPatients: StateFlow<List<UserData>> = DBManager.users
-        .map { users -> 
-            val doctorAmka = DBManager.getCurrentUserAmka()
-            users.filter { it.role == UserRole.PATIENT && it.assignedDoctorAmka == doctorAmka }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = emptyList()
-        )
+    // Uses combine to react to both user list changes and current doctor changes
+    val myPatients: StateFlow<List<UserData>> = combine(DBManager.users, DBManager.currentUserAmka) { users, doctorAmka ->
+        users.filter { it.role == UserRole.PATIENT && it.assignedDoctorAmka == doctorAmka }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
+    )
 
     private val allRecords = listOf(
         MedicalRecord("r1", "1", LocalDate.of(2023, 5, 10), "Φάρμακο", "Depon 500mg, 2 φορές/μέρα"),
@@ -57,7 +55,16 @@ class DoctorViewModel : ViewModel() {
     private val _patientHistory = MutableStateFlow<List<MedicalRecord>>(emptyList())
     val patientHistory = _patientHistory.asStateFlow()
 
-    val appointments: StateFlow<List<Appointment>> = DBManager.appointments
+    // Appointments for this doctor specifically
+    val appointments: StateFlow<List<Appointment>> = combine(DBManager.appointments, DBManager.currentUserAmka) { appointments, doctorAmka ->
+        val doctor = DBManager.users.value.find { it.amka == doctorAmka }
+        val doctorName = if (doctor != null) "${doctor.name} ${doctor.surname}" else "Doctor"
+        appointments.filter { it.doctorName == doctorName }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
+    )
 
     // Search specifically within MY patients
     fun searchPatient(query: String) {

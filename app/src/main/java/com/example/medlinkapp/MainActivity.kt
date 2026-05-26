@@ -39,6 +39,7 @@ import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
 import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
 import com.example.medlinkapp.ui.doctor.AssignPatientScreen
+import com.example.medlinkapp.ui.doctor.ScheduledAppointmentsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -129,6 +130,9 @@ fun AppNavigation() {
                 onNavigateToRegisterPatient = {
                     navController.navigate("assign_patient_screen")
                 },
+                onNavigateToAppointments = {
+                    navController.navigate("scheduled_appointments_screen")
+                },
                 onLogout = {
                     loginViewModel.logout()
                     navController.navigate("login_screen") {
@@ -145,6 +149,13 @@ fun AppNavigation() {
                 onNavigateHome = {
                     navController.popBackStack("doctor_dashboard", inclusive = false)
                 }
+            )
+        }
+
+        composable("scheduled_appointments_screen") {
+            ScheduledAppointmentsScreen(
+                viewModel = doctorViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,9 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.medlinkapp.model.UserData
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,17 +29,23 @@ fun AddAppointmentScreen(
     onNavigateBack: () -> Unit,
     onNavigateHome: () -> Unit
 ) {
-    var date by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
     var reason by remember { mutableStateOf("") }
     
     var selectedPatient by remember { mutableStateOf<UserData?>(null) }
     var showPatientPicker by remember { mutableStateOf(false) }
     val myPatients by viewModel.myPatients.collectAsState()
 
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var showSuccess by remember { mutableStateOf(false) }
+
+    val datePickerState = rememberDatePickerState()
+    val timePickerState = rememberTimePickerState()
 
     Scaffold(
         topBar = {
@@ -57,7 +67,7 @@ fun AddAppointmentScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (!showSuccess) {
-                // Patient Selection (Limited to assigned patients)
+                // Patient Selection
                 OutlinedCard(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -85,21 +95,41 @@ fun AddAppointmentScreen(
                     }
                 }
 
-                OutlinedTextField(
-                    value = date,
-                    onValueChange = { date = it; showError = false },
-                    label = { Text("Ημερομηνία (dd/MM/yyyy)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = showError && date.isBlank()
-                )
+                // Date Selection
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showDatePicker = true }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (selectedDate == null) "Επιλογή Ημερομηνίας" else "Ημερομηνία: ${selectedDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(Icons.Default.DateRange, contentDescription = null)
+                    }
+                }
 
-                OutlinedTextField(
-                    value = time,
-                    onValueChange = { time = it; showError = false },
-                    label = { Text("Ώρα (HH:mm)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = showError && time.isBlank()
-                )
+                // Time Selection
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showTimePicker = true }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (selectedTime == null) "Επιλογή Ώρας" else "Ώρα: ${selectedTime?.format(DateTimeFormatter.ofPattern("HH:mm"))}",
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(Icons.Default.Notifications, contentDescription = null) // Using notifications icon for time
+                    }
+                }
 
                 OutlinedTextField(
                     value = reason,
@@ -121,25 +151,22 @@ fun AddAppointmentScreen(
 
                 Button(
                     onClick = {
-                        if (date.isBlank() || time.isBlank() || reason.isBlank() || selectedPatient == null) {
+                        if (selectedDate == null || selectedTime == null || reason.isBlank() || selectedPatient == null) {
                             showError = true
-                            errorMessage = if (selectedPatient == null) "Παρακαλώ επιλέξτε ασθενή από την λίστα σας." else "Όλα τα πεδία είναι υποχρεωτικά."
+                            errorMessage = when {
+                                selectedPatient == null -> "Παρακαλώ επιλέξτε ασθενή."
+                                selectedDate == null -> "Παρακαλώ επιλέξτε ημερομηνία."
+                                selectedTime == null -> "Παρακαλώ επιλέξτε ώρα."
+                                else -> "Όλα τα πεδία είναι υποχρεωτικά."
+                            }
                         } else {
-                            try {
-                                val d = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                                val t = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"))
-                                val dateTime = LocalDateTime.of(d, t)
-
-                                val result = viewModel.addAppointment(dateTime, reason, selectedPatient!!.amka)
-                                if (result.isSuccess) {
-                                    showSuccess = true
-                                } else {
-                                    showError = true
-                                    errorMessage = result.exceptionOrNull()?.message ?: "Σφάλμα κατά την αποθήκευση."
-                                }
-                            } catch (e: Exception) {
+                            val dateTime = LocalDateTime.of(selectedDate, selectedTime)
+                            val result = viewModel.addAppointment(dateTime, reason, selectedPatient!!.amka)
+                            if (result.isSuccess) {
+                                showSuccess = true
+                            } else {
                                 showError = true
-                                errorMessage = "Μη έγκυρη μορφή ημερομηνίας ή ώρας."
+                                errorMessage = result.exceptionOrNull()?.message ?: "Σφάλμα κατά την αποθήκευση."
                             }
                         }
                     },
@@ -171,6 +198,46 @@ fun AddAppointmentScreen(
         }
     }
 
+    // Date Picker Dialog
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let {
+                        selectedDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                    }
+                    showDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    // Time Picker Dialog
+    if (showTimePicker) {
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedTime = LocalTime.of(timePickerState.hour, timePickerState.minute)
+                    showTimePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
+            },
+            text = {
+                TimePicker(state = timePickerState)
+            }
+        )
+    }
+
+    // Patient Picker Dialog
     if (showPatientPicker) {
         AlertDialog(
             onDismissRequest = { showPatientPicker = false },
