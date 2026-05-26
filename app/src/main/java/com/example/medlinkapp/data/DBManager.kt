@@ -23,6 +23,7 @@ object DBManager {
     private const val KEY_MEASUREMENTS = "measurements"
     private const val KEY_USERS = "users"
     private const val KEY_INTAKES = "intake_records"
+    private const val KEY_APPOINTMENTS = "appointments"
 
     private val gson = GsonBuilder()
         .registerTypeAdapter(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
@@ -49,6 +50,9 @@ object DBManager {
     private val _intakeRecords = MutableStateFlow<List<IntakeRecord>>(emptyList())
     val intakeRecords: StateFlow<List<IntakeRecord>> = _intakeRecords.asStateFlow()
 
+    private val _appointments = MutableStateFlow<List<Appointment>>(emptyList())
+    val appointments: StateFlow<List<Appointment>> = _appointments.asStateFlow()
+
     // Current Session
     private var currentUserAmka: String? = null
 
@@ -59,6 +63,7 @@ object DBManager {
             loadMedications()
             loadMeasurements()
             loadIntakeRecords()
+            loadAppointments()
         }
     }
 
@@ -97,6 +102,15 @@ object DBManager {
 
     fun registerUser(userData: UserData) {
         _users.update { it + userData }
+        saveUsers()
+    }
+
+    fun assignPatientToDoctor(patientAmka: String, doctorAmka: String) {
+        _users.update { list ->
+            list.map { 
+                if (it.amka == patientAmka) it.copy(assignedDoctorAmka = doctorAmka) else it 
+            }
+        }
         saveUsers()
     }
 
@@ -164,6 +178,35 @@ object DBManager {
     fun addIntakeRecord(record: IntakeRecord) {
         _intakeRecords.update { it + record }
         saveIntakeRecords()
+    }
+
+    // --- Appointments ---
+    private fun loadAppointments() {
+        val json = prefs?.getString(KEY_APPOINTMENTS, null)
+        if (json != null) {
+            try {
+                val type = object : TypeToken<List<Appointment>>() {}.type
+                _appointments.value = gson.fromJson(json, type)
+            } catch (e: Exception) {
+                _appointments.value = emptyList()
+            }
+        }
+    }
+
+    private fun saveAppointments() {
+        val json = gson.toJson(_appointments.value)
+        prefs?.edit()?.putString(KEY_APPOINTMENTS, json)?.apply()
+    }
+
+    fun addAppointment(appointment: Appointment) {
+        _appointments.update { it + appointment }
+        saveAppointments()
+        // Simulate saving reminders
+        println("Reminders scheduled for appointment: 24h and 1h before ${appointment.date}")
+    }
+
+    fun isSlotAvailable(date: LocalDateTime): Boolean {
+        return _appointments.value.none { it.date == date }
     }
 
     // --- Measurements ---

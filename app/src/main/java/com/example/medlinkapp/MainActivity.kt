@@ -37,6 +37,8 @@ import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
 import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
 import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
+import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
+import com.example.medlinkapp.ui.doctor.AssignPatientScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,11 +123,37 @@ fun AppNavigation() {
                 onNavigateToSearch = {
                     navController.navigate("doctor_search_screen")
                 },
+                onNavigateToAddAppointment = {
+                    navController.navigate("add_appointment_screen")
+                },
+                onNavigateToRegisterPatient = {
+                    navController.navigate("assign_patient_screen")
+                },
                 onLogout = {
                     loginViewModel.logout()
                     navController.navigate("login_screen") {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable("add_appointment_screen") {
+            AddAppointmentScreen(
+                viewModel = doctorViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateHome = {
+                    navController.popBackStack("doctor_dashboard", inclusive = false)
+                }
+            )
+        }
+
+        composable("assign_patient_screen") {
+            AssignPatientScreen(
+                viewModel = doctorViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateHome = {
+                    navController.popBackStack("doctor_dashboard", inclusive = false)
                 }
             )
         }
