@@ -22,6 +22,7 @@ object DBManager {
     private const val KEY_MEDICATIONS = "medications"
     private const val KEY_MEASUREMENTS = "measurements"
     private const val KEY_USERS = "users"
+    private const val KEY_INTAKES = "intake_records"
 
     private val gson = GsonBuilder()
         .registerTypeAdapter(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
@@ -45,6 +46,9 @@ object DBManager {
     private val _users = MutableStateFlow<List<UserData>>(emptyList())
     val users: StateFlow<List<UserData>> = _users.asStateFlow()
 
+    private val _intakeRecords = MutableStateFlow<List<IntakeRecord>>(emptyList())
+    val intakeRecords: StateFlow<List<IntakeRecord>> = _intakeRecords.asStateFlow()
+
     // Current Session
     private var currentUserAmka: String? = null
 
@@ -54,6 +58,7 @@ object DBManager {
             loadUsers()
             loadMedications()
             loadMeasurements()
+            loadIntakeRecords()
         }
     }
 
@@ -117,13 +122,15 @@ object DBManager {
         return _medications.value.filter { it.patientAmka == amka }
     }
 
-    fun addMedication(name: String, dosage: String, stock: Int, amka: String) {
+    fun addMedication(name: String, dosage: String, stock: Int, amka: String, intakeTimes: List<String> = emptyList(), frequency: Int = 1) {
         val newMed = MedicationData(
             id = System.currentTimeMillis().toString(),
             name = name,
             dosage = dosage,
             stockCount = stock,
-            patientAmka = amka
+            patientAmka = amka,
+            intakeTimes = intakeTimes,
+            frequency = frequency
         )
         _medications.update { it + newMed }
         saveMedications()
@@ -134,6 +141,29 @@ object DBManager {
             list.map { if (it.id == medId) it.copy(stockCount = newStock) else it }
         }
         saveMedications()
+    }
+
+    // --- Intake Records ---
+    private fun loadIntakeRecords() {
+        val json = prefs?.getString(KEY_INTAKES, null)
+        if (json != null) {
+            try {
+                val type = object : TypeToken<List<IntakeRecord>>() {}.type
+                _intakeRecords.value = gson.fromJson(json, type)
+            } catch (e: Exception) {
+                _intakeRecords.value = emptyList()
+            }
+        }
+    }
+
+    private fun saveIntakeRecords() {
+        val json = gson.toJson(_intakeRecords.value)
+        prefs?.edit()?.putString(KEY_INTAKES, json)?.apply()
+    }
+
+    fun addIntakeRecord(record: IntakeRecord) {
+        _intakeRecords.update { it + record }
+        saveIntakeRecords()
     }
 
     // --- Measurements ---
