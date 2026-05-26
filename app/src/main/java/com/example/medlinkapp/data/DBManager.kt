@@ -24,6 +24,7 @@ object DBManager {
     private const val KEY_USERS = "users"
     private const val KEY_INTAKES = "intake_records"
     private const val KEY_APPOINTMENTS = "appointments"
+    private const val KEY_MESSAGES = "messages"
 
     private val gson = GsonBuilder()
         .registerTypeAdapter(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
@@ -53,6 +54,9 @@ object DBManager {
     private val _appointments = MutableStateFlow<List<Appointment>>(emptyList())
     val appointments: StateFlow<List<Appointment>> = _appointments.asStateFlow()
 
+    private val _messages = MutableStateFlow<List<Message>>(emptyList())
+    val messages: StateFlow<List<Message>> = _messages.asStateFlow()
+
     // Current Session
     private val _currentUserAmka = MutableStateFlow<String?>(null)
     val currentUserAmka: StateFlow<String?> = _currentUserAmka.asStateFlow()
@@ -65,6 +69,7 @@ object DBManager {
             loadMeasurements()
             loadIntakeRecords()
             loadAppointments()
+            loadMessages()
         }
     }
 
@@ -202,8 +207,55 @@ object DBManager {
     fun addAppointment(appointment: Appointment) {
         _appointments.update { it + appointment }
         saveAppointments()
+        
+        // Send a message to the patient
+        addMessage(
+            Message(
+                id = System.currentTimeMillis().toString(),
+                patientAmka = appointment.patientId,
+                title = "Νέο Ραντεβού",
+                content = "Έχετε ένα νέο ραντεβού με τον/την ${appointment.doctorName} στις ${appointment.date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}.",
+                timestamp = LocalDateTime.now()
+            )
+        )
+        
         // Simulate saving reminders
         println("Reminders scheduled for appointment: 24h and 1h before ${appointment.date}")
+    }
+
+    fun deleteAppointment(appointmentId: String) {
+        _appointments.update { list -> list.filter { it.appointmentId != appointmentId } }
+        saveAppointments()
+    }
+
+    // --- Messages ---
+    private fun loadMessages() {
+        val json = prefs?.getString(KEY_MESSAGES, null)
+        if (json != null) {
+            try {
+                val type = object : TypeToken<List<Message>>() {}.type
+                _messages.value = gson.fromJson(json, type)
+            } catch (e: Exception) {
+                _messages.value = emptyList()
+            }
+        }
+    }
+
+    private fun saveMessages() {
+        val json = gson.toJson(_messages.value)
+        prefs?.edit()?.putString(KEY_MESSAGES, json)?.apply()
+    }
+
+    fun addMessage(message: Message) {
+        _messages.update { it + message }
+        saveMessages()
+    }
+
+    fun markMessageAsRead(messageId: String) {
+        _messages.update { list ->
+            list.map { if (it.id == messageId) it.copy(isRead = true) else it }
+        }
+        saveMessages()
     }
 
     fun isSlotAvailable(date: LocalDateTime): Boolean {

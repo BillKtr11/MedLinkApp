@@ -19,7 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medlinkapp.R
+import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.ui.medication.MedicationViewModel
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +38,14 @@ fun PatientDashboardScreen(
     onLogout: () -> Unit
 ) {
     val medications by medViewModel.medications.collectAsState()
+    val appointments by DBManager.appointments.collectAsState()
+    val messages by DBManager.messages.collectAsState()
+    val userAmka = DBManager.getCurrentUserAmka()
     
+    val myAppointments = appointments.filter { it.patientId == userAmka }.sortedBy { it.date }
+    val myMessages = messages.filter { it.patientAmka == userAmka }
+    val unreadMessagesCount = myMessages.count { !it.isRead }
+
     // Find the next medication to take
     val nextMed = medications.filter { it.intakeTimes.isNotEmpty() }
         .mapNotNull { med -> 
@@ -106,10 +115,16 @@ fun PatientDashboardScreen(
             }
 
             item {
+                val nextAppt = myAppointments.firstOrNull()
+                val apptText = if (nextAppt != null) {
+                    "Next: ${nextAppt.date.format(DateTimeFormatter.ofPattern("dd/MM HH:mm"))} with ${nextAppt.doctorName}"
+                } else {
+                    "No upcoming appointments"
+                }
                 DashboardActionCard(
                     title = "Upcoming Appointments",
                     icon = Icons.Default.DateRange,
-                    summaryText = "Dental Clean - June 1st, 9:00 AM",
+                    summaryText = apptText,
                     onClick = onNavigateToAppointments
                 )
             }
@@ -139,10 +154,11 @@ fun PatientDashboardScreen(
 
 
             item {
+                val msgText = if (unreadMessagesCount > 0) "$unreadMessagesCount unread messages" else "No new messages"
                 DashboardActionCard(
                     title = "Messages",
                     icon = Icons.Default.Email,
-                    summaryText = "2 Unread Messages from Dr. Lee",
+                    summaryText = msgText,
                     onClick = onNavigateToMessages
                 )
             }

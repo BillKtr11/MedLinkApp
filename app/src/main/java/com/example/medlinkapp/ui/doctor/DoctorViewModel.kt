@@ -119,4 +119,8 @@ class DoctorViewModel : ViewModel() {
         DBManager.addAppointment(newAppointment)
         return Result.success(Unit)
     }
+
+    fun cancelAppointment(appointmentId: String) {
+        DBManager.deleteAppointment(appointmentId)
+    }
 }

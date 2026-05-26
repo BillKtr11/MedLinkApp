@@ -33,6 +33,8 @@ import com.example.medlinkapp.ui.medication.AddMedicationScreen
 import com.example.medlinkapp.ui.medication.IntakeScreen
 import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
+import com.example.medlinkapp.ui.patient.PatientAppointmentsScreen
+import com.example.medlinkapp.ui.patient.PatientMessagesScreen
 import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
 import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
 import com.example.medlinkapp.ui.doctor.DoctorViewModel
@@ -200,7 +202,7 @@ fun AppNavigation() {
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
                 onNavigateToResults = { /* Navigate to results */ },
-                onNavigateToMessages = { /* Navigate to messages */ },
+                onNavigateToMessages = { navController.navigate("messages_screen") },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
                 onNavigateToTakeMedication = { medId ->
                     navController.navigate("intake_screen/$medId")
@@ -214,6 +216,18 @@ fun AppNavigation() {
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable("appointments_screen") {
+            PatientAppointmentsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("messages_screen") {
+            PatientMessagesScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
 

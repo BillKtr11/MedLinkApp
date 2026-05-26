@@ -71,3 +71,12 @@ data class UserData(
     val role: UserRole = UserRole.PATIENT,
     val assignedDoctorAmka: String? = null
 )
+
+data class Message(
+    val id: String,
+    val patientAmka: String,
+    val title: String,
+    val content: String,
+    val timestamp: LocalDateTime,
+    val isRead: Boolean = false
+)
