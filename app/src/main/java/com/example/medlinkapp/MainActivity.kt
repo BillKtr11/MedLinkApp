@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -69,6 +70,28 @@ fun AppNavigation() {
     val doctorViewModel: DoctorViewModel = viewModel()
     
     val loginState by loginViewModel.loginState.collectAsState()
+
+    // Auto-login logic
+    LaunchedEffect(Unit) {
+        if (DBManager.isSessionValid()) {
+            val user = DBManager.getCurrentUser()
+            if (user != null) {
+                loginViewModel.autoLogin(user)
+                
+                when (user.role) {
+                    UserRole.DOCTOR -> navController.navigate("doctor_dashboard") {
+                        popUpTo("login_screen") { inclusive = true }
+                    }
+                    UserRole.PATIENT -> navController.navigate("patient_dashboard") {
+                        popUpTo("login_screen") { inclusive = true }
+                    }
+                    UserRole.CAREGIVER -> navController.navigate("caregiver_dashboard") {
+                        popUpTo("login_screen") { inclusive = true }
+                    }
+                }
+            }
+        }
+    }
 
     NavHost(navController = navController, startDestination = "login_screen") {
 
@@ -202,7 +225,7 @@ fun AppNavigation() {
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
                 onNavigateToResults = { /* Navigate to results */ },
-                onNavigateToMessages = { navController.navigate("messages_screen") },
+                onNavigateToMessages = { /* Navigate to messages */ },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
                 onNavigateToTakeMedication = { medId ->
                     navController.navigate("intake_screen/$medId")

@@ -25,6 +25,8 @@ object DBManager {
     private const val KEY_INTAKES = "intake_records"
     private const val KEY_APPOINTMENTS = "appointments"
     private const val KEY_MESSAGES = "messages"
+    private const val KEY_SESSION_EXPIRY = "session_expiry"
+    private const val KEY_CURRENT_USER_AMKA_PERSISTENT = "current_user_amka_persistent"
 
     private val gson = GsonBuilder()
         .registerTypeAdapter(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
@@ -70,11 +72,56 @@ object DBManager {
             loadIntakeRecords()
             loadAppointments()
             loadMessages()
+            checkPersistentSession()
         }
     }
 
-    fun setCurrentUser(amka: String) {
+    private fun checkPersistentSession() {
+        val amka = prefs?.getString(KEY_CURRENT_USER_AMKA_PERSISTENT, null)
+        val expiryStr = prefs?.getString(KEY_SESSION_EXPIRY, null)
+        if (amka != null && expiryStr != null) {
+            try {
+                val expiry = LocalDateTime.parse(expiryStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                if (expiry.isAfter(LocalDateTime.now())) {
+                    _currentUserAmka.value = amka
+                } else {
+                    clearSession()
+                }
+            } catch (e: Exception) {
+                clearSession()
+            }
+        }
+    }
+
+    fun isSessionValid(): Boolean {
+        return _currentUserAmka.value != null
+    }
+
+    fun setCurrentUser(amka: String, keepSignedIn: Boolean = false) {
         _currentUserAmka.value = amka
+        if (keepSignedIn) {
+            val expiry = LocalDateTime.now().plusDays(30)
+            prefs?.edit()?.apply {
+                putString(KEY_CURRENT_USER_AMKA_PERSISTENT, amka)
+                putString(KEY_SESSION_EXPIRY, expiry.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                apply()
+            }
+        } else {
+            prefs?.edit()?.apply {
+                remove(KEY_CURRENT_USER_AMKA_PERSISTENT)
+                remove(KEY_SESSION_EXPIRY)
+                apply()
+            }
+        }
+    }
+
+    fun clearSession() {
+        _currentUserAmka.value = null
+        prefs?.edit()?.apply {
+            remove(KEY_CURRENT_USER_AMKA_PERSISTENT)
+            remove(KEY_SESSION_EXPIRY)
+            apply()
+        }
     }
 
     fun getCurrentUserAmka(): String? = _currentUserAmka.value
