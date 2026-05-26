@@ -27,15 +27,6 @@ import com.example.medlinkapp.model.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import com.example.medlinkapp.data.DBManager
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(
@@ -46,17 +37,16 @@ fun ReportScreen(
     val context = LocalContext.current
     val currentStep = when(uiState){
         is ReportUiState.Idle -> ReportStep.PATIENT_SEARCH
-        is ReportUiState.Loading ->{
-            ReportStep.PATIENT_SEARCH
-        }
+        is ReportUiState.Loading -> ReportStep.PATIENT_SEARCH
         is ReportUiState.PatientFound -> ReportStep.DATE_SELECTION
         is ReportUiState.Success -> ReportStep.REPORT_READY
-        is ReportUiState.Error ->(uiState as ReportUiState.Error).step
+        is ReportUiState.Error -> (uiState as ReportUiState.Error).step
     }
+
     Scaffold(
         topBar ={
             TopAppBar(
-                title ={Text("Print Health Report",FontWeight = FontWeight.Bold)},
+                title ={Text("Print Health Report", fontWeight = FontWeight.Bold)},
                 navigationIcon ={
                     IconButton(onClick={
                         if(currentStep == ReportStep.PATIENT_SEARCH){
@@ -73,78 +63,75 @@ fun ReportScreen(
                         Icon(Icons.Default.ArrowBack,contentDescription="Back")
                     }
                 },
-                colors = TopAppBarDefaults.TopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             )
         }
     ){paddingValues ->
-    Column(
-        modifier = Modifier
-        .fillMaxSize()
-        .padding(paddingValues)
-        .background(
-            Brush.verticalGradient(
-                colors = listOf(
-                    MaterialTheme.colorScheme.primaryContainer.copy(alpha=0.2f),
-                    MaterialTheme.colorScheme.background
-                )
-            )
-        )
-        .padding(16.dp) 
-    ){
-        StepIndicator(currentStep = currentStep)
-        Spacer(modifier = Modifier.height(20.dp))
-        AnimatedContent(
-            targetState = uiState,
-            transitionSpec ={
-                fadeIn() togetherWith fadeOut()
-            },
-            label = "ReportFlowTransition"
-        ){state ->
-        when(state){
-            is ReportUiState.Idle ->{
-                PatientSearchSection(onSearch ={id->viewModel.searchPatient(id)})
-            }
-            is ReportUiState.Loading ->{
-                Box(modifier = Modifier.fillMaxSize(),contentAlignment = Alignment.Center){
-                    CircularProgressIndicator()
-                }
-            }
-            is ReportUiState.PatientFound ->{
-                DateSelectionSection(
-                    patient = state.patient,
-                    onGenerate = {start,end -> viewModel.generateReport(start,end)}
-                )
-            }
-            is ReportUiState.Success -> {
-                ReportReadySection(
-                    report = state.report,
-                    onExportPdf ={
-                        Toast.makeText(context,"the pdf is saved!",Toast.LENGTH_LONG).show()
-                    },
-                    onNewSearch = {viewModel.resetToStep(ReportStep.PATIENT_SEARCH)}
-                )
-            }
-            is ReportUiState.Error ->{
-                ErrorSection(
-                    message = state.message,
-                    step = state.step,
-                    onRetry ={
-                        viewModel.resetToStep(state.step)
-                        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                            MaterialTheme.colorScheme.background
+                        )
                     )
+                )
+                .padding(16.dp)
+        ){
+            StepIndicator(currentStep = currentStep)
+            Spacer(modifier = Modifier.height(20.dp))
+            AnimatedContent(
+                targetState = uiState,
+                transitionSpec ={
+                    fadeIn() togetherWith fadeOut()
+                },
+                label = "ReportFlowTransition"
+            ){state ->
+                when(state){
+                    is ReportUiState.Idle ->{
+                        PatientSearchSection(onSearch ={id->viewModel.searchPatient(id)})
+                    }
+                    is ReportUiState.Loading ->{
+                        Box(modifier = Modifier.fillMaxSize(),contentAlignment = Alignment.Center){
+                            CircularProgressIndicator()
+                        }
+                    }
+                    is ReportUiState.PatientFound ->{
+                        DateSelectionSection(
+                            patient = state.patient,
+                            onGenerate ={start,end -> viewModel.generateReport(start,end)}
+                        )
+                    }
+                    is ReportUiState.Success ->{
+                        ReportReadySection(
+                            report = state.report,
+                            onExportPdf ={
+                                Toast.makeText(context,"the pdf is saved!",Toast.LENGTH_LONG).show()
+                            },
+                            onNewSearch ={viewModel.resetToStep(ReportStep.PATIENT_SEARCH)}
+                        )
+                    }
+                    is ReportUiState.Error ->{
+                        ErrorSection(
+                            message = state.message,
+                            step = state.step,
+                            onRetry ={
+                                viewModel.resetToStep(state.step)
+                            }
+                        )
+                    }
                 }
             }
         }
-        }
-        }
-    )
+    }
 }
 
-
 //UI_COMPONENTS
-
 
 @Composable
 fun StepIndicator(currentStep:ReportStep){
@@ -153,11 +140,11 @@ fun StepIndicator(currentStep:ReportStep){
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ){
-        StepNode(stepNumber =1,label="Search",isActive = currentStep == ReportStep.PATIENT_SEARCH)
-        Divider(modifier = Modifier.width(30.dp),color=Color.Gray)
-        StepNode(stepNumber =2,label="Date Selection",isActive = currentStep == ReportStep.DATE_SELECTION)
-        Divider(modifier = Modifier.width(30.dp),color=Color.Gray)
-        StepNode(stepNumber =3,label="Report",isActive = currentStep == ReportStep.REPORT_READY)
+        StepNode(stepNumber = 1,label = "Search",isActive = currentStep == ReportStep.PATIENT_SEARCH)
+        HorizontalDivider(modifier = Modifier.width(30.dp),color = Color.Gray)
+        StepNode(stepNumber = 2,label = "Date Selection",isActive = currentStep == ReportStep.DATE_SELECTION)
+        HorizontalDivider(modifier = Modifier.width(30.dp),color = Color.Gray)
+        StepNode(stepNumber = 3,label = "Report",isActive = currentStep == ReportStep.REPORT_READY)
     }
 }
 
@@ -169,18 +156,18 @@ fun StepNode(stepNumber:Int,label:String,isActive:Boolean){
                 .size(36.dp)
                 .clip(RoundedCornerShape(50))
                 .background(
-                    if(isActive)MaterialTheme.colorScheme.primary else Color.LightGray
+                    if(isActive) MaterialTheme.colorScheme.primary else Color.LightGray
                 ),
             contentAlignment = Alignment.Center
         ){
             Text(
                 text = stepNumber.toString(),
-                color = if(isActive)Color.White else Color.DarkGray,
+                color = if(isActive) Color.White else Color.DarkGray,
                 fontWeight = FontWeight.Bold
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label,fontSize =11.sp,fontWeight = if(isActive)FontWeight.Bold else FontWeight.Normal)
+        Text(text = label,fontSize = 11.sp,fontWeight = if(isActive) FontWeight.Bold else FontWeight.Normal)
     }
 }
 
@@ -200,20 +187,20 @@ fun PatientSearchSection(onSearch:(String)->Unit){
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text ="Insert patient ID to retrieve patient details and information",
+                text = "Insert patient ID to retrieve patient details and information",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = patientId,
-                onValueChange = {patientId=it},
+                onValueChange ={patientId = it},
                 label ={Text("Patient ID (AMKA)")},
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = {if(patientId.isNotBlank())onSearch(patientId.trim())},
+                onClick ={if(patientId.isNotBlank()) onSearch(patientId.trim())},
                 enabled = patientId.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ){
@@ -248,35 +235,35 @@ fun DateSelectionSection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
-                Text(text="Name:",fontWeight = FontWeight.Bold)
+                Text(text = "Name:",fontWeight = FontWeight.Bold)
                 Text(text = patient.name)
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
-                Text(text = "Date of birth:",fontWeight=FontWeight.Bold)
+                Text(text = "Date of birth:",fontWeight = FontWeight.Bold)
                 Text(text = patient.dateOfBirth)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Medical History:",fontWeight=FontWeight.Bold)
+            Text(text = "Medical History:",fontWeight = FontWeight.Bold)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.padding(top=4.dp)
+                modifier = Modifier.padding(top = 4.dp)
             ){
                 patient.medicalHistory.forEach{history->
-                Box(
-                    modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .padding(horizontal=8.dp,vertical=4.dp)
-                ){
-                    Text(text = history,fontSize = 11.sp,color=MaterialTheme.colorScheme.onSecondaryContainer)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .padding(horizontal = 8.dp,vertical = 4.dp)
+                    ){
+                        Text(text = history,fontSize = 11.sp,color = MaterialTheme.colorScheme.onSecondaryContainer)
                     }
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Choose time interval",
@@ -286,14 +273,14 @@ fun DateSelectionSection(
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = startDateStr,
-                onValueChange = {startDateStr=it},
+                onValueChange ={startDateStr = it},
                 label ={Text("Start date(YYYY-MM-DD)")},
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = endDateStr,
-                onValueChange ={endDateStr=it},
+                onValueChange ={endDateStr = it},
                 label ={Text("End date(YYYY-MM-DD)")},
                 modifier = Modifier.fillMaxWidth()
             )
@@ -303,7 +290,7 @@ fun DateSelectionSection(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ){
                 TextButton(
-                    onClick = {
+                    onClick ={
                         startDateStr = LocalDateTime.now().minusDays(7).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                     },
                     modifier = Modifier.weight(1f)
@@ -311,7 +298,7 @@ fun DateSelectionSection(
                     Text("Last 7 days",fontSize = 11.sp)
                 }
                 TextButton(
-                    onClick = {
+                    onClick ={
                         startDateStr = LocalDateTime.now().minusDays(30).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                     },
                     modifier = Modifier.weight(1f)
@@ -328,7 +315,7 @@ fun DateSelectionSection(
                 },
                 modifier = Modifier.fillMaxWidth()
             ){
-                Icon(Icons.Default.CheckCircle,contentDescription=null)
+                Icon(Icons.Default.CheckCircle,contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Report Creation!")
             }
@@ -338,7 +325,7 @@ fun DateSelectionSection(
 
 @Composable
 fun ReportReadySection(
-    report: Report,
+    report:HealthReport,
     onExportPdf:()->Unit,
     onNewSearch:()->Unit
 ){
@@ -353,28 +340,28 @@ fun ReportReadySection(
         ){
             item {
                 Row(verticalAlignment = Alignment.CenterVertically){
-                    Icon(Icons.Default.CheckCircle,contentDescription=null,tint=Color.Green)
+                    Icon(Icons.Default.CheckCircle,contentDescription = null,tint = Color.Green)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Report Ready",fontWeight = FontWeight.Bold,style = MaterialTheme.typography.titleLarge)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Divider()
+                HorizontalDivider()
             }
             item {
-                Text(text="Patient Details",fontWeight=FontWeight.Bold,style=MaterialTheme.typography.titleMedium)
+                Text(text = "Patient Details",fontWeight = FontWeight.Bold,style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text="Name: ${report.patient.name}")
-                Text(text="AMKA: ${report.patient.patientId}")
-                Text(text="Period: ${report.startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))} to ${report.endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}")
+                Text(text = "Name: ${report.patient.name}")
+                Text(text = "AMKA: ${report.patient.patientId}")
+                Text(text = "Period: ${report.startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))} to ${report.endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}")
             }
             item {
-                Divider()
+                HorizontalDivider()
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text="Device Measurements",fontWeight=FontWeight.Bold,style=MaterialTheme.typography.titleMedium)
+                Text(text = "Device Measurements",fontWeight = FontWeight.Bold,style = MaterialTheme.typography.titleMedium)
             }
             if(report.measurements.isEmpty()){
                 item {
-                    Text(text="No measurements in this period",color=Color.Gray,fontSize=13.sp)
+                    Text(text = "No measurements in this period",color = Color.Gray,fontSize = 13.sp)
                 }
             }else{
                 items(report.measurements){m->
@@ -386,55 +373,55 @@ fun ReportReadySection(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ){
                         Column {
-                            Text(text=m.measurementType,fontWeight=FontWeight.Bold)
-                            Text(text=m.timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),fontSize=11.sp,color=Color.Gray)
+                            Text(text = m.measurementType,fontWeight = FontWeight.Bold)
+                            Text(text = m.timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),fontSize = 11.sp,color = Color.Gray)
                         }
-                        Text(text="${m.measurementValue}",fontWeight=FontWeight.Bold,color=MaterialTheme.colorScheme.primary)
+                        Text(text = "${m.measurementValue}",fontWeight = FontWeight.Bold,color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
             item {
-                Divider()
+                HorizontalDivider()
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text="Medications",fontWeight=FontWeight.Bold,style=MaterialTheme.typography.titleMedium)
+                Text(text = "Medications",fontWeight = FontWeight.Bold,style = MaterialTheme.typography.titleMedium)
             }
             if(report.medications.isEmpty()){
                 item {
-                    Text(text="No medications assigned",color=Color.Gray,fontSize=13.sp)
+                    Text(text = "No medications assigned",color = Color.Gray,fontSize = 13.sp)
                 }
             }else{
                 items(report.medications){med->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha=0.2f),RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f),RoundedCornerShape(8.dp))
                             .padding(8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ){
                         Column {
-                            Text(text=med.name,fontWeight=FontWeight.Bold)
-                            Text(text="Dosage: ${med.dosage}",fontSize=11.sp,color=Color.Gray)
+                            Text(text = med.drugName,fontWeight = FontWeight.Bold)
+                            Text(text = "Dosage: ${med.drugDosage}mg",fontSize = 11.sp,color = Color.Gray)
                         }
-                        Text(text="Stock: ${med.stockCount}",fontWeight=FontWeight.Bold)
+                        Text(text = "Stock: ${med.drugStock}",fontWeight = FontWeight.Bold)
                     }
                 }
             }
             item {
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
-                    onClick=onExportPdf,
+                    onClick = onExportPdf,
                     modifier = Modifier.fillMaxWidth()
                 ){
-                    Icon(Icons.Default.Share,contentDescription=null)
+                    Icon(Icons.Default.Share,contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Export PDF")
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
-                    onClick=onNewSearch,
+                    onClick = onNewSearch,
                     modifier = Modifier.fillMaxWidth()
                 ){
-                    Icon(Icons.Default.Refresh,contentDescription=null)
+                    Icon(Icons.Default.Refresh,contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("New Search")
                 }
@@ -459,17 +446,17 @@ fun ErrorSection(
             modifier = Modifier.padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            Icon(Icons.Default.Warning,contentDescription=null,tint=MaterialTheme.colorScheme.error,modifier = Modifier.size(40.dp))
+            Icon(Icons.Default.Warning,contentDescription = null,tint = MaterialTheme.colorScheme.error,modifier = Modifier.size(40.dp))
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text="Error",fontWeight=FontWeight.Bold,style=MaterialTheme.typography.titleMedium)
+            Text(text = "Error",fontWeight = FontWeight.Bold,style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text=message,textAlign = TextAlign.Center)
+            Text(text = message,textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick=onRetry,
+                onClick = onRetry,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ){
-                Icon(Icons.Default.Refresh,contentDescription=null)
+                Icon(Icons.Default.Refresh,contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Retry")
             }
@@ -477,9 +464,7 @@ fun ErrorSection(
     }
 }
 
-
 //HELPERS
-
 
 fun parseDate(dateStr:String,isEndOfDay:Boolean):LocalDateTime{
     return try {
@@ -487,125 +472,5 @@ fun parseDate(dateStr:String,isEndOfDay:Boolean):LocalDateTime{
         if(isEndOfDay) date.atTime(23,59,59) else date.atStartOfDay()
     }catch(e:Exception){
         if(isEndOfDay) LocalDateTime.now() else LocalDateTime.now().minusDays(7)
-    }
-}
-
-
-//DATA_MODELS
-
-
-enum class ReportStep {
-    PATIENT_SEARCH,
-    DATE_SELECTION,
-    REPORT_READY
-}
-
-data class Report(
-    val patient:Patient,
-    val startDate:LocalDateTime,
-    val endDate:LocalDateTime,
-    val measurements:List<DeviceData>,
-    val medications:List<MedicationData>,
-    val generatedAt:LocalDateTime = LocalDateTime.now()
-)
-
-sealed class ReportUiState {
-    object Idle : ReportUiState()
-    object Loading : ReportUiState()
-    data class PatientFound(val patient:Patient) : ReportUiState()
-    data class Success(val report:Report) : ReportUiState()
-    data class Error(val message:String,val step:ReportStep) : ReportUiState()
-}
-
-
-//VIEWMODEL
-
-
-class ReportViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow<ReportUiState>(ReportUiState.Idle)
-    val uiState:StateFlow<ReportUiState> = _uiState.asStateFlow()
-
-    private var selectedPatient:Patient? = null
-
-    fun searchPatient(patientId:String){
-        viewModelScope.launch {
-            _uiState.value = ReportUiState.Loading
-            delay(1000)
-            val user = DBManager.users.value.find { it.amka == patientId && it.role == UserRole.PATIENT }
-            if(user != null){
-                val historyResult = DBManager.searchPatientHistory(patientId)
-                val medicalHistory = historyResult.getOrDefault(emptyList())
-                val patient = Patient(
-                    patientId = user.amka,
-                    name = "${user.name} ${user.surname}",
-                    dateOfBirth = "1990-05-15",
-                    medicalHistory = medicalHistory
-                )
-                selectedPatient = patient
-                _uiState.value = ReportUiState.PatientFound(patient)
-            }else if(patientId == "12345678901" || patientId == "09876543210" || patientId == "000000"){
-                val mockName = when(patientId){
-                    "12345678901" -> "Γιώργος Παπαδόπουλος"
-                    "09876543210" -> "Μαρία Νικολάου"
-                    else -> "Demo Patient"
-                }
-                val patient = Patient(
-                    patientId = patientId,
-                    name = mockName,
-                    dateOfBirth = "1990-05-15",
-                    medicalHistory = listOf("Υπέρταση","Σακχαρώδης Διαβήτης")
-                )
-                selectedPatient = patient
-                _uiState.value = ReportUiState.PatientFound(patient)
-            }else{
-                _uiState.value = ReportUiState.Error("Patient with AMKA $patientId not found",ReportStep.PATIENT_SEARCH)
-            }
-        }
-    }
-
-    fun generateReport(startDate:LocalDateTime,endDate:LocalDateTime){
-        val patient = selectedPatient
-        if(patient == null){
-            _uiState.value = ReportUiState.Error("No patient selected",ReportStep.PATIENT_SEARCH)
-            return
-        }
-        viewModelScope.launch {
-            _uiState.value = ReportUiState.Loading
-            delay(1000)
-            try {
-                val measurements = DBManager.getMeasurementsForUser(patient.patientId).filter {
-                    !it.timestamp.isBefore(startDate) && !it.timestamp.isAfter(endDate)
-                }
-                val medications = DBManager.getMedicationsForUser(patient.patientId)
-                val report = Report(
-                    patient = patient,
-                    startDate = startDate,
-                    endDate = endDate,
-                    measurements = measurements,
-                    medications = medications
-                )
-                _uiState.value = ReportUiState.Success(report)
-            }catch(e:Exception){
-                _uiState.value = ReportUiState.Error("Failed to generate report: ${e.localizedMessage}",ReportStep.DATE_SELECTION)
-            }
-        }
-    }
-
-    fun resetToStep(step:ReportStep){
-        when(step){
-            ReportStep.PATIENT_SEARCH -> {
-                selectedPatient = null
-                _uiState.value = ReportUiState.Idle
-            }
-            ReportStep.DATE_SELECTION -> {
-                val patient = selectedPatient
-                if(patient != null){
-                    _uiState.value = ReportUiState.PatientFound(patient)
-                }else{
-                    _uiState.value = ReportUiState.Idle
-                }
-            }
-            ReportStep.REPORT_READY -> {}
-        }
     }
 }

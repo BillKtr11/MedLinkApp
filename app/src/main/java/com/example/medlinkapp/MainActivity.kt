@@ -16,6 +16,7 @@ import com.example.medlinkapp.model.UserRole // Adjust import based on your stru
 import com.example.medlinkapp.ui.login.LoginScreen // Adjust import based on your structure
 import com.example.medlinkapp.ui.medication.MedicationManagerScreen
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
+import com.example.medlinkapp.ui.report.ReportScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,7 +75,7 @@ fun AppNavigation() {
             PatientDashboardScreen(
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
-                onNavigateToResults = { /* Navigate to results */ },
+                onNavigateToResults = { navController.navigate("report_screen") },
                 onNavigateToMessages = { /* Navigate to messages */ },
                 onTriggerSOS = {
                     // In a real app, this would trigger an Alert Dialog or call the ViewModel
@@ -85,6 +86,12 @@ fun AppNavigation() {
 
         composable("medications_screen") {
             MedicationManagerScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("report_screen") {
+            ReportScreen(
                 onBackClick = { navController.popBackStack() }
             )
         }
