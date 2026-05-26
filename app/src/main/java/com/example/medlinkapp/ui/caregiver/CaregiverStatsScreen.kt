@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.medlinkapp.model.IntakeRecord
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -32,7 +31,7 @@ fun CaregiverStatsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Statistics: ${patient?.name ?: ""}") },
+                title = { Text("Στατιστικά: ${patient?.name ?: ""}") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -53,22 +52,22 @@ fun CaregiverStatsScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Select Time Period", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("Επιλογή Χρονικής Περιόδου", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("From: ${startDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}")
-                        Text("To: ${endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}")
+                        Text("Από: ${startDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}")
+                        Text("Έως: ${endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { showDatePicker = true },
                         modifier = Modifier.align(Alignment.End)
                     ) {
-                        Text("Change Period")
+                        Text("Αλλαγή Περιόδου")
                     }
                 }
             }
@@ -88,16 +87,31 @@ fun CaregiverStatsScreen(
                     }
 
                     item {
-                        Text("Medication Adherence History", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("Ιστορικό Συμμόρφωσης Φαρμάκων", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
 
-                    if (stats!!.history.isEmpty()) {
+                    if (stats!!.intakeHistory.isEmpty()) {
                         item {
-                            Text("No records found for this period.", color = Color.Gray)
+                            Text("Δεν βρέθηκαν εγγραφές για αυτή την περίοδο.", color = Color.Gray)
                         }
                     } else {
-                        items(stats!!.history) { record ->
+                        items(stats!!.intakeHistory) { record ->
                             IntakeRecordItem(record)
+                        }
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Ιστορικό Μετρήσεων (Vitals)", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    }
+
+                    if (stats!!.measurementHistory.isEmpty()) {
+                        item {
+                            Text("Δεν υπάρχουν ιστορικά δεδομένα μετρήσεων.", color = Color.Gray)
+                        }
+                    } else {
+                        items(stats!!.measurementHistory) { measurement ->
+                            MeasurementItem(measurement)
                         }
                     }
                 }
@@ -106,25 +120,24 @@ fun CaregiverStatsScreen(
     }
 
     if (showDatePicker) {
-        // Simplified Date Range Picker logic
-        // In a real app, use DateRangePicker from M3
         AlertDialog(
             onDismissRequest = { showDatePicker = false },
-            title = { Text("Select Range (Mock)") },
+            title = { Text("Επιλογή Εύρους") },
             text = {
                 Column {
                     Button(onClick = {
                         viewModel.setDateRange(LocalDate.now().minusDays(30), LocalDate.now())
                         showDatePicker = false
-                    }) { Text("Last 30 Days") }
+                    }, modifier = Modifier.fillMaxWidth()) { Text("Τελευταίες 30 Ημέρες") }
+                    Spacer(modifier = Modifier.height(8.dp))
                     Button(onClick = {
                         viewModel.setDateRange(LocalDate.now().minusDays(7), LocalDate.now())
                         showDatePicker = false
-                    }) { Text("Last 7 Days") }
+                    }, modifier = Modifier.fillMaxWidth()) { Text("Τελευταία Εβδομάδα") }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Close") }
+                TextButton(onClick = { showDatePicker = false }) { Text("Κλείσιμο") }
             }
         )
     }
@@ -137,7 +150,7 @@ fun ComplianceOverviewCard(stats: AdherenceStats) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Overall Compliance", style = MaterialTheme.typography.titleMedium)
+            Text("Συνολική Συμμόρφωση", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "${stats.adherencePercentage.toInt()}%",
@@ -146,7 +159,7 @@ fun ComplianceOverviewCard(stats: AdherenceStats) {
                 color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Taken: ${stats.totalTaken} / Expected: ${stats.totalExpected}", style = MaterialTheme.typography.bodyMedium)
+            Text("Λήψεις: ${stats.totalTaken} / Προγραμματισμένες: ${stats.totalExpected}", style = MaterialTheme.typography.bodyMedium)
             
             LinearProgressIndicator(
                 progress = { stats.adherencePercentage / 100f },
@@ -156,32 +169,6 @@ fun ComplianceOverviewCard(stats: AdherenceStats) {
                     .height(8.dp),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
-fun IntakeRecordItem(record: IntakeRecord) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(record.medName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                Text(
-                    record.timestamp.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            Text(
-                record.status,
-                color = if (record.status == "Confirmed") Color(0xFF4CAF50) else Color(0xFFF44336),
-                fontWeight = FontWeight.Bold
             )
         }
     }

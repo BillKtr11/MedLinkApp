@@ -4,17 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.model.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class AdherenceStats(
     val totalExpected: Int,
     val totalTaken: Int,
     val adherencePercentage: Float,
-    val history: List<IntakeRecord>
+    val intakeHistory: List<IntakeRecord>,
+    val measurementHistory: List<DeviceData>
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CaregiverViewModel : ViewModel() {
 
     // Patients specifically assigned to this caregiver
@@ -39,38 +41,54 @@ class CaregiverViewModel : ViewModel() {
     val selectedPatient = _selectedPatient.asStateFlow()
 
     // Real-time monitoring data
-    val patientMedications = _selectedPatient.flatMapLatest { patient ->
-        if (patient == null) flowOf(emptyList<MedicationData>())
+    val patientMedications: StateFlow<List<MedicationData>> = _selectedPatient.flatMapLatest { patient ->
+        if (patient == null) flowOf(emptyList())
         else DBManager.medications.map { meds -> meds.filter { it.patientAmka == patient.amka } }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val patientMeasurements = _selectedPatient.flatMapLatest { patient ->
-        if (patient == null) flowOf(emptyList<DeviceData>())
+    val patientMeasurements: StateFlow<List<DeviceData>> = _selectedPatient.flatMapLatest { patient ->
+        if (patient == null) flowOf(emptyList())
         else DBManager.measurements.map { measurements -> measurements.filter { it.patientAmka == patient.amka } }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val patientIntakeRecords = _selectedPatient.flatMapLatest { patient ->
-        if (patient == null) flowOf(emptyList<IntakeRecord>())
+    val patientIntakeRecords: StateFlow<List<IntakeRecord>> = _selectedPatient.flatMapLatest { patient ->
+        if (patient == null) flowOf(emptyList())
         else DBManager.intakeRecords.map { records -> records.filter { it.patientAmka == patient.amka } }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    // Stats
+    // Stats Range
     private val _startDate = MutableStateFlow<LocalDate>(LocalDate.now().minusDays(7))
     val startDate = _startDate.asStateFlow()
 
     private val _endDate = MutableStateFlow<LocalDate>(LocalDate.now())
     val endDate = _endDate.asStateFlow()
 
-    val adherenceStats = combine(_selectedPatient, patientIntakeRecords, patientMedications, _startDate, _endDate) { patient, records, meds, start, end ->
+    // Combine 6 flows using the array-based combine overload to avoid type inference issues
+    val adherenceStats: StateFlow<AdherenceStats?> = combine(
+        listOf(_selectedPatient, patientIntakeRecords, patientMedications, patientMeasurements, startDate, endDate)
+    ) { flows ->
+        val patient = flows[0] as? UserData
+        @Suppress("UNCHECKED_CAST")
+        val records = flows[1] as List<IntakeRecord>
+        @Suppress("UNCHECKED_CAST")
+        val meds = flows[2] as List<MedicationData>
+        @Suppress("UNCHECKED_CAST")
+        val measurements = flows[3] as List<DeviceData>
+        val start = flows[4] as LocalDate
+        val end = flows[5] as LocalDate
+
         if (patient == null) return@combine null
 
         val filteredRecords = records.filter { 
             val date = it.timestamp.toLocalDate()
-            !date.isBefore(start) && !date.isAfter(end)
+            (date.isEqual(start) || date.isAfter(start)) && (date.isEqual(end) || date.isBefore(end))
         }
 
-        // Simplistic calculation: count "Confirmed" vs total expected in period
-        // For a real app, we'd calculate based on medication frequency over days
+        val filteredMeasurements = measurements.filter {
+            val date = it.timestamp.toLocalDate()
+            (date.isEqual(start) || date.isAfter(start)) && (date.isEqual(end) || date.isBefore(end))
+        }
+
         val days = (end.toEpochDay() - start.toEpochDay()).toInt() + 1
         val totalExpected = meds.sumOf { it.frequency * days }
         val totalTaken = filteredRecords.count { it.status == "Confirmed" }
@@ -81,7 +99,8 @@ class CaregiverViewModel : ViewModel() {
             totalExpected = totalExpected,
             totalTaken = totalTaken,
             adherencePercentage = percentage,
-            history = filteredRecords.sortedByDescending { it.timestamp }
+            intakeHistory = filteredRecords.sortedByDescending { it.timestamp },
+            measurementHistory = filteredMeasurements.sortedByDescending { it.timestamp }
         )
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 

@@ -155,6 +155,13 @@ object DBManager {
             changed = true
         }
 
+        // Add a default patient linked to the caregiver for testing
+        if (_users.value.none { it.email == "patient" }) {
+            val defaultPatient = UserData("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT, assignedCaregiverAmka = "222222")
+            _users.update { it + defaultPatient }
+            changed = true
+        }
+
         if (changed) {
             saveUsers()
         }
@@ -199,6 +206,11 @@ object DBManager {
                 _medications.value = emptyList()
             }
         }
+
+        if (_medications.value.none { it.patientAmka == "000000" }) {
+            addMedication("Depon", "500mg", 20, "000000", listOf("08:00", "20:00"), 2)
+            addMedication("Amoxil", "1g", 10, "000000", listOf("12:00"), 1)
+        }
     }
 
     private fun saveMedications() {
@@ -241,6 +253,17 @@ object DBManager {
             } catch (e: Exception) {
                 _intakeRecords.value = emptyList()
             }
+        }
+
+        if (_intakeRecords.value.none { it.patientAmka == "000000" }) {
+            _intakeRecords.update { current -> 
+                current + listOf(
+                    IntakeRecord("med1", "Depon", LocalDateTime.now().minusDays(1).withHour(8), "000000", "Confirmed"),
+                    IntakeRecord("med1", "Depon", LocalDateTime.now().minusDays(1).withHour(20), "000000", "Confirmed"),
+                    IntakeRecord("med1", "Depon", LocalDateTime.now().minusDays(2).withHour(8), "000000", "Skipped")
+                )
+            }
+            saveIntakeRecords()
         }
     }
 
@@ -342,6 +365,17 @@ object DBManager {
             } catch (e: Exception) {
                 _measurements.value = emptyList()
             }
+        }
+
+        if (_measurements.value.none { it.patientAmka == "000000" }) {
+            _measurements.update { current ->
+                current + listOf(
+                    DeviceData("d1", 120, "Πίεση", LocalDateTime.now().minusHours(2), "000000"),
+                    DeviceData("d2", 72, "Σφύξεις", LocalDateTime.now().minusHours(2), "000000"),
+                    DeviceData("d3", 98, "Οξυγόνο", LocalDateTime.now().minusDays(1), "000000")
+                )
+            }
+            saveMeasurements()
         }
     }
 
