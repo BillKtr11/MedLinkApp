@@ -22,15 +22,19 @@ class AuthRepository {
                 Result.failure(Exception("Fields cannot be empty"))
             }
             email == "doctor" && password == "123" -> {
-                val doctor = users.find { it.email == "doctor" }!!
+                val doctor = users.find { it.email == "doctor" } ?: UserData("Dr. Lee", "George", "111111", "doctor", "123", UserRole.DOCTOR)
                 DBManager.setCurrentUser(doctor.amka)
                 Result.success(doctor)
             }
             email == "patient" && password == "123" -> {
-                // Return a dummy patient for legacy testing if not in DB
-                val dummy = UserData("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT)
-                DBManager.setCurrentUser(dummy.amka)
-                Result.success(dummy)
+                val patient = users.find { it.email == "patient" } ?: UserData("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT)
+                DBManager.setCurrentUser(patient.amka)
+                Result.success(patient)
+            }
+            email == "caregiver" && password == "123" -> {
+                val caregiver = users.find { it.email == "caregiver" } ?: UserData("Anna", "Caregiver", "222222", "caregiver", "123", UserRole.CAREGIVER)
+                DBManager.setCurrentUser(caregiver.amka)
+                Result.success(caregiver)
             }
             else -> {
                 Result.failure(Exception("Invalid credentials"))

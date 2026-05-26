@@ -109,7 +109,11 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             OutlinedTextField(
-                value = if (selectedRole == UserRole.PATIENT) "Patient" else "Doctor",
+                value = when (selectedRole) {
+                    UserRole.PATIENT -> "Patient"
+                    UserRole.DOCTOR -> "Doctor"
+                    UserRole.CAREGIVER -> "Caregiver"
+                },
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Register as") },
@@ -133,6 +137,13 @@ fun RegisterScreen(
                     text = { Text("Doctor") },
                     onClick = {
                         selectedRole = UserRole.DOCTOR
+                        expanded = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Caregiver") },
+                    onClick = {
+                        selectedRole = UserRole.CAREGIVER
                         expanded = false
                     }
                 )

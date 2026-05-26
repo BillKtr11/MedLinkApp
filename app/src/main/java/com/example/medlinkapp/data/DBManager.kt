@@ -140,10 +140,22 @@ object DBManager {
             }
         }
         
+        var changed = false
         // Add a default doctor if none exists
         if (_users.value.none { it.role == UserRole.DOCTOR }) {
             val defaultDoctor = UserData("Dr. Lee", "George", "111111", "doctor", "123", UserRole.DOCTOR)
             _users.update { it + defaultDoctor }
+            changed = true
+        }
+        
+        // Add a default caregiver if none exists
+        if (_users.value.none { it.role == UserRole.CAREGIVER }) {
+            val defaultCaregiver = UserData("Anna", "Caregiver", "222222", "caregiver", "123", UserRole.CAREGIVER)
+            _users.update { it + defaultCaregiver }
+            changed = true
+        }
+
+        if (changed) {
             saveUsers()
         }
     }
@@ -162,6 +174,15 @@ object DBManager {
         _users.update { list ->
             list.map { 
                 if (it.amka == patientAmka) it.copy(assignedDoctorAmka = doctorAmka) else it 
+            }
+        }
+        saveUsers()
+    }
+
+    fun assignPatientToCaregiver(patientAmka: String, caregiverAmka: String) {
+        _users.update { list ->
+            list.map { 
+                if (it.amka == patientAmka) it.copy(assignedCaregiverAmka = caregiverAmka) else it 
             }
         }
         saveUsers()
@@ -265,9 +286,6 @@ object DBManager {
                 timestamp = LocalDateTime.now()
             )
         )
-        
-        // Simulate saving reminders
-        println("Reminders scheduled for appointment: 24h and 1h before ${appointment.date}")
     }
 
     fun deleteAppointment(appointmentId: String) {
