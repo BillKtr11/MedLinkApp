@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,11 +28,27 @@ fun AddMedicationScreen(
     var frequency by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf("") }
     var stock by remember { mutableStateOf("") }
+    
+    // Intake Times
+    val intakeTimes = remember { mutableStateListOf<String>() }
 
     var showError by remember { mutableStateOf(false) }
     var showStockWarning by remember { mutableStateOf(false) }
     var showSuccess by remember { mutableStateOf(false) }
     var stockExhaustionDate by remember { mutableStateOf("") }
+
+    // Update intake times when frequency changes
+    LaunchedEffect(frequency) {
+        val freqInt = frequency.toIntOrNull() ?: 0
+        intakeTimes.clear()
+        if (freqInt > 0) {
+            val interval = 24 / freqInt
+            for (i in 0 until freqInt) {
+                val hour = (8 + i * interval) % 24 // Start at 8 AM
+                intakeTimes.add(String.format("%02d:00", hour))
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -96,6 +113,27 @@ fun AddMedicationScreen(
                     isError = showError && stock.toIntOrNull() == null
                 )
 
+                if (intakeTimes.isNotEmpty()) {
+                    Text("Ώρες Λήψης:", style = MaterialTheme.typography.titleSmall)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        intakeTimes.forEachIndexed { index, time ->
+                            var currentTime by remember { mutableStateOf(time) }
+                            OutlinedTextField(
+                                value = currentTime,
+                                onValueChange = { 
+                                    currentTime = it
+                                    intakeTimes[index] = it 
+                                },
+                                modifier = Modifier.weight(1f),
+                                textStyle = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+
                 if (showError) {
                     Text(
                         text = "Παρακαλώ συμπληρώστε όλα τα πεδία σωστά.",
@@ -122,7 +160,7 @@ fun AddMedicationScreen(
                                 stockExhaustionDate = exhaustionDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                                 showStockWarning = true
                             } else {
-                                viewModel.addMedication(name, dosage, stockInt)
+                                viewModel.addMedication(name, dosage, stockInt, freqInt, intakeTimes.toList())
                                 showSuccess = true
                             }
                         }
@@ -158,7 +196,7 @@ fun AddMedicationScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         showStockWarning = false
-                        viewModel.addMedication(name, dosage, stock.toInt())
+                        viewModel.addMedication(name, dosage, stock.toInt(), frequency.toInt(), intakeTimes.toList())
                         showSuccess = true
                     }) {
                         Text("Ναι")
@@ -167,7 +205,7 @@ fun AddMedicationScreen(
                 dismissButton = {
                     TextButton(onClick = { 
                         showStockWarning = false
-                        viewModel.addMedication(name, dosage, stock.toInt())
+                        viewModel.addMedication(name, dosage, stock.toInt(), frequency.toInt(), intakeTimes.toList())
                         showSuccess = true
                     }) {
                         Text("Όχι")

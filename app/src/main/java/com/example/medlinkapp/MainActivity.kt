@@ -30,6 +30,7 @@ import com.example.medlinkapp.ui.measurement.NewMeasurementScreen
 import com.example.medlinkapp.ui.measurement.MeasurementHistoryScreen
 import com.example.medlinkapp.ui.medication.MedicationManagerScreen
 import com.example.medlinkapp.ui.medication.AddMedicationScreen
+import com.example.medlinkapp.ui.medication.IntakeScreen
 import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
 import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
@@ -162,6 +163,9 @@ fun AppNavigation() {
                 onNavigateToResults = { /* Navigate to results */ },
                 onNavigateToMessages = { /* Navigate to messages */ },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
+                onNavigateToTakeMedication = { medId ->
+                    navController.navigate("intake_screen/$medId")
+                },
                 onTriggerSOS = {
                     println("SOS Triggered!")
                 },
@@ -177,7 +181,20 @@ fun AppNavigation() {
         composable("medications_screen") {
             MedicationManagerScreen(
                 onBackClick = { navController.popBackStack() },
-                onNavigateToAddMedication = { navController.navigate(Screen.AddMedication.route) }
+                onNavigateToAddMedication = { navController.navigate(Screen.AddMedication.route) },
+                onNavigateToIntake = { medId -> 
+                    navController.navigate("intake_screen/$medId")
+                }
+            )
+        }
+
+        composable("intake_screen/{medId}") { backStackEntry ->
+            val medId = backStackEntry.arguments?.getString("medId") ?: ""
+            val medViewModel: MedicationViewModel = viewModel()
+            IntakeScreen(
+                medId = medId,
+                viewModel = medViewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

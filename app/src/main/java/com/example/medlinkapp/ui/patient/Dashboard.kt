@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,20 +17,33 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medlinkapp.R
+import com.example.medlinkapp.ui.medication.MedicationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientDashboardScreen(
     patientName: String = "Alex Johnson",
+    medViewModel: MedicationViewModel = viewModel(),
     onNavigateToMedications: () -> Unit,
     onNavigateToAppointments: () -> Unit,
     onNavigateToResults: () -> Unit,
     onNavigateToMessages: () -> Unit,
     onNavigateToNewMeasurement: () -> Unit,
+    onNavigateToTakeMedication: (String) -> Unit,
     onTriggerSOS: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val medications by medViewModel.medications.collectAsState()
+    
+    // Find the next medication to take
+    val nextMed = medications.filter { it.intakeTimes.isNotEmpty() }
+        .mapNotNull { med -> 
+            med.getNextIntakeTime()?.let { time -> med to time }
+        }
+        .minByOrNull { it.second }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -44,6 +59,14 @@ fun PatientDashboardScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = {
+                        // Test Notification logic simulation: open intake screen for the next med
+                        if (nextMed != null) {
+                            onNavigateToTakeMedication(nextMed.first.id)
+                        }
+                    }) {
+                        Icon(Icons.Default.Notifications, contentDescription = "Test Notification", tint = MaterialTheme.colorScheme.primary)
+                    }
                     IconButton(onClick = onLogout) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
                     }
@@ -92,10 +115,15 @@ fun PatientDashboardScreen(
             }
 
             item {
+                val medText = if (nextMed != null) {
+                    "Next: ${nextMed.first.name} at ${nextMed.second}"
+                } else {
+                    "No active prescriptions"
+                }
                 DashboardActionCard(
                     title = "My Medications",
                     icon = Icons.Default.Info,
-                    summaryText = "3 Active Prescriptions (Next: Lisinopril at 8 AM)",
+                    summaryText = "$medText (${medications.size} Total)",
                     onClick = onNavigateToMedications
                 )
             }

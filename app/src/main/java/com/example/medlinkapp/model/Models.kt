@@ -49,7 +49,17 @@ data class MedicationData(
     val dosage: String,
     val stockCount: Int,
     val lowStockThreshold: Int = 10,
-    val patientAmka: String
+    val patientAmka: String,
+    val intakeTimes: List<String> = emptyList(), // e.g. ["08:00", "20:00"]
+    val frequency: Int = 1 // times per day
+)
+
+data class IntakeRecord(
+    val medId: String,
+    val medName: String,
+    val timestamp: LocalDateTime,
+    val patientAmka: String,
+    val status: String // "Confirmed", "Skipped"
 )
 
 data class UserData(

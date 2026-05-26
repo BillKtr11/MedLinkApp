@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -12,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -20,9 +22,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun MedicationManagerScreen(
     viewModel: MedicationViewModel = viewModel(),
     onBackClick: () -> Unit,
-    onNavigateToAddMedication: () -> Unit
+    onNavigateToAddMedication: () -> Unit,
+    onNavigateToIntake: (String) -> Unit
 ) {
     val medications by viewModel.medications.collectAsState()
+
+    var showRestockDialog by remember { mutableStateOf(false) }
+    var restockMedId by remember { mutableStateOf<String?>(null) }
+    var restockAmount by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -51,11 +58,48 @@ fun MedicationManagerScreen(
                 items(medications) { med ->
                     MedicationCard(
                         medication = med,
-                        onTakeDose = { viewModel.takeDose(med.id) },
-                        onRestock = { viewModel.restock(med.id, 30) }
+                        onTakeDose = { onNavigateToIntake(med.id) },
+                        onRestock = { 
+                            restockMedId = med.id
+                            showRestockDialog = true
+                        }
                     )
                 }
             }
+        }
+
+        if (showRestockDialog) {
+            AlertDialog(
+                onDismissRequest = { showRestockDialog = false },
+                title = { Text("Ανανέωση Αποθέματος") },
+                text = {
+                    Column {
+                        Text("Εισάγετε τον αριθμό των νέων δόσεων:")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = restockAmount,
+                            onValueChange = { restockAmount = it },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val amount = restockAmount.toIntOrNull() ?: 0
+                        restockMedId?.let { viewModel.restock(it, amount) }
+                        showRestockDialog = false
+                        restockAmount = ""
+                    }) {
+                        Text("Προσθήκη")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showRestockDialog = false }) {
+                        Text("Ακύρωση")
+                    }
+                }
+            )
         }
     }
 }
