@@ -50,15 +50,6 @@ fun DoctorDashboardScreen(
                     IconButton(onClick = onLogout) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
                     }
-                    Button(
-                        onClick = { /* SOS simulation */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        Icon(Icons.Default.Warning, contentDescription = "SOS", modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("SOS")
-                    }
                 }
             )
         }

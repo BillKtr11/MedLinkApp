@@ -228,6 +228,11 @@ object DBManager {
         saveAppointments()
     }
 
+    fun deleteMessage(messageId: String) {
+        _messages.update { list -> list.filter { it.id != messageId } }
+        saveMessages()
+    }
+
     // --- Messages ---
     private fun loadMessages() {
         val json = prefs?.getString(KEY_MESSAGES, null)
