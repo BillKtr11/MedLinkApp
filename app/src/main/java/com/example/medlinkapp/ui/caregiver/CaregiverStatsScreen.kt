@@ -25,6 +25,7 @@ fun CaregiverStatsScreen(
     val stats by viewModel.adherenceStats.collectAsState()
     val startDate by viewModel.startDate.collectAsState()
     val endDate by viewModel.endDate.collectAsState()
+    val dateRangeError by viewModel.dateRangeError.collectAsState()
 
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -119,6 +120,23 @@ fun CaregiverStatsScreen(
         }
     }
 
+    // Alternative Flow 2: Error Dialog for Invalid Date Range
+    if (dateRangeError != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearDateRangeError() },
+            title = { Text("Σφάλμα Επιλογής") },
+            text = { Text(dateRangeError!!) },
+            confirmButton = {
+                Button(onClick = { 
+                    viewModel.clearDateRangeError()
+                    showDatePicker = true // Return to period selection
+                }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
     if (showDatePicker) {
         AlertDialog(
             onDismissRequest = { showDatePicker = false },
@@ -134,6 +152,14 @@ fun CaregiverStatsScreen(
                         viewModel.setDateRange(LocalDate.now().minusDays(7), LocalDate.now())
                         showDatePicker = false
                     }, modifier = Modifier.fillMaxWidth()) { Text("Τελευταία Εβδομάδα") }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Simulation of an invalid selection
+                    Button(onClick = {
+                        viewModel.setDateRange(LocalDate.now().plusDays(1), LocalDate.now())
+                        showDatePicker = false
+                    }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)) { 
+                        Text("Επιλογή Μελλοντικής Ημ/νίας (Σφάλμα)") 
+                    }
                 }
             },
             confirmButton = {

@@ -67,7 +67,11 @@ class CaregiverViewModel : ViewModel() {
     private val _endDate = MutableStateFlow<LocalDate>(LocalDate.now())
     val endDate = _endDate.asStateFlow()
 
-    // Combine 6 flows using the array-based combine overload to avoid type inference issues
+    // Validation Error State for Date Range
+    private val _dateRangeError = MutableStateFlow<String?>(null)
+    val dateRangeError = _dateRangeError.asStateFlow()
+
+    // Combine flows to calculate stats
     val adherenceStats: StateFlow<AdherenceStats?> = combine(
         listOf(_selectedPatient, patientIntakeRecords, patientMedications, patientMeasurements, startDate, endDate)
     ) { flows ->
@@ -110,8 +114,6 @@ class CaregiverViewModel : ViewModel() {
 
     fun selectPatient(patient: UserData) {
         _selectedPatient.value = patient
-        // Simulate a communication error for specific test cases if needed
-        // For now, let's keep it toggleable or based on some logic
     }
 
     fun toggleCommunicationError(hasError: Boolean) {
@@ -119,8 +121,22 @@ class CaregiverViewModel : ViewModel() {
     }
 
     fun setDateRange(start: LocalDate, end: LocalDate) {
+        if (start.isAfter(end)) {
+            _dateRangeError.value = "Η ημερομηνία έναρξης δεν μπορεί να είναι μετά την ημερομηνία λήξης."
+            return
+        }
+        if (end.isAfter(LocalDate.now())) {
+            _dateRangeError.value = "Η ημερομηνία λήξης δεν μπορεί να είναι στο μέλλον."
+            return
+        }
+        
+        _dateRangeError.value = null
         _startDate.value = start
         _endDate.value = end
+    }
+
+    fun clearDateRangeError() {
+        _dateRangeError.value = null
     }
 
     fun assignPatientToMe(patientAmka: String) {

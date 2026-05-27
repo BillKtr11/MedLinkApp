@@ -141,21 +141,21 @@ object DBManager {
         }
         
         var changed = false
-        // Add a default doctor if none exists
+        // Add a default doctor
         if (_users.value.none { it.role == UserRole.DOCTOR }) {
             val defaultDoctor = UserData("Dr. Lee", "George", "111111", "doctor", "123", UserRole.DOCTOR)
             _users.update { it + defaultDoctor }
             changed = true
         }
         
-        // Add a default caregiver if none exists
+        // Add a default caregiver
         if (_users.value.none { it.role == UserRole.CAREGIVER }) {
             val defaultCaregiver = UserData("Anna", "Caregiver", "222222", "caregiver", "123", UserRole.CAREGIVER)
             _users.update { it + defaultCaregiver }
             changed = true
         }
 
-        // Add a default patient linked to the caregiver for testing
+        // Add a default patient linked to the caregiver
         if (_users.value.none { it.email == "patient" }) {
             val defaultPatient = UserData("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT, assignedCaregiverAmka = "222222")
             _users.update { it + defaultPatient }
