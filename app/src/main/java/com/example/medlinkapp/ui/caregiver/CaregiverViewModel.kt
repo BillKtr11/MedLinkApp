@@ -40,6 +40,10 @@ class CaregiverViewModel : ViewModel() {
     private val _selectedPatient = MutableStateFlow<UserData?>(null)
     val selectedPatient = _selectedPatient.asStateFlow()
 
+    // Communication status
+    private val _isCommunicationError = MutableStateFlow(false)
+    val isCommunicationError = _isCommunicationError.asStateFlow()
+
     // Real-time monitoring data
     val patientMedications: StateFlow<List<MedicationData>> = _selectedPatient.flatMapLatest { patient ->
         if (patient == null) flowOf(emptyList())
@@ -106,6 +110,12 @@ class CaregiverViewModel : ViewModel() {
 
     fun selectPatient(patient: UserData) {
         _selectedPatient.value = patient
+        // Simulate a communication error for specific test cases if needed
+        // For now, let's keep it toggleable or based on some logic
+    }
+
+    fun toggleCommunicationError(hasError: Boolean) {
+        _isCommunicationError.value = hasError
     }
 
     fun setDateRange(start: LocalDate, end: LocalDate) {
