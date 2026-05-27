@@ -1,10 +1,12 @@
 package com.example.medlinkapp.ui.doctor
 
 import androidx.lifecycle.ViewModel
+import com.example.medlinkapp.model.Prescription
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
+import kotlinx.coroutines.flow.update
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.model.Appointment
@@ -118,6 +120,63 @@ class DoctorViewModel : ViewModel() {
                     !it.date.isAfter(endDate)
         }.sortedByDescending { it.date }
     }
+    // Λίστα με τις αποθηκευμένες συνταγές
+    private val _prescriptions = MutableStateFlow<List<Prescription>>(emptyList())
+    val prescriptions = _prescriptions.asStateFlow()
+
+    /**
+     * Υλοποίηση Βημάτων 2, 4, 5 και 6
+     * Επιστρέφει null αν όλα είναι εντάξει, ή μήνυμα λάθους αν αποτύχει ο έλεγχος.
+     */
+    fun issuePrescription(
+        patientId: String,
+        medication: String,
+        dosage: String,
+        frequency: String,
+        duration: String
+    ): String? {
+
+        // ΒΗΜΑ 2: Έλεγχος εγκυρότητας στοιχείων
+        if (medication.isBlank()) return "Το όνομα του φαρμάκου δεν μπορεί να είναι κενό."
+        if (dosage.isBlank()) return "Η δοσολογία δεν μπορεί να είναι κενή."
+        if (frequency.isBlank()) return "Η συχνότητα δεν μπορεί να είναι κενή."
+        if (duration.isBlank()) return "Η διάρκεια δεν μπορεί να είναι κενή."
+
+        // ΒΗΜΑ 4: Αποθήκευση της συνταγής στο σύστημα
+        val newPrescription = Prescription(
+            id = "presc_${System.currentTimeMillis()}",
+            patientId = patientId,
+            medication = medication,
+            dosage = dosage,
+            frequency = frequency,
+            duration = duration,
+            dateIssued = LocalDate.now()
+        )
+        _prescriptions.update { it + newPrescription }
+
+        // --- ΠΡΟΣΘΗΚΗ: Αυτόματη εισαγωγή της συνταγής στο Ιατρικό Ιστορικό του Ασθενή ---
+        // Δημιουργούμε ένα record με τα στοιχεία που έγραψε ο γιατρός
+        val newRecord = MedicalRecord(
+            id = "rec_${System.currentTimeMillis()}",
+            patientId = patientId,
+            date = LocalDate.now(),
+            type = "Συνταγογράφηση", // Εμφανίζεται με μπλε/primary χρώμα στην κάρτα
+            description = "Φάρμακο: $medication\nΔοσολογία: $dosage\nΣυχνότητα: $frequency\nΔιάρκεια: $duration"
+        )
+
+        // Ενημερώνουμε τη λίστα του ιστορικού.
+        // Το προσθέτουμε στην αρχή της λίστας (newRecord + it) για να φαίνεται πρώτο-πρώτο πάνω στην οθόνη
+        _patientHistory.update { listOf(newRecord) + it }
+
+        // ΒΗΜΑ 5: Αυτόματη ενημέρωση του προγράμματος φαρμάκων του ασθενή (Simulated)
+        println("SYSTEM: Το πρόγραμμα φαρμάκων του ασθενή $patientId ενημερώθηκε με το φάρμακο $medication.")
+
+        // ΒΗΜΑ 6: Αποστολή ειδοποίησης στον ασθενή (Simulated)
+        println("SYSTEM: Εστάλη ειδοποίηση (Notification) στον ασθενή $patientId: 'Ο γιατρός σας εξέδωσε νέα συνταγή'.")
+
+        return null // Επιστροφή null σημαίνει επιτυχία χωρίς σφάλματα
+    }
+}
 
     fun addAppointment(date: LocalDateTime, reason: String, patientAmka: String): Result<Unit> {
         if (reason.isBlank()) return Result.failure(Exception("Reason cannot be empty"))

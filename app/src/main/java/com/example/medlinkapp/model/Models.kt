@@ -1,4 +1,5 @@
 package com.example.medlinkapp.model
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 enum class UserRole {

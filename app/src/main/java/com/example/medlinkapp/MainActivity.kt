@@ -45,6 +45,7 @@ import com.example.medlinkapp.ui.patient.PatientMessagesScreen
 import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
 import com.example.medlinkapp.ui.doctor.AssignPatientScreen
 import com.example.medlinkapp.ui.doctor.ScheduledAppointmentsScreen
+import com.example.medlinkapp.ui.doctor.PrescriptionScreen
 import com.example.medlinkapp.ui.caregiver.*
 
 class MainActivity : ComponentActivity() {
@@ -223,12 +224,23 @@ fun AppNavigation() {
         composable("patient_history_screen") {
             PatientHistoryScreen(
                 viewModel = doctorViewModel,
-                onBackClick = {
-                    navController.popBackStack()
+                onBackClick = { navController.popBackStack() },
+                onNavigateToPrescription = {
+                    // Πλοήγηση στη νέα οθόνη της συνταγής
+                    navController.navigate("prescription_screen")
                 }
             )
         }
 
+        // 2.3 ΝΕΑ ΟΘΟΝΗ: Καταχώριση Συνταγής
+        composable("prescription_screen") {
+            PrescriptionScreen(
+                viewModel = doctorViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // 3. Patient Dashboard
         composable("patient_dashboard") {
             val patientName = (loginState as? LoginState.Success)?.let { success ->
                 DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
