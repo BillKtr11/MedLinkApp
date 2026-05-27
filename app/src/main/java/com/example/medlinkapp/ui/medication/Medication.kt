@@ -1,51 +1,93 @@
 package com.example.medlinkapp.ui.medication
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import androidx.lifecycle.viewModelScope
+import com.example.medlinkapp.data.DBManager
+import kotlinx.coroutines.flow.*
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
-// Data model for the UI state
 data class MedicationUiModel(
     val id: String,
     val name: String,
     val dosage: String,
     val stockCount: Int,
-    val lowStockThreshold: Int = 10
+    val lowStockThreshold: Int = 10,
+    val intakeTimes: List<String> = emptyList()
 ) {
     val isLowStock: Boolean get() = stockCount <= lowStockThreshold
+
+    fun getNextIntakeTime(): String? {
+        if (intakeTimes.isEmpty()) return null
+        val now = LocalTime.now()
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        
+        // Find the first time that is after now
+        val nextTime = intakeTimes.map { LocalTime.parse(it, formatter) }
+            .filter { it.isAfter(now) }
+            .minOrNull()
+        
+        // If no time today is after now, the next one is the first one tomorrow
+        return (nextTime ?: intakeTimes.map { LocalTime.parse(it, formatter) }.minOrNull())?.format(formatter)
+    }
 }
 
 class MedicationViewModel : ViewModel() {
 
-    // Mock initial data - in production, fetch this from DBManager
-    private val _medications = MutableStateFlow(
-        listOf(
-            MedicationUiModel("1", "Metformin", "500mg", 14),
-            MedicationUiModel("2", "Lisinopril", "10mg", 5, 7), // Already low stock
-            MedicationUiModel("3", "Simvastatin", "20mg", 30)
-        )
-    )
-    val medications: StateFlow<List<MedicationUiModel>> = _medications.asStateFlow()
-
-    fun takeDose(medId: String) {
-        _medications.update { currentList ->
-            currentList.map { med ->
-                if (med.id == medId && med.stockCount > 0) {
-                    med.copy(stockCount = med.stockCount - 1)
-                } else med
+    // Fetching data from the persistent singleton DBManager, filtered by user
+    val medications: StateFlow<List<MedicationUiModel>> = combine(DBManager.medications, DBManager.currentUserAmka) { list, amka ->
+        list.filter { it.patientAmka == amka }
+            .map { 
+                MedicationUiModel(it.id, it.name, it.dosage, it.stockCount, it.lowStockThreshold, it.intakeTimes ?: emptyList())
             }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    fun confirmIntake(medId: String) {
+        val currentMed = medications.value.find { it.id == medId }
+        val amka = DBManager.getCurrentUserAmka() ?: return
+        if (currentMed != null && currentMed.stockCount > 0) {
+            DBManager.updateStock(medId, currentMed.stockCount - 1)
+            DBManager.addIntakeRecord(
+                com.example.medlinkapp.model.IntakeRecord(
+                    medId = medId,
+                    medName = currentMed.name,
+                    timestamp = java.time.LocalDateTime.now(),
+                    patientAmka = amka,
+                    status = "Confirmed"
+                )
+            )
         }
     }
 
-    fun restock(medId: String, amount: Int = 30) {
-        _medications.update { currentList ->
-            currentList.map { med ->
-                if (med.id == medId) {
-                    med.copy(stockCount = med.stockCount + amount)
-                } else med
-            }
+    fun skipIntake(medId: String) {
+        val currentMed = medications.value.find { it.id == medId }
+        val amka = DBManager.getCurrentUserAmka() ?: return
+        if (currentMed != null) {
+            DBManager.addIntakeRecord(
+                com.example.medlinkapp.model.IntakeRecord(
+                    medId = medId,
+                    medName = currentMed.name,
+                    timestamp = java.time.LocalDateTime.now(),
+                    patientAmka = amka,
+                    status = "Skipped"
+                )
+            )
         }
+    }
+
+    fun restock(medId: String, amount: Int) {
+        val currentMed = medications.value.find { it.id == medId }
+        if (currentMed != null) {
+            DBManager.updateStock(medId, currentMed.stockCount + amount)
+        }
+    }
+
+    fun addMedication(name: String, dosage: String, stock: Int, frequency: Int, intakeTimes: List<String>) {
+        val amka = DBManager.getCurrentUserAmka() ?: return
+        DBManager.addMedication(name, dosage, stock, amka, intakeTimes, frequency)
     }
 }

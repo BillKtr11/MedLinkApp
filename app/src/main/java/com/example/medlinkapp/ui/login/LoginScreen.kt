@@ -1,32 +1,36 @@
 package com.example.medlinkapp.ui.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.medlinkapp.R
 import com.example.medlinkapp.model.LoginState
 import com.example.medlinkapp.model.UserRole
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (UserRole) -> Unit, // Callback to navigate based on role
+    onLoginSuccess: (UserRole) -> Unit,
+    onNavigateToRegister: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var keepSignedIn by remember { mutableStateOf(false) }
     val loginState by viewModel.loginState.collectAsState()
 
-    // Handle navigation when login is successful
     LaunchedEffect(loginState) {
         if (loginState is LoginState.Success) {
             val role = (loginState as LoginState.Success).role
-            onLoginSuccess(role) // e.g., navigate to DoctorScreen or PatientScreen
+            onLoginSuccess(role)
         }
     }
 
@@ -37,6 +41,13 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.medlink),
+            contentDescription = "MedLink Logo",
+            modifier = Modifier
+                .size(150.dp)
+                .padding(bottom = 24.dp)
+        )
         Text(
             text = "Welcome Back",
             style = MaterialTheme.typography.headlineMedium,
@@ -64,9 +75,25 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = keepSignedIn,
+                onCheckedChange = { keepSignedIn = it }
+            )
+            Text(
+                text = "Keep me signed in (30 days)",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Show Error Message if present
         if (loginState is LoginState.Error) {
             Text(
                 text = (loginState as LoginState.Error).message,
@@ -75,17 +102,22 @@ fun LoginScreen(
             )
         }
 
-        // Login Button or Loading Indicator
         if (loginState is LoginState.Loading) {
             CircularProgressIndicator()
         } else {
             Button(
-                onClick = { viewModel.login(email, password) },
+                onClick = { viewModel.login(email, password, keepSignedIn) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
                 Text("Login")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = onNavigateToRegister) {
+                Text("Don't have an account? Register")
             }
         }
     }
