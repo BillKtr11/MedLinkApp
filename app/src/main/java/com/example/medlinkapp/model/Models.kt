@@ -40,6 +40,7 @@ data class DeviceData(
     val measurementValue: Int,
     val measurementType: String,
     val timestamp: LocalDateTime,
+    val patientAmka: String
 )
 
 data class SideEffectReport(
@@ -49,9 +50,7 @@ data class SideEffectReport(
     val symptom: String,
     val duration: String,
     val intensity: Int,
-    val timestamp: LocalDateTime,
-)
-    val patientAmka: String
+    val timestamp: LocalDateTime
 )
 
 data class SideEffect(
@@ -93,7 +92,7 @@ data class MedicationData(
     val frequency: Int = 1 // times per day
 ) {
     fun getNextIntakeTime(): String? {
-        if (intakeTimes.isEmpty()) return null
+        if (intakeTimes == null || intakeTimes.isEmpty()) return null
         // Simplistic logic for demonstration: return first intake time
         return intakeTimes.first()
     }

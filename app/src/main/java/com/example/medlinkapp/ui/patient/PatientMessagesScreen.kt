@@ -22,9 +22,22 @@ fun PatientMessagesScreen(
     onBackClick: () -> Unit
 ) {
     val messages by DBManager.messages.collectAsState()
-    val userAmka = DBManager.getCurrentUserAmka()
+    val users by DBManager.users.collectAsState()
+    val currentUser = DBManager.getCurrentUser()
+    val userAmka = currentUser?.amka
     
-    val myMessages = messages.filter { it.patientAmka == userAmka }.sortedByDescending { it.timestamp }
+    val myMessages = remember(messages, users, userAmka) {
+        messages.filter { 
+            if (currentUser?.role == com.example.medlinkapp.model.UserRole.DOCTOR) {
+                // Doctors see messages where they are the assigned doctor of the patient
+                val patient = users.find { u -> u.amka == it.patientAmka }
+                patient?.assignedDoctorAmka == userAmka
+            } else {
+                // Patients see their own messages
+                it.patientAmka == userAmka 
+            }
+        }.sortedByDescending { it.timestamp }
+    }
 
     Scaffold(
         topBar = {

@@ -40,9 +40,6 @@ import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
 import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.report.ReportScreen
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
-import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
-import com.example.medlinkapp.ui.doctor.DoctorViewModel
-import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
 import com.example.medlinkapp.ui.patient.PatientAppointmentsScreen
 import com.example.medlinkapp.ui.patient.PatientMessagesScreen
 import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
@@ -173,13 +170,15 @@ fun AppNavigation() {
                 onNavigateToReport = {
                     navController.navigate("report_screen")
                 },
+                onNavigateToMessages = {
+                    navController.navigate("messages_screen")
+                },
                 onLogout = {
                     loginViewModel.logout()
                     navController.navigate("login_screen") {
                         popUpTo(0) { inclusive = true }
                     }
-                }
-            }
+            })
         }
 
         composable("add_appointment_screen") {
@@ -240,7 +239,7 @@ fun AppNavigation() {
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
                 onNavigateToResults = { },
-                onNavigateToMessages = { },
+                onNavigateToMessages = { navController.navigate("messages_screen") },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
                 onNavigateToReportSymptom = { navController.navigate(Screen.ReportSymptom.route) },                
                 onNavigateToTakeMedication = { medId ->

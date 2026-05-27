@@ -255,7 +255,8 @@ fun PatientDashboardScreenPreview() {
             onNavigateToMessages = {},
             onNavigateToNewMeasurement = {},
             onNavigateToReportSymptom = {},
-            onTriggerSOS = {},
+            onNavigateToTakeMedication = {},
+            onTriggerSOS = {}
         ) { }
     }
 }

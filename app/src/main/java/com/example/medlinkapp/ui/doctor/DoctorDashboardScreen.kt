@@ -28,6 +28,7 @@ fun DoctorDashboardScreen(
     onNavigateToRegisterPatient: () -> Unit,
     onNavigateToAppointments: () -> Unit,
     onNavigateToReport: () -> Unit,
+    onNavigateToMessages: () -> Unit,
     onLogout: () -> Unit
 ) {
     val myPatients by viewModel.myPatients.collectAsState()
@@ -149,7 +150,7 @@ fun DoctorDashboardScreen(
                     title = "Μηνύματα",
                     icon = Icons.Default.Email,
                     summaryText = "Επικοινωνία με τους ασθενείς σας",
-                    onClick = { /* Navigate to messages */ }
+                    onClick = onNavigateToMessages
                 )
             }
         }
