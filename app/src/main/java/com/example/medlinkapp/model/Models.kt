@@ -1,5 +1,6 @@
 package com.example.medlinkapp.model
 import java.time.LocalDateTime
+
 enum class UserRole {
     PATIENT, DOCTOR, CAREGIVER
 }
@@ -7,12 +8,10 @@ enum class UserRole {
 sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
-    data class Success(val role: UserRole, val token: String) : LoginState()
+    data class Success(val role: UserRole, val token: String, val userAmka: String = "") : LoginState()
     data class Error(val message: String) : LoginState()
 }
 
-
-// Represents the data needed for PatientEntryForm and PatientScreen
 data class Patient(
     val patientId: String,
     val name: String,
@@ -20,16 +19,14 @@ data class Patient(
     val medicalHistory: List<String> = emptyList()
 )
 
-// Represents data from DrugRegistrationManager and ManagePrescription
 data class Prescription(
     val drugName: String,
-    val drugDosage: Int, // e.g., in mg
-    val drugFreq: Int,   // e.g., times per day
-    val drugDuration: Int, // e.g., in days
+    val drugDosage: Int,
+    val drugFreq: Int,
+    val drugDuration: Int,
     val drugStock: Int
 )
 
-// Represents data from AppointmentForm
 data class Appointment(
     val appointmentId: String,
     val patientId: String,
@@ -38,7 +35,6 @@ data class Appointment(
     val reason: String
 )
 
-// Represents data for DeviceManager and PatientComplianceStatusScreen
 data class DeviceData(
     val deviceId: String,
     val measurementValue: Int,
@@ -71,4 +67,51 @@ data class EmergencyAlert(
     val timestamp:LocalDateTime,
     var status:String = "PENDING",
     var doctorInstructions:String = ""
+    val timestamp: LocalDateTime,
+    val patientAmka: String
+)
+
+data class MedicationData(
+    val id: String,
+    val name: String,
+    val dosage: String,
+    val stockCount: Int,
+    val lowStockThreshold: Int = 10,
+    val patientAmka: String,
+    val intakeTimes: List<String> = emptyList(), // e.g. ["08:00", "20:00"]
+    val frequency: Int = 1 // times per day
+) {
+    fun getNextIntakeTime(): String? {
+        if (intakeTimes.isEmpty()) return null
+        // Simplistic logic for demonstration: return first intake time
+        return intakeTimes.first()
+    }
+}
+
+data class IntakeRecord(
+    val medId: String,
+    val medName: String,
+    val timestamp: LocalDateTime,
+    val patientAmka: String,
+    val status: String // "Confirmed", "Skipped"
+)
+
+data class UserData(
+    val name: String,
+    val surname: String,
+    val amka: String,
+    val email: String,
+    val password: String,
+    val role: UserRole = UserRole.PATIENT,
+    val assignedDoctorAmka: String? = null,
+    val assignedCaregiverAmka: String? = null
+)
+
+data class Message(
+    val id: String,
+    val patientAmka: String,
+    val title: String,
+    val content: String,
+    val timestamp: LocalDateTime,
+    val isRead: Boolean = false
 )

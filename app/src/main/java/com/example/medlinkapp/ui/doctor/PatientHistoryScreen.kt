@@ -122,7 +122,7 @@ fun PatientHistoryScreen(
                                         viewModel.filterHistoryByDate(startDate, endDate)
                                         isFilterExpanded = false
                                     }
-                                } catch (_: DateTimeException) {
+                                } catch (e: DateTimeException) {
                                     errorMessage = "Λάθος στην ημερομηνία! Ελέγξτε αν οι μέρες αντιστοιχούν σωστά στον μήνα (π.χ. ο Φεβρουάριος δεν έχει 30)."
                                 }
                             },

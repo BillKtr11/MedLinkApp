@@ -1,26 +1,58 @@
 package com.example.medlinkapp.data
 import com.example.medlinkapp.model.UserRole
+import com.example.medlinkapp.model.UserData
 import kotlinx.coroutines.delay
 
 class AuthRepository {
-    // Simulates a network call to your backend API
-    suspend fun authenticateUser(email: String, password: String): Result<UserRole> {
-        delay(1500) // Simulate network latency
+    suspend fun authenticateUser(email: String, password: String): Result<UserData> {
+        delay(500) // Simulating network delay
 
+        // Check persistent users first
+        val users = DBManager.users.value
+        val foundUser = users.find { it.email == email && it.password == password }
+        
+        if (foundUser != null) {
+            DBManager.setCurrentUser(foundUser.amka)
+            return Result.success(foundUser)
+        }
+
+        // Check hardcoded defaults
         return when {
             email.isEmpty() || password.isEmpty() -> {
                 Result.failure(Exception("Fields cannot be empty"))
             }
-            // Mock authentication logic
-            email == "doctor@hospital.com" && password == "password123" -> {
-                Result.success(UserRole.DOCTOR)
+            email == "doctor" && password == "123" -> {
+                val doctor = users.find { it.email == "doctor" } ?: UserData("Dr. Lee", "George", "111111", "doctor", "123", UserRole.DOCTOR)
+                DBManager.setCurrentUser(doctor.amka)
+                Result.success(doctor)
             }
-            email == "patient@clinic.com" && password == "password123" -> {
-                Result.success(UserRole.PATIENT)
+            email == "patient" && password == "123" -> {
+                val patient = users.find { it.email == "patient" } ?: UserData("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT)
+                DBManager.setCurrentUser(patient.amka)
+                Result.success(patient)
+            }
+            email == "caregiver" && password == "123" -> {
+                val caregiver = users.find { it.email == "caregiver" } ?: UserData("Anna", "Caregiver", "222222", "caregiver", "123", UserRole.CAREGIVER)
+                DBManager.setCurrentUser(caregiver.amka)
+                Result.success(caregiver)
             }
             else -> {
                 Result.failure(Exception("Invalid credentials"))
             }
         }
+    }
+
+    suspend fun registerUser(userData: UserData): Result<Unit> {
+        delay(500)
+        
+        // Check if user already exists
+        val exists = DBManager.users.value.any { it.email == userData.email || it.amka == userData.amka }
+        if (exists) {
+            return Result.failure(Exception("User already exists with this Email or AMKA"))
+        }
+
+        DBManager.registerUser(userData)
+        DBManager.setCurrentUser(userData.amka)
+        return Result.success(Unit)
     }
 }

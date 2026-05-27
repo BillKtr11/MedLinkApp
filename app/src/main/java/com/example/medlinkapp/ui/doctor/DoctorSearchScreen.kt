@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.medlinkapp.model.UserData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +72,7 @@ fun DoctorSearchScreen(
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = patient.name, style = MaterialTheme.typography.titleMedium)
+                            Text(text = "${patient.name} ${patient.surname}", style = MaterialTheme.typography.titleMedium)
                             Text(text = "ΑΜΚΑ: ${patient.amka}", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
