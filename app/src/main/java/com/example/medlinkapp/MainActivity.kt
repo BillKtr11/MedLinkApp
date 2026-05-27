@@ -42,6 +42,7 @@ import com.example.medlinkapp.ui.report.ReportScreen
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
 import com.example.medlinkapp.ui.patient.PatientAppointmentsScreen
 import com.example.medlinkapp.ui.patient.PatientMessagesScreen
+import com.example.medlinkapp.ui.prescription.PrescriptionHistoryScreen
 import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
 import com.example.medlinkapp.ui.doctor.AssignPatientScreen
 import com.example.medlinkapp.ui.doctor.ScheduledAppointmentsScreen
@@ -174,12 +175,24 @@ fun AppNavigation() {
                 onNavigateToMessages = {
                     navController.navigate("messages_screen")
                 },
+                onNavigateToPrescriptionHistory = {
+                    navController.navigate("prescription_history_doctor")
+                },
                 onLogout = {
                     loginViewModel.logout()
                     navController.navigate("login_screen") {
                         popUpTo(0) { inclusive = true }
                     }
             })
+        }
+
+        composable("prescription_history_doctor") {
+            val prescriptions by DBManager.prescriptions.collectAsState()
+            PrescriptionHistoryScreen(
+                prescriptions = prescriptions,
+                title = "Ιστορικό Εκδοθέντων Συνταγών",
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable("add_appointment_screen") {
@@ -252,6 +265,7 @@ fun AppNavigation() {
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
                 onNavigateToResults = { },
                 onNavigateToMessages = { navController.navigate("messages_screen") },
+                onNavigateToPrescriptionHistory = { navController.navigate("prescription_history_patient") },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
                 onNavigateToReportSymptom = { navController.navigate(Screen.ReportSymptom.route) },                
                 onNavigateToTakeMedication = { medId ->
@@ -266,6 +280,18 @@ fun AppNavigation() {
                         popUpTo(0) { inclusive = true }
                     }
                 },
+            )
+        }
+
+        composable("prescription_history_patient") {
+            val prescriptions by DBManager.prescriptions.collectAsState()
+            val userAmka = DBManager.getCurrentUserAmka()
+            val myPrescriptions = prescriptions.filter { it.patientAmka == userAmka }
+            
+            PrescriptionHistoryScreen(
+                prescriptions = myPrescriptions,
+                title = "Οι Συνταγές Μου",
+                onBackClick = { navController.popBackStack() }
             )
         }
 

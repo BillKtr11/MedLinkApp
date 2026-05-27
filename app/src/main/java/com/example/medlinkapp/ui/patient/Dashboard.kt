@@ -38,6 +38,7 @@ fun PatientDashboardScreen(
     onNavigateToMessages: () -> Unit,
     onNavigateToNewMeasurement: () -> Unit,
     onNavigateToReportSymptom: () -> Unit,
+    onNavigateToPrescriptionHistory: () -> Unit,
     onNavigateToTakeMedication: (String) -> Unit,
     onTriggerSOS: () -> Unit,
     onLogout: () -> Unit,
@@ -159,6 +160,15 @@ fun PatientDashboardScreen(
 
             item {
                 DashboardActionCard(
+                    title = "Ιστορικό Συνταγών",
+                    icon = Icons.AutoMirrored.Filled.List,
+                    summaryText = "Προβολή όλων των συνταγών που έχουν εκδοθεί για εσάς",
+                    onClick = onNavigateToPrescriptionHistory,
+                )
+            }
+
+            item {
+                DashboardActionCard(
                     title = "Test Results & Records",
                     icon = Icons.AutoMirrored.Filled.List,
                     summaryText = "New result available: Lipid Panel",
@@ -255,8 +265,10 @@ fun PatientDashboardScreenPreview() {
             onNavigateToMessages = {},
             onNavigateToNewMeasurement = {},
             onNavigateToReportSymptom = {},
+            onNavigateToPrescriptionHistory = {},
             onNavigateToTakeMedication = {},
-            onTriggerSOS = {}
-        ) { }
+            onTriggerSOS = {},
+            onLogout = {}
+        )
     }
 }
