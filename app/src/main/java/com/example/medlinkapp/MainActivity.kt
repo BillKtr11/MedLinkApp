@@ -57,12 +57,10 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    // Δημιουργούμε το ViewModel για τις οθόνες του γιατρού
     val doctorViewModel: DoctorViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "login_screen") {
 
-        // 1. Login Screen
         composable("login_screen") {
             LoginScreen(
                 onLoginSuccess = { role ->
@@ -93,7 +91,6 @@ fun AppNavigation() {
             }
         }
 
-        // 2.1 Αναζήτηση Ασθενή
         composable("doctor_search_screen") {
             DoctorSearchScreen(
                 viewModel = doctorViewModel,
@@ -102,11 +99,10 @@ fun AppNavigation() {
                 },
                 onBackClick = {
                     navController.popBackStack()
-                }
+                },
             )
         }
 
-        // 2.2 Ιστορικό Ασθενή
         composable("patient_history_screen") {
             PatientHistoryScreen(
                 viewModel = doctorViewModel,
@@ -116,13 +112,12 @@ fun AppNavigation() {
             )
         }
 
-        // 3. Patient Dashboard
         composable("patient_dashboard") {
             PatientDashboardScreen(
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
-                onNavigateToResults = { /* Navigate to results */ },
-                onNavigateToMessages = { /* Navigate to messages */ },
+                onNavigateToResults = { },
+                onNavigateToMessages = { },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
                 onNavigateToReportSymptom = { navController.navigate(Screen.ReportSymptom.route) },
                 onTriggerSOS = {
@@ -132,7 +127,7 @@ fun AppNavigation() {
                     navController.navigate("login_screen") {
                         popUpTo(0) { inclusive = true }
                     }
-                }
+                },
             )
         }
         composable("medications_screen") {
@@ -182,11 +177,10 @@ fun AppNavigation() {
             val sideEffectViewModel: SideEffectViewModel = viewModel()
             ReportSymptomScreen(
                 viewModel = sideEffectViewModel,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
             )
         }
 
-        // 4. Caregiver Dashboard (Placeholder)
         composable("caregiver_dashboard") {
             Text(text = "Caregiver Dashboard")
         }

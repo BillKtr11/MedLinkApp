@@ -21,9 +21,9 @@ data class Patient(
 
 data class Prescription(
     val drugName: String,
-    val drugDosage: Int, // e.g., in mg
-    val drugFreq: Int,   // e.g., times per day
-    val drugDuration: Int, // e.g., in days
+    val drugDosage: Int,
+    val drugFreq: Int,
+    val drugDuration: Int,
     val drugStock: Int
 )
 
@@ -48,6 +48,6 @@ data class SideEffectReport(
     val medicationName: String,
     val symptom: String,
     val duration: String,
-    val intensity: Int, // 1 to 10
+    val intensity: Int,
     val timestamp: LocalDateTime,
 )

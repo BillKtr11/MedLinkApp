@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,7 +56,6 @@ fun ReportSymptomScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Medication Selection
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded },
@@ -84,16 +84,27 @@ fun ReportSymptomScreen(
                 }
             }
 
-            // Symptom Description
             OutlinedTextField(
                 value = symptom,
-                onValueChange = { symptom = it },
+                onValueChange = {
+                    if (it.length <= 500) {
+                        symptom = it
+                    }
+                },
                 label = { Text("Describe the Symptom/Side Effect") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
+                supportingText = {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "${symptom.length} / 500",
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.align(Alignment.CenterEnd),
+                        )
+                    }
+                },
             )
 
-            // Duration
             OutlinedTextField(
                 value = duration,
                 onValueChange = { duration = it },
@@ -101,7 +112,6 @@ fun ReportSymptomScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            // Intensity
             Column {
                 Text("Intensity: ${intensity.toInt()}")
                 Slider(
