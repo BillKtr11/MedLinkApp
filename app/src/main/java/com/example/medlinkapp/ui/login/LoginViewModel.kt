@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.AuthRepository
 import com.example.medlinkapp.data.DBManager
-import com.example.medlinkapp.model.UserData
+import com.example.medlinkapp.model.User
 import com.example.medlinkapp.model.LoginState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,20 +31,20 @@ class LoginViewModel(private val repository: AuthRepository = AuthRepository()) 
         }
     }
 
-    fun register(userData: UserData) {
+    fun register(user: User) {
         _loginState.value = LoginState.Loading
         viewModelScope.launch {
-            val result = repository.registerUser(userData)
+            val result = repository.registerUser(user)
             result.onSuccess {
-                DBManager.setCurrentUser(userData.amka, false)
-                _loginState.value = LoginState.Success(userData.role, "mock_token", userData.amka)
+                DBManager.setCurrentUser(user.amka, false)
+                _loginState.value = LoginState.Success(user.role, "mock_token", user.amka)
             }.onFailure { exception ->
                 _loginState.value = LoginState.Error(exception.message ?: "Registration failed")
             }
         }
     }
 
-    fun autoLogin(user: UserData) {
+    fun autoLogin(user: User) {
         _loginState.value = LoginState.Success(user.role, "mock_token", user.amka)
     }
 

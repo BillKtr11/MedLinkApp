@@ -3,7 +3,7 @@ package com.example.medlinkapp.ui.patient
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
-import com.example.medlinkapp.model.MedicationData
+import com.example.medlinkapp.model.Medication
 import com.example.medlinkapp.model.Message
 import com.example.medlinkapp.model.SideEffectReport
 import kotlinx.coroutines.flow.*
@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 
 class SideEffectViewModel : ViewModel() {
 
-    val medications: StateFlow<List<MedicationData>> = combine(
+    val medications: StateFlow<List<Medication>> = combine(
         DBManager.medications,
         DBManager.currentUserAmka
     ) { meds, amka ->

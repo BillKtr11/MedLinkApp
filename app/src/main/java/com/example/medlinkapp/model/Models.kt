@@ -39,7 +39,7 @@ data class Appointment(
     val reason: String
 )
 
-data class DeviceData(
+data class Measurement(
     val deviceId: String,
     val measurementValue: Int,
     val measurementType: String,
@@ -66,7 +66,7 @@ data class SideEffect(
 
 data class HealthReport(
     val patient: Patient,
-    val measurements: List<DeviceData>,
+    val measurements: List<Measurement>,
     val sideEffects: List<SideEffect>,
     val medications: List<Prescription>,
     val startDate: LocalDateTime,
@@ -85,7 +85,7 @@ data class EmergencyAlert(
     val patientAmka: String
 )
 
-data class MedicationData(
+data class Medication(
     val id: String,
     val name: String,
     val dosage: String,
@@ -110,7 +110,7 @@ data class IntakeRecord(
     val status: String // "Confirmed", "Skipped"
 )
 
-data class UserData(
+data class User(
     val name: String,
     val surname: String,
     val amka: String,

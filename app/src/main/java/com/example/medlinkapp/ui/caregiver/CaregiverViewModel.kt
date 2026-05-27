@@ -13,14 +13,14 @@ data class AdherenceStats(
     val totalTaken: Int,
     val adherencePercentage: Float,
     val intakeHistory: List<IntakeRecord>,
-    val measurementHistory: List<DeviceData>
+    val measurementHistory: List<Measurement>
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CaregiverViewModel : ViewModel() {
 
     // Patients specifically assigned to this caregiver
-    val myPatients: StateFlow<List<UserData>> = combine(DBManager.users, DBManager.currentUserAmka) { users, caregiverAmka ->
+    val myPatients: StateFlow<List<User>> = combine(DBManager.users, DBManager.currentUserAmka) { users, caregiverAmka ->
         users.filter { it.role == UserRole.PATIENT && it.assignedCaregiverAmka == caregiverAmka }
     }.stateIn(
         scope = viewModelScope,
@@ -29,7 +29,7 @@ class CaregiverViewModel : ViewModel() {
     )
 
     // All patients (to allow assignment)
-    val allPatients: StateFlow<List<UserData>> = DBManager.users
+    val allPatients: StateFlow<List<User>> = DBManager.users
         .map { users -> users.filter { it.role == UserRole.PATIENT } }
         .stateIn(
             scope = viewModelScope,
@@ -37,7 +37,7 @@ class CaregiverViewModel : ViewModel() {
             initialValue = emptyList()
         )
 
-    private val _selectedPatient = MutableStateFlow<UserData?>(null)
+    private val _selectedPatient = MutableStateFlow<User?>(null)
     val selectedPatient = _selectedPatient.asStateFlow()
 
     // Communication status
@@ -45,12 +45,12 @@ class CaregiverViewModel : ViewModel() {
     val isCommunicationError = _isCommunicationError.asStateFlow()
 
     // Real-time monitoring data
-    val patientMedications: StateFlow<List<MedicationData>> = _selectedPatient.flatMapLatest { patient ->
+    val patientMedications: StateFlow<List<Medication>> = _selectedPatient.flatMapLatest { patient ->
         if (patient == null) flowOf(emptyList())
         else DBManager.medications.map { meds -> meds.filter { it.patientAmka == patient.amka } }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val patientMeasurements: StateFlow<List<DeviceData>> = _selectedPatient.flatMapLatest { patient ->
+    val patientMeasurements: StateFlow<List<Measurement>> = _selectedPatient.flatMapLatest { patient ->
         if (patient == null) flowOf(emptyList())
         else DBManager.measurements.map { measurements -> measurements.filter { it.patientAmka == patient.amka } }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
@@ -75,13 +75,13 @@ class CaregiverViewModel : ViewModel() {
     val adherenceStats: StateFlow<AdherenceStats?> = combine(
         listOf(_selectedPatient, patientIntakeRecords, patientMedications, patientMeasurements, startDate, endDate)
     ) { flows ->
-        val patient = flows[0] as? UserData
+        val patient = flows[0] as? User
         @Suppress("UNCHECKED_CAST")
         val records = flows[1] as List<IntakeRecord>
         @Suppress("UNCHECKED_CAST")
-        val meds = flows[2] as List<MedicationData>
+        val meds = flows[2] as List<Medication>
         @Suppress("UNCHECKED_CAST")
-        val measurements = flows[3] as List<DeviceData>
+        val measurements = flows[3] as List<Measurement>
         val start = flows[4] as LocalDate
         val end = flows[5] as LocalDate
 
@@ -112,7 +112,7 @@ class CaregiverViewModel : ViewModel() {
         )
     }.stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    fun selectPatient(patient: UserData) {
+    fun selectPatient(patient: User) {
         _selectedPatient.value = patient
     }
 

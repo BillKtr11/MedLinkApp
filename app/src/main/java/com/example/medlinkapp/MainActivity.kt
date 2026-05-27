@@ -21,32 +21,32 @@ import androidx.compose.runtime.getValue
 import com.example.medlinkapp.model.LoginState
 import com.example.medlinkapp.model.UserRole
 import com.example.medlinkapp.ui.login.LoginScreen
-import com.example.medlinkapp.ui.login.RegisterScreen
+import com.example.medlinkapp.ui.login.SystemAdministratorManager
 import com.example.medlinkapp.ui.login.LoginViewModel
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.ui.Screen
 import com.example.medlinkapp.ui.measurement.MeasurementViewModel
-import com.example.medlinkapp.ui.measurement.NewMeasurementScreen
-import com.example.medlinkapp.ui.measurement.MeasurementHistoryScreen
-import com.example.medlinkapp.ui.medication.MedicationManagerScreen
-import com.example.medlinkapp.ui.medication.AddMedicationScreen
+import com.example.medlinkapp.ui.measurement.ManageMeasurementRecording
+import com.example.medlinkapp.ui.measurement.ManageSensorData
+import com.example.medlinkapp.ui.medication.ManageMedicationIntake
+import com.example.medlinkapp.ui.medication.DrugRegistrationManager
 import com.example.medlinkapp.ui.medication.IntakeScreen
 import com.example.medlinkapp.ui.medication.MedicationViewModel
-import com.example.medlinkapp.ui.patient.PatientDashboardScreen
-import com.example.medlinkapp.ui.patient.ReportSymptomScreen
+import com.example.medlinkapp.ui.patient.PatientScreen
+import com.example.medlinkapp.ui.patient.SideEffectReportManager
 import com.example.medlinkapp.ui.patient.SideEffectViewModel
 import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
-import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
+import com.example.medlinkapp.ui.doctor.ManageSearchHistory
 import com.example.medlinkapp.ui.doctor.DoctorViewModel
-import com.example.medlinkapp.ui.report.ReportScreen
-import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
-import com.example.medlinkapp.ui.patient.PatientAppointmentsScreen
-import com.example.medlinkapp.ui.patient.PatientMessagesScreen
+import com.example.medlinkapp.ui.report.HealthReportManager
+import com.example.medlinkapp.ui.doctor.DoctorScreen
+import com.example.medlinkapp.ui.patient.AppointmentList as PatientAppointmentList
+import com.example.medlinkapp.ui.patient.MessageSystem
 import com.example.medlinkapp.ui.prescription.PrescriptionHistoryScreen
-import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
-import com.example.medlinkapp.ui.doctor.AssignPatientScreen
-import com.example.medlinkapp.ui.doctor.ScheduledAppointmentsScreen
-import com.example.medlinkapp.ui.doctor.PrescriptionScreen
+import com.example.medlinkapp.ui.doctor.AppointmentAdditionScreen
+import com.example.medlinkapp.ui.doctor.ManageDoctorClient
+import com.example.medlinkapp.ui.doctor.AppointmentList as DoctorAppointmentList
+import com.example.medlinkapp.ui.doctor.PrescriptionSystem
 import com.example.medlinkapp.ui.caregiver.*
 
 class MainActivity : ComponentActivity() {
@@ -126,7 +126,7 @@ fun AppNavigation() {
         }
 
         composable("register_screen") {
-            RegisterScreen(
+            SystemAdministratorManager(
                 viewModel = loginViewModel,
                 onRegisterSuccess = {
                     val role = (loginViewModel.loginState.value as? LoginState.Success)?.role
@@ -154,7 +154,7 @@ fun AppNavigation() {
                 DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
             } ?: "Doctor"
 
-            DoctorDashboardScreen(
+            DoctorScreen(
                 doctorName = doctorName,
                 viewModel = doctorViewModel,
                 onNavigateToSearch = {
@@ -196,7 +196,7 @@ fun AppNavigation() {
         }
 
         composable("add_appointment_screen") {
-            AddAppointmentScreen(
+            AppointmentAdditionScreen(
                 viewModel = doctorViewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateHome = {
@@ -206,14 +206,14 @@ fun AppNavigation() {
         }
 
         composable("scheduled_appointments_screen") {
-            ScheduledAppointmentsScreen(
+            DoctorAppointmentList(
                 viewModel = doctorViewModel,
                 onBackClick = { navController.popBackStack() }
             )
         }
 
         composable("assign_patient_screen") {
-            AssignPatientScreen(
+            ManageDoctorClient(
                 viewModel = doctorViewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateHome = {
@@ -235,7 +235,7 @@ fun AppNavigation() {
         }
 
         composable("patient_history_screen") {
-            PatientHistoryScreen(
+            ManageSearchHistory(
                 viewModel = doctorViewModel,
                 onBackClick = { navController.popBackStack() },
                 onNavigateToPrescription = {
@@ -247,7 +247,7 @@ fun AppNavigation() {
 
         // 2.3 ΝΕΑ ΟΘΟΝΗ: Καταχώριση Συνταγής
         composable("prescription_screen") {
-            PrescriptionScreen(
+            PrescriptionSystem(
                 viewModel = doctorViewModel,
                 onBackClick = { navController.popBackStack() }
             )
@@ -259,7 +259,7 @@ fun AppNavigation() {
                 DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
             } ?: "Patient"
 
-            PatientDashboardScreen(
+            PatientScreen(
                 patientName = patientName,
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
@@ -296,19 +296,19 @@ fun AppNavigation() {
         }
 
         composable("appointments_screen") {
-            PatientAppointmentsScreen(
+            PatientAppointmentList(
                 onBackClick = { navController.popBackStack() }
             )
         }
 
         composable("messages_screen") {
-            PatientMessagesScreen(
+            MessageSystem(
                 onBackClick = { navController.popBackStack() }
             )
         }
 
         composable("medications_screen") {
-            MedicationManagerScreen(
+            ManageMedicationIntake(
                 onBackClick = { navController.popBackStack() },
                 onNavigateToAddMedication = { navController.navigate(Screen.AddMedication.route) },
                 onNavigateToIntake = { medId -> 
@@ -329,7 +329,7 @@ fun AppNavigation() {
 
         composable(route = Screen.AddMedication.route) {
             val medViewModel: MedicationViewModel = viewModel()
-            AddMedicationScreen(
+            DrugRegistrationManager(
                 viewModel = medViewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateHome = {
@@ -348,7 +348,7 @@ fun AppNavigation() {
                 }
             )
 
-            NewMeasurementScreen(
+            ManageMeasurementRecording(
                 viewModel = measurementViewModel,
                 onNavigateToHistory = {
                     navController.navigate(Screen.History.route)
@@ -368,7 +368,7 @@ fun AppNavigation() {
                     }
                 }
             )
-            MeasurementHistoryScreen(
+            ManageSensorData(
                 viewModel = measurementViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
@@ -376,7 +376,7 @@ fun AppNavigation() {
 
         composable(route = Screen.ReportSymptom.route) {
             val sideEffectViewModel: SideEffectViewModel = viewModel()
-            ReportSymptomScreen(
+            SideEffectReportManager(
                 viewModel = sideEffectViewModel,
                 onNavigateBack = { navController.popBackStack() },
             )
@@ -384,7 +384,7 @@ fun AppNavigation() {
 
         composable("report_screen") {
             val assignedPatients by doctorViewModel.myPatients.collectAsState()
-            ReportScreen(
+            HealthReportManager(
                 onBackClick = { navController.popBackStack() },
                 assignedPatients = assignedPatients
             )
@@ -396,7 +396,7 @@ fun AppNavigation() {
                 DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
             } ?: "Caregiver"
 
-            CaregiverDashboardScreen(
+            CaregiverScreen(
                 caregiverName = caregiverName,
                 viewModel = caregiverViewModel,
                 onNavigateToAssignPatient = {
@@ -419,7 +419,7 @@ fun AppNavigation() {
         }
 
         composable("assign_patient_caregiver") {
-            AssignPatientCaregiverScreen(
+            ManageCaregiverClient(
                 viewModel = caregiverViewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateHome = {
@@ -439,7 +439,7 @@ fun AppNavigation() {
         }
 
         composable("caregiver_stats") {
-            CaregiverStatsScreen(
+            PatientComplianceSystem(
                 viewModel = caregiverViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )

@@ -3,7 +3,7 @@ package com.example.medlinkapp.ui.measurement
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
-import com.example.medlinkapp.model.DeviceData
+import com.example.medlinkapp.model.Measurement
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -21,7 +21,7 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
     val uiState: StateFlow<MeasurementState> = _uiState.asStateFlow()
 
     // Filter measurements by current user
-    val measurements: StateFlow<List<DeviceData>> = combine(dbManager.measurements, dbManager.currentUserAmka) { list, amka ->
+    val measurements: StateFlow<List<Measurement>> = combine(dbManager.measurements, dbManager.currentUserAmka) { list, amka ->
         list.filter { it.patientAmka == amka }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -37,7 +37,7 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
         viewModelScope.launch {
             _uiState.value = MeasurementState.Loading
 
-            val deviceData = DeviceData(
+            val measurementData = Measurement(
                 deviceId = if (method == "Bluetooth") "BT_DEVICE_01" else "MANUAL_ENTRY",
                 measurementValue = value,
                 measurementType = type,
@@ -45,7 +45,7 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
                 patientAmka = amka
             )
 
-            val result = dbManager.saveMeasurement(deviceData)
+            val result = dbManager.saveMeasurement(measurementData)
 
             result.onSuccess {
                 if (!isWithinNormalLimits(type, value)) {

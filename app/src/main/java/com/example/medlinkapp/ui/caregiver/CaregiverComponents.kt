@@ -8,13 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.medlinkapp.model.DeviceData
+import com.example.medlinkapp.model.Measurement
 import com.example.medlinkapp.model.IntakeRecord
-import com.example.medlinkapp.model.MedicationData
+import com.example.medlinkapp.model.Medication
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun MedicationAdherenceItem(med: MedicationData) {
+fun MedicationAdherenceItem(med: Medication) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -48,7 +48,7 @@ fun MedicationAdherenceItem(med: MedicationData) {
 }
 
 @Composable
-fun MeasurementItem(data: DeviceData) {
+fun MeasurementItem(data: Measurement) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
