@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -20,7 +19,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.medlinkapp.model.LoginState
 import com.example.medlinkapp.model.UserRole
-import com.example.medlinkapp.model.UserData
 import com.example.medlinkapp.ui.login.LoginScreen
 import com.example.medlinkapp.ui.login.RegisterScreen
 import com.example.medlinkapp.ui.login.LoginViewModel
@@ -43,6 +41,7 @@ import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
 import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
 import com.example.medlinkapp.ui.doctor.AssignPatientScreen
 import com.example.medlinkapp.ui.doctor.ScheduledAppointmentsScreen
+import com.example.medlinkapp.ui.caregiver.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +67,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val loginViewModel: LoginViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
+    val caregiverViewModel: CaregiverViewModel = viewModel()
     
     val loginState by loginViewModel.loginState.collectAsState()
 
@@ -125,6 +125,9 @@ fun AppNavigation() {
                     val role = (loginViewModel.loginState.value as? LoginState.Success)?.role
                     when (role) {
                         UserRole.DOCTOR -> navController.navigate("doctor_dashboard") {
+                            popUpTo("login_screen") { inclusive = true }
+                        }
+                        UserRole.CAREGIVER -> navController.navigate("caregiver_dashboard") {
                             popUpTo("login_screen") { inclusive = true }
                         }
                         else -> navController.navigate("patient_dashboard") {
@@ -322,7 +325,57 @@ fun AppNavigation() {
         }
 
         composable("caregiver_dashboard") {
-            Text(text = "Caregiver Dashboard")
+            val caregiverName = (loginState as? LoginState.Success)?.let { success ->
+                DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
+            } ?: "Caregiver"
+
+            CaregiverDashboardScreen(
+                caregiverName = caregiverName,
+                viewModel = caregiverViewModel,
+                onNavigateToAssignPatient = {
+                    navController.navigate("assign_patient_caregiver")
+                },
+                onNavigateToPatientDetails = { patientAmka ->
+                    val patient = DBManager.users.value.find { it.amka == patientAmka }
+                    if (patient != null) {
+                        caregiverViewModel.selectPatient(patient)
+                        navController.navigate("patient_detail_caregiver")
+                    }
+                },
+                onLogout = {
+                    loginViewModel.logout()
+                    navController.navigate("login_screen") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable("assign_patient_caregiver") {
+            AssignPatientCaregiverScreen(
+                viewModel = caregiverViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateHome = {
+                    navController.popBackStack("caregiver_dashboard", inclusive = false)
+                }
+            )
+        }
+
+        composable("patient_detail_caregiver") {
+            PatientDetailCaregiverScreen(
+                viewModel = caregiverViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToStats = {
+                    navController.navigate("caregiver_stats")
+                }
+            )
+        }
+
+        composable("caregiver_stats") {
+            CaregiverStatsScreen(
+                viewModel = caregiverViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

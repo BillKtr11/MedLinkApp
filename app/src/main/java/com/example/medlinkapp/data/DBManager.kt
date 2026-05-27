@@ -140,10 +140,29 @@ object DBManager {
             }
         }
         
-        // Add a default doctor if none exists
+        var changed = false
+        // Add a default doctor
         if (_users.value.none { it.role == UserRole.DOCTOR }) {
             val defaultDoctor = UserData("Dr. Lee", "George", "111111", "doctor", "123", UserRole.DOCTOR)
             _users.update { it + defaultDoctor }
+            changed = true
+        }
+        
+        // Add a default caregiver
+        if (_users.value.none { it.role == UserRole.CAREGIVER }) {
+            val defaultCaregiver = UserData("Anna", "Caregiver", "222222", "caregiver", "123", UserRole.CAREGIVER)
+            _users.update { it + defaultCaregiver }
+            changed = true
+        }
+
+        // Add a default patient linked to the caregiver
+        if (_users.value.none { it.email == "patient" }) {
+            val defaultPatient = UserData("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT, assignedCaregiverAmka = "222222")
+            _users.update { it + defaultPatient }
+            changed = true
+        }
+
+        if (changed) {
             saveUsers()
         }
     }
@@ -167,6 +186,15 @@ object DBManager {
         saveUsers()
     }
 
+    fun assignPatientToCaregiver(patientAmka: String, caregiverAmka: String) {
+        _users.update { list ->
+            list.map { 
+                if (it.amka == patientAmka) it.copy(assignedCaregiverAmka = caregiverAmka) else it 
+            }
+        }
+        saveUsers()
+    }
+
     // --- Medications ---
     private fun loadMedications() {
         val json = prefs?.getString(KEY_MEDICATIONS, null)
@@ -177,6 +205,11 @@ object DBManager {
             } catch (e: Exception) {
                 _medications.value = emptyList()
             }
+        }
+
+        if (_medications.value.none { it.patientAmka == "000000" }) {
+            addMedication("Depon", "500mg", 20, "000000", listOf("08:00", "20:00"), 2)
+            addMedication("Amoxil", "1g", 10, "000000", listOf("12:00"), 1)
         }
     }
 
@@ -220,6 +253,17 @@ object DBManager {
             } catch (e: Exception) {
                 _intakeRecords.value = emptyList()
             }
+        }
+
+        if (_intakeRecords.value.none { it.patientAmka == "000000" }) {
+            _intakeRecords.update { current -> 
+                current + listOf(
+                    IntakeRecord("med1", "Depon", LocalDateTime.now().minusDays(1).withHour(8), "000000", "Confirmed"),
+                    IntakeRecord("med1", "Depon", LocalDateTime.now().minusDays(1).withHour(20), "000000", "Confirmed"),
+                    IntakeRecord("med1", "Depon", LocalDateTime.now().minusDays(2).withHour(8), "000000", "Skipped")
+                )
+            }
+            saveIntakeRecords()
         }
     }
 
@@ -265,9 +309,6 @@ object DBManager {
                 timestamp = LocalDateTime.now()
             )
         )
-        
-        // Simulate saving reminders
-        println("Reminders scheduled for appointment: 24h and 1h before ${appointment.date}")
     }
 
     fun deleteAppointment(appointmentId: String) {
@@ -324,6 +365,17 @@ object DBManager {
             } catch (e: Exception) {
                 _measurements.value = emptyList()
             }
+        }
+
+        if (_measurements.value.none { it.patientAmka == "000000" }) {
+            _measurements.update { current ->
+                current + listOf(
+                    DeviceData("d1", 120, "Πίεση", LocalDateTime.now().minusHours(2), "000000"),
+                    DeviceData("d2", 72, "Σφύξεις", LocalDateTime.now().minusHours(2), "000000"),
+                    DeviceData("d3", 98, "Οξυγόνο", LocalDateTime.now().minusDays(1), "000000")
+                )
+            }
+            saveMeasurements()
         }
     }
 

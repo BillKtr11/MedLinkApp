@@ -52,7 +52,13 @@ data class MedicationData(
     val patientAmka: String,
     val intakeTimes: List<String> = emptyList(), // e.g. ["08:00", "20:00"]
     val frequency: Int = 1 // times per day
-)
+) {
+    fun getNextIntakeTime(): String? {
+        if (intakeTimes.isEmpty()) return null
+        // Simplistic logic for demonstration: return first intake time
+        return intakeTimes.first()
+    }
+}
 
 data class IntakeRecord(
     val medId: String,
@@ -69,7 +75,8 @@ data class UserData(
     val email: String,
     val password: String,
     val role: UserRole = UserRole.PATIENT,
-    val assignedDoctorAmka: String? = null
+    val assignedDoctorAmka: String? = null,
+    val assignedCaregiverAmka: String? = null
 )
 
 data class Message(
