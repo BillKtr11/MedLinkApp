@@ -5,12 +5,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -80,39 +82,46 @@ fun CaregiverStatsScreen(
                     CircularProgressIndicator()
                 }
             } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        ComplianceOverviewCard(stats!!)
-                    }
+                // Alternative Flow 3: Detect insufficient data
+                val isInsufficientData = stats!!.totalExpected == 0 && stats!!.measurementHistory.isEmpty() && stats!!.intakeHistory.isEmpty()
 
-                    item {
-                        Text("Ιστορικό Συμμόρφωσης Φαρμάκων", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    }
-
-                    if (stats!!.intakeHistory.isEmpty()) {
+                if (isInsufficientData) {
+                    InsufficientDataMessage()
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         item {
-                            Text("Δεν βρέθηκαν εγγραφές για αυτή την περίοδο.", color = Color.Gray)
+                            ComplianceOverviewCard(stats!!)
                         }
-                    } else {
-                        items(stats!!.intakeHistory) { record ->
-                            IntakeRecordItem(record)
-                        }
-                    }
 
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Ιστορικό Μετρήσεων (Vitals)", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    }
-
-                    if (stats!!.measurementHistory.isEmpty()) {
                         item {
-                            Text("Δεν υπάρχουν ιστορικά δεδομένα μετρήσεων.", color = Color.Gray)
+                            Text("Ιστορικό Συμμόρφωσης Φαρμάκων", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         }
-                    } else {
-                        items(stats!!.measurementHistory) { measurement ->
-                            MeasurementItem(measurement)
+
+                        if (stats!!.intakeHistory.isEmpty()) {
+                            item {
+                                Text("Δεν βρέθηκαν εγγραφές για αυτή την περίοδο.", color = Color.Gray)
+                            }
+                        } else {
+                            items(stats!!.intakeHistory) { record ->
+                                IntakeRecordItem(record)
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Ιστορικό Μετρήσεων (Vitals)", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        }
+
+                        if (stats!!.measurementHistory.isEmpty()) {
+                            item {
+                                Text("Δεν υπάρχουν ιστορικά δεδομένα μετρήσεων.", color = Color.Gray)
+                            }
+                        } else {
+                            items(stats!!.measurementHistory) { measurement ->
+                                MeasurementItem(measurement)
+                            }
                         }
                     }
                 }
@@ -153,7 +162,15 @@ fun CaregiverStatsScreen(
                         showDatePicker = false
                     }, modifier = Modifier.fillMaxWidth()) { Text("Τελευταία Εβδομάδα") }
                     Spacer(modifier = Modifier.height(8.dp))
-                    // Simulation of an invalid selection
+                    // Option to trigger "Insufficient Data" (Flow 3) by choosing a range with no data
+                    Button(onClick = {
+                        viewModel.setDateRange(LocalDate.now().minusYears(2), LocalDate.now().minusYears(2).plusDays(1))
+                        showDatePicker = false
+                    }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)) { 
+                        Text("Επιλογή Περιόδου χωρίς δεδομένα (Flow 3)") 
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Simulation of an invalid selection (Flow 2)
                     Button(onClick = {
                         viewModel.setDateRange(LocalDate.now().plusDays(1), LocalDate.now())
                         showDatePicker = false
@@ -165,6 +182,38 @@ fun CaregiverStatsScreen(
             confirmButton = {
                 TextButton(onClick = { showDatePicker = false }) { Text("Κλείσιμο") }
             }
+        )
+    }
+}
+
+@Composable
+fun InsufficientDataMessage() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.outline
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Ανεπαρκή Δεδομένα",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Τα διαθέσιμα δεδομένα για την επιλεγμένη χρονική περίοδο δεν επαρκούν για τη δημιουργία στατιστικών.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
