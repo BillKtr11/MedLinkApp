@@ -1,6 +1,10 @@
 package com.example.medlinkapp.ui.doctor
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import java.time.LocalDate
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.model.Appointment
@@ -10,6 +14,11 @@ import kotlinx.coroutines.flow.*
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+data class Patient(
+    val id: String,
+    val name: String,
+    val amka: String
+)
 data class MedicalRecord(
     val id: String,
     val patientId: String,

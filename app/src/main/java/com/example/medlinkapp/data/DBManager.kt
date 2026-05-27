@@ -6,6 +6,8 @@ import com.example.medlinkapp.model.*
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDateTime
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +20,11 @@ import java.time.format.DateTimeFormatter
 
 object DBManager {
 
+    val activeAlerts:StateFlow<List<EmergencyAlert>>
+
+    // Patient Management
+    suspend fun getPatientInformation(patientId: String): Result<Patient>
+    suspend fun searchPatientHistory(patientId: String): Result<List<String>>
     private const val PREFS_NAME = "medlink_prefs"
     private const val KEY_MEDICATIONS = "medications"
     private const val KEY_MEASUREMENTS = "measurements"
@@ -40,6 +47,16 @@ object DBManager {
 
     private var prefs: SharedPreferences? = null
 
+    // Emergency & Measurements (Using Flow to observe real-time data)
+    fun requestDeviceData(deviceId: String): Flow<DeviceData>
+    suspend fun saveMeasurement(data: DeviceData): Result<Unit>
+    suspend fun triggerEmergencySOS(patientId: String, data: String): Result<String>
+    fun respondToAlert(alertId:String,instructions:String)
+
+    // Health Report Generation (UC10)
+    suspend fun getPatientMeasurements(patientId: String, start: LocalDateTime, end: LocalDateTime): Result<List<DeviceData>>
+    suspend fun getPatientSideEffects(patientId: String, start: LocalDateTime, end: LocalDateTime): Result<List<SideEffect>>
+    suspend fun getPatientPrescriptions(patientId: String): Result<List<Prescription>>
     // --- State ---
     private val _medications = MutableStateFlow<List<MedicationData>>(emptyList())
     val medications: StateFlow<List<MedicationData>> = _medications.asStateFlow()

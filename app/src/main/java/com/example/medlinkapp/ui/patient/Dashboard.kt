@@ -88,6 +88,10 @@ fun PatientDashboardScreen(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("SOS")
                     }
+                    // LOGOUT BUTTON
+                    IconButton(onClick = onLogout){
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
+                    }
                 }
             )
         }
