@@ -31,7 +31,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ReportScreen(
     onBackClick:()->Unit,
-    viewModel: ReportViewModel = viewModel()
+    viewModel: ReportViewModel = viewModel(),
+    assignedPatients: List<UserData> = emptyList()
 ){
     val uiState by viewModel.uiState.collectAsState(ReportUiState.Idle)
     val context = LocalContext.current
@@ -94,7 +95,10 @@ fun ReportScreen(
             ){state ->
                 when(state){
                     is ReportUiState.Idle ->{
-                        PatientSearchSection(onSearch ={id->viewModel.searchPatient(id)})
+                        PatientSearchSection(
+                            onSearch ={id->viewModel.searchPatient(id)},
+                            assignedPatients = assignedPatients
+                        )
                     }
                     is ReportUiState.Loading ->{
                         Box(modifier = Modifier.fillMaxSize(),contentAlignment = Alignment.Center){
@@ -171,9 +175,15 @@ fun StepNode(stepNumber:Int,label:String,isActive:Boolean){
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PatientSearchSection(onSearch:(String)->Unit){
+fun PatientSearchSection(
+    onSearch:(String)->Unit,
+    assignedPatients: List<UserData> = emptyList()
+){
     var patientId by remember{mutableStateOf("")}
+    var isExpanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -187,10 +197,44 @@ fun PatientSearchSection(onSearch:(String)->Unit){
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Insert patient ID to retrieve patient details and information",
+                text = "Insert patient ID or select from assigned patients to retrieve details",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
+            
+            if (assignedPatients.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Select from Assigned Patients:", style = MaterialTheme.typography.labelMedium)
+                ExposedDropdownMenuBox(
+                    expanded = isExpanded,
+                    onExpandedChange = { isExpanded = !isExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = if (patientId.isEmpty()) "Select a patient..." else patientId,
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) }
+                    )
+                    ExposedDropdownMenu(
+                        expanded = isExpanded,
+                        onDismissRequest = { isExpanded = false }
+                    ) {
+                        assignedPatients.forEach { patient ->
+                            DropdownMenuItem(
+                                text = { Text("${patient.name} ${patient.surname} (${patient.amka})") },
+                                onClick = {
+                                    patientId = patient.amka
+                                    isExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = patientId,
@@ -206,7 +250,7 @@ fun PatientSearchSection(onSearch:(String)->Unit){
             ){
                 Icon(Icons.Default.Search,contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Search")
+                Text("Search & Continue")
             }
         }
     }

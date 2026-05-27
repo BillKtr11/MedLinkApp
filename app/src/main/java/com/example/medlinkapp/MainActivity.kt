@@ -152,6 +152,7 @@ fun AppNavigation() {
 
             DoctorDashboardScreen(
                 doctorName = doctorName,
+                viewModel = doctorViewModel,
                 onNavigateToSearch = {
                     navController.navigate("doctor_search_screen")
                 },
@@ -163,6 +164,9 @@ fun AppNavigation() {
                 },
                 onNavigateToAppointments = {
                     navController.navigate("scheduled_appointments_screen")
+                },
+                onNavigateToReport = {
+                    navController.navigate("report_screen")
                 },
                 onLogout = {
                     loginViewModel.logout()
@@ -230,7 +234,7 @@ fun AppNavigation() {
                 patientName = patientName,
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
-                onNavigateToResults = { navController.navigate("report_screen") },
+                onNavigateToResults = { /* Removed for Patient as per UC10 */ },
                 onNavigateToMessages = { /* Navigate to messages */ },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
                 onNavigateToTakeMedication = { medId ->
@@ -328,8 +332,10 @@ fun AppNavigation() {
         }
 
         composable("report_screen") {
+            val assignedPatients by doctorViewModel.myPatients.collectAsState()
             ReportScreen(
-                onBackClick = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() },
+                assignedPatients = assignedPatients
             )
         }
 

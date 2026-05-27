@@ -27,6 +27,7 @@ fun DoctorDashboardScreen(
     onNavigateToAddAppointment: () -> Unit,
     onNavigateToRegisterPatient: () -> Unit,
     onNavigateToAppointments: () -> Unit,
+    onNavigateToReport: () -> Unit,
     onLogout: () -> Unit
 ) {
     val myPatients by viewModel.myPatients.collectAsState()
@@ -131,6 +132,15 @@ fun DoctorDashboardScreen(
                     icon = Icons.Default.Search,
                     summaryText = "Αναζήτηση ιστορικού για τους εγγεγραμμένους ασθενείς σας",
                     onClick = onNavigateToSearch
+                )
+            }
+
+            item {
+                DoctorActionCard(
+                    title = "Αναφορά Υγείας (UC10)",
+                    icon = Icons.Default.Info,
+                    summaryText = "Δημιουργία αναφοράς (PDF) για συγκεκριμένο ασθενή και χρονικό διάστημα",
+                    onClick = onNavigateToReport
                 )
             }
 
