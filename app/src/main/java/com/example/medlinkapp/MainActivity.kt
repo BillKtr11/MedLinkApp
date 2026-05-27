@@ -28,9 +28,9 @@ import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
 import com.example.medlinkapp.ui.patient.ReportSymptomScreen
 import com.example.medlinkapp.ui.patient.SideEffectViewModel
- import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
- import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
- import com.example.medlinkapp.ui.doctor.DoctorViewModel
+import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
+import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
+import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
 
 
