@@ -1,4 +1,5 @@
 package com.example.medlinkapp.model
+import java.time.LocalDate
 import java.time.LocalDateTime
 enum class UserRole {
     PATIENT, DOCTOR, CAREGIVER
@@ -22,11 +23,13 @@ data class Patient(
 
 // Represents data from DrugRegistrationManager and ManagePrescription
 data class Prescription(
-    val drugName: String,
-    val drugDosage: Int, // e.g., in mg
-    val drugFreq: Int,   // e.g., times per day
-    val drugDuration: Int, // e.g., in days
-    val drugStock: Int
+    val id: String,
+    val patientId: String,
+    val medication: String,
+    val dosage: String,
+    val frequency: String,
+    val duration: String,
+    val dateIssued: LocalDate
 )
 
 // Represents data from AppointmentForm

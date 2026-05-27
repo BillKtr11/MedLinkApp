@@ -17,10 +17,11 @@ import com.example.medlinkapp.model.UserRole
 import com.example.medlinkapp.ui.login.LoginScreen
 import com.example.medlinkapp.ui.medication.MedicationManagerScreen
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
- import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
- import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
- import com.example.medlinkapp.ui.doctor.DoctorViewModel
+import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
+import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
+import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
+import com.example.medlinkapp.ui.doctor.PrescriptionScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -99,9 +100,19 @@ fun AppNavigation() {
         composable("patient_history_screen") {
             PatientHistoryScreen(
                 viewModel = doctorViewModel,
-                onBackClick = {
-                    navController.popBackStack()
+                onBackClick = { navController.popBackStack() },
+                onNavigateToPrescription = {
+                    // Πλοήγηση στη νέα οθόνη της συνταγής
+                    navController.navigate("prescription_screen")
                 }
+            )
+        }
+
+        // 2.3 ΝΕΑ ΟΘΟΝΗ: Καταχώριση Συνταγής
+        composable("prescription_screen") {
+            PrescriptionScreen(
+                viewModel = doctorViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

@@ -17,7 +17,8 @@ import java.time.LocalDate
 @Composable
 fun PatientHistoryScreen(
     viewModel: DoctorViewModel,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onNavigateToPrescription: () -> Unit // ΠΡΟΣΘΗΚΗ
 ) {
     val patient by viewModel.selectedPatient.collectAsState()
     val history by viewModel.patientHistory.collectAsState()
@@ -38,18 +39,18 @@ fun PatientHistoryScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Ιατρικό Ιστορικό") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Επιστροφή")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            )
+        topBar = { /* Η TopBar που είχαμε φτιάξει */ },
+        bottomBar = { // ΠΡΟΣΘΗΚΗ: Σταθερό κουμπί στο κάτω μέρος της οθόνης
+            Button(
+                onClick = onNavigateToPrescription,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Έκδοση Συνταγής")
+            }
         }
     ) { paddingValues ->
         Column(
