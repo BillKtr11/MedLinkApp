@@ -6,6 +6,8 @@ import com.example.medlinkapp.data.DBManager
 import kotlinx.coroutines.flow.*
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 data class MedicationUiModel(
     val id: String,
@@ -32,6 +34,7 @@ data class MedicationUiModel(
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MedicationViewModel : ViewModel() {
 
     // Fetching data from the persistent singleton DBManager, filtered by user
@@ -40,6 +43,16 @@ class MedicationViewModel : ViewModel() {
             .map { 
                 MedicationUiModel(it.id, it.name, it.dosage, it.stockCount, it.lowStockThreshold, it.intakeTimes ?: emptyList())
             }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    // New: Fetch prescriptions for the current patient
+    val prescriptions: StateFlow<List<com.example.medlinkapp.model.Prescription>> = DBManager.prescriptions.map { list ->
+        val amka = DBManager.getCurrentUserAmka()
+        list.filter { it.patientAmka == amka }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -89,5 +102,32 @@ class MedicationViewModel : ViewModel() {
     fun addMedication(name: String, dosage: String, stock: Int, frequency: Int, intakeTimes: List<String>) {
         val amka = DBManager.getCurrentUserAmka() ?: return
         DBManager.addMedication(name, dosage, stock, amka, intakeTimes, frequency)
+    }
+
+    fun addFromPrescription(prescription: com.example.medlinkapp.model.Prescription) {
+        val amka = DBManager.getCurrentUserAmka() ?: return
+        
+        // Create intake times based on frequency
+        val intakeTimes = mutableListOf<String>()
+        val freq = prescription.drugFreq
+        if (freq > 0) {
+            val interval = 24 / freq
+            for (i in 0 until freq) {
+                val hour = (8 + i * interval) % 24
+                intakeTimes.add(String.format(Locale.getDefault(), "%02d:00", hour))
+            }
+        }
+        
+        // Determine dosage string with unit (defaulting to mg if none specified, though model is Int)
+        val dosageStr = if (prescription.drugDosage > 0) "${prescription.drugDosage}mg" else "As directed"
+
+        DBManager.addMedication(
+            name = prescription.drugName,
+            dosage = dosageStr,
+            stock = prescription.drugStock,
+            amka = amka,
+            intakeTimes = intakeTimes,
+            frequency = freq
+        )
     }
 }

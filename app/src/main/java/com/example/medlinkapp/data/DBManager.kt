@@ -8,6 +8,7 @@ import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.delay
@@ -30,6 +31,7 @@ object DBManager {
     private const val KEY_USERS = "users"
     private const val KEY_INTAKES = "intake_records"
     private const val KEY_APPOINTMENTS = "appointments"
+    private const val KEY_PRESCRIPTIONS = "prescriptions"
     private const val KEY_SIDE_EFFECTS = "side_effects"
     private const val KEY_MESSAGES = "messages"
     private const val KEY_SESSION_EXPIRY = "session_expiry"
@@ -42,6 +44,13 @@ object DBManager {
                 JsonPrimitive(formatter.format(src))
             override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): LocalDateTime =
                 LocalDateTime.parse(json.asString, formatter)
+        })
+        .registerTypeAdapter(LocalDate::class.java, object : JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
+            private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+            override fun serialize(src: LocalDate, typeOfSrc: Type, context: JsonSerializationContext): JsonElement =
+                JsonPrimitive(formatter.format(src))
+            override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): LocalDate =
+                LocalDate.parse(json.asString, formatter)
         })
         .create()
 
@@ -63,6 +72,9 @@ object DBManager {
     private val _appointments = MutableStateFlow<List<Appointment>>(emptyList())
     val appointments: StateFlow<List<Appointment>> = _appointments.asStateFlow()
 
+    private val _prescriptions = MutableStateFlow<List<Prescription>>(emptyList())
+    val prescriptions: StateFlow<List<Prescription>> = _prescriptions.asStateFlow()
+
     private val _sideEffects = MutableStateFlow<List<SideEffect>>(emptyList())
     val sideEffects: StateFlow<List<SideEffect>> = _sideEffects.asStateFlow()
 
@@ -82,6 +94,7 @@ object DBManager {
             loadSideEffectReports()
             loadIntakeRecords()
             loadAppointments()
+            loadPrescriptions()
             loadSideEffects()
             loadMessages()
             checkPersistentSession()
@@ -326,6 +339,40 @@ object DBManager {
         )
     }
 
+    // --- Prescriptions ---
+    private fun loadPrescriptions() {
+        val json = prefs?.getString(KEY_PRESCRIPTIONS, null)
+        if (json != null) {
+            try {
+                val type = object : TypeToken<List<Prescription>>() {}.type
+                _prescriptions.value = gson.fromJson(json, type)
+            } catch (_: Exception) {
+                _prescriptions.value = emptyList()
+            }
+        }
+    }
+
+    private fun savePrescriptions() {
+        val json = gson.toJson(_prescriptions.value)
+        prefs?.edit()?.putString(KEY_PRESCRIPTIONS, json)?.apply()
+    }
+
+    fun addPrescription(prescription: Prescription) {
+        _prescriptions.update { it + prescription }
+        savePrescriptions()
+        
+        // Send a message to the patient
+        addMessage(
+            Message(
+                id = System.currentTimeMillis().toString(),
+                patientAmka = prescription.patientAmka,
+                title = "Νέα Συνταγογράφηση",
+                content = "Ο γιατρός σας εξέδωσε νέα συνταγή για το φάρμακο ${prescription.drugName}.",
+                timestamp = LocalDateTime.now()
+            )
+        )
+    }
+
     fun deleteAppointment(appointmentId: String) {
         _appointments.update { list -> list.filter { it.appointmentId != appointmentId } }
         saveAppointments()
@@ -548,8 +595,6 @@ object DBManager {
     }
 
     suspend fun getPatientPrescriptions(patientId: String): Result<List<Prescription>> {
-        val meds = _medications.value.filter { it.patientAmka == patientId }
-        val prescriptions = meds.map { Prescription(it.name, it.dosage.filter { c -> c.isDigit() }.toIntOrNull() ?: 0, it.frequency, 30, it.stockCount) }
-        return Result.success(prescriptions)
+        return Result.success(_prescriptions.value.filter { it.patientAmka == patientId })
     }
 }

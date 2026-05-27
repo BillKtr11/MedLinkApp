@@ -97,11 +97,11 @@ fun PrescriptionScreen(
             // ΒΗΜΑ 3: Επιβεβαίωση ενέργειας (Κουμπί Enter / Αποθήκευση)
             Button(
                 onClick = {
-                    val patientId = patient?.id ?: return@Button
+                    val patientAmka = patient?.amka ?: return@Button
 
                     // Εκτέλεση ελέγχου και αποθήκευσης
                     val resultError = viewModel.issuePrescription(
-                        patientId = patientId,
+                        patientId = patientAmka,
                         medication = medication,
                         dosage = dosage,
                         frequency = frequency,

@@ -21,11 +21,14 @@ data class Patient(
 )
 
 data class Prescription(
+    val id: String = "",
+    val patientAmka: String = "",
     val drugName: String,
     val drugDosage: Int,
     val drugFreq: Int,
     val drugDuration: Int,
-    val drugStock: Int
+    val drugStock: Int,
+    val dateIssued: LocalDate = LocalDate.now()
 )
 
 data class Appointment(

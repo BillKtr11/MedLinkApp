@@ -143,16 +143,21 @@ class DoctorViewModel : ViewModel() {
         if (duration.isBlank()) return "Η διάρκεια δεν μπορεί να είναι κενή."
 
         // ΒΗΜΑ 4: Αποθήκευση της συνταγής στο σύστημα
+        val dosageInt = dosage.filter { it.isDigit() }.toIntOrNull() ?: 0
+        val freqInt = frequency.filter { it.isDigit() }.toIntOrNull() ?: 1
+        val durInt = duration.filter { it.isDigit() }.toIntOrNull() ?: 30
+        
         val newPrescription = Prescription(
             id = "presc_${System.currentTimeMillis()}",
-            patientId = patientId,
-            medication = medication,
-            dosage = dosage,
-            frequency = frequency,
-            duration = duration,
+            patientAmka = patientId,
+            drugName = medication,
+            drugDosage = dosageInt,
+            drugFreq = freqInt,
+            drugDuration = durInt,
+            drugStock = freqInt * durInt, // Suggest enough stock for the whole duration
             dateIssued = LocalDate.now()
         )
-        _prescriptions.update { it + newPrescription }
+        DBManager.addPrescription(newPrescription)
 
         // --- ΠΡΟΣΘΗΚΗ: Αυτόματη εισαγωγή της συνταγής στο Ιατρικό Ιστορικό του Ασθενή ---
         // Δημιουργούμε ένα record με τα στοιχεία που έγραψε ο γιατρός
@@ -176,7 +181,6 @@ class DoctorViewModel : ViewModel() {
 
         return null // Επιστροφή null σημαίνει επιτυχία χωρίς σφάλματα
     }
-}
 
     fun addAppointment(date: LocalDateTime, reason: String, patientAmka: String): Result<Unit> {
         if (reason.isBlank()) return Result.failure(Exception("Reason cannot be empty"))

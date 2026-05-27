@@ -26,6 +26,7 @@ fun MedicationManagerScreen(
     onNavigateToIntake: (String) -> Unit
 ) {
     val medications by viewModel.medications.collectAsState()
+    val prescriptions by viewModel.prescriptions.collectAsState()
 
     var showRestockDialog by remember { mutableStateOf(false) }
     var restockMedId by remember { mutableStateOf<String?>(null) }
@@ -48,23 +49,49 @@ fun MedicationManagerScreen(
             }
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(medications) { med ->
-                    MedicationCard(
-                        medication = med,
-                        onTakeDose = { onNavigateToIntake(med.id) },
-                        onRestock = { 
-                            restockMedId = med.id
-                            showRestockDialog = true
-                        }
+            if (prescriptions.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Active Prescriptions",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
+                items(prescriptions) { presc ->
+                    PrescriptionCard(
+                        prescription = presc,
+                        onAddMedication = { viewModel.addFromPrescription(presc) }
+                    )
+                }
+                item {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                }
+            }
+
+            item {
+                Text(
+                    text = "Current Inventory",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            items(medications) { med ->
+                MedicationCard(
+                    medication = med,
+                    onTakeDose = { onNavigateToIntake(med.id) },
+                    onRestock = { 
+                        restockMedId = med.id
+                        showRestockDialog = true
+                    }
+                )
             }
         }
 
@@ -100,6 +127,33 @@ fun MedicationManagerScreen(
                     }
                 }
             )
+        }
+    }
+}
+
+@Composable
+fun PrescriptionCard(
+    prescription: com.example.medlinkapp.model.Prescription,
+    onAddMedication: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = prescription.drugName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(text = "Dosage: ${prescription.drugDosage}mg", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Frequency: ${prescription.drugFreq} times/day", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Duration: ${prescription.drugDuration} days", style = MaterialTheme.typography.bodyMedium)
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Button(
+                onClick = onAddMedication,
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Add to Medications")
+            }
         }
     }
 }
