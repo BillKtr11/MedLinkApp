@@ -2,6 +2,7 @@ package com.example.medlinkapp.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.example.medlinkapp.model.*
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
@@ -78,6 +79,7 @@ object DBManager {
             loadUsers()
             loadMedications()
             loadMeasurements()
+            loadSideEffectReports()
             loadIntakeRecords()
             loadAppointments()
             loadSideEffects()
@@ -225,7 +227,7 @@ object DBManager {
 
     private fun saveMedications() {
         val json = gson.toJson(_medications.value)
-        prefs?.edit()?.putString(KEY_MEDICATIONS, json)?.apply()
+        prefs?.edit { putString(KEY_MEDICATIONS, json) }
     }
 
     fun getMedicationsForUser(amka: String): List<MedicationData> {
@@ -252,6 +254,9 @@ object DBManager {
         }
         saveMedications()
     }
+
+    private val _sideEffectReports = MutableStateFlow<List<SideEffectReport>>(emptyList())
+    val sideEffectReports: StateFlow<List<SideEffectReport>> = _sideEffectReports.asStateFlow()
 
     // --- Intake Records ---
     private fun loadIntakeRecords() {
@@ -418,9 +423,27 @@ object DBManager {
         }
     }
 
+    private fun loadSideEffectReports() {
+        val json = prefs?.getString(KEY_SIDE_EFFECTS, null)
+        if (json != null) {
+            try {
+                val type = object : TypeToken<List<SideEffectReport>>() {}.type
+                val list: List<SideEffectReport> = gson.fromJson(json, type)
+                _sideEffectReports.value = list
+            } catch (_: Exception) {
+                _sideEffectReports.value = emptyList()
+            }
+        }
+    }
+
     private fun saveMeasurements() {
         val json = gson.toJson(_measurements.value)
-        prefs?.edit()?.putString(KEY_MEASUREMENTS, json)?.apply()
+        prefs?.edit { putString(KEY_MEASUREMENTS, json) }
+    }
+
+    private fun saveSideEffectReports() {
+        val json = gson.toJson(_sideEffectReports.value)
+        prefs?.edit { putString(KEY_SIDE_EFFECTS, json) }
     }
 
     fun getMeasurementsForUser(amka: String): List<DeviceData> {
@@ -452,6 +475,14 @@ object DBManager {
             _activeAlerts.update { it + newAlert }
         }
 
+        return Result.success(Unit)
+    }
+
+    suspend fun saveSideEffectReport(report: SideEffectReport): Result<Unit> {
+        delay(500)
+        _sideEffectReports.update { it + report }
+        saveSideEffectReports()
+        println("Reported side effect for ${report.medicationName}: ${report.symptom}")
         return Result.success(Unit)
     }
 

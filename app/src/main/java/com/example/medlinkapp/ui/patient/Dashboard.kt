@@ -5,6 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medlinkapp.R
@@ -33,9 +37,10 @@ fun PatientDashboardScreen(
     onNavigateToResults: () -> Unit,
     onNavigateToMessages: () -> Unit,
     onNavigateToNewMeasurement: () -> Unit,
+    onNavigateToReportSymptom: () -> Unit,
     onNavigateToTakeMedication: (String) -> Unit,
     onTriggerSOS: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
 ) {
     val medications by medViewModel.medications.collectAsState()
     val appointments by DBManager.appointments.collectAsState()
@@ -61,7 +66,7 @@ fun PatientDashboardScreen(
                         Image(
                             painter = painterResource(id = R.drawable.medlink),
                             contentDescription = null,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(32.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Welcome, $patientName")
@@ -90,14 +95,14 @@ fun PatientDashboardScreen(
                     }
                 }
             )
-        }
+        },
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
 
             item {
@@ -110,7 +115,16 @@ fun PatientDashboardScreen(
                     title = "New Measurement",
                     icon = Icons.Default.Add,
                     summaryText = "Record Blood Pressure, Glucose, Weight, etc.",
-                    onClick = onNavigateToNewMeasurement
+                    onClick = onNavigateToNewMeasurement,
+                )
+            }
+
+            item {
+                DashboardActionCard(
+                    title = "Report Side Effect",
+                    icon = Icons.Default.Warning,
+                    summaryText = "Report symptoms or side effects from medications",
+                    onClick = onNavigateToReportSymptom,
                 )
             }
 
@@ -146,9 +160,9 @@ fun PatientDashboardScreen(
             item {
                 DashboardActionCard(
                     title = "Test Results & Records",
-                    icon = Icons.Default.List,
+                    icon = Icons.AutoMirrored.Filled.List,
                     summaryText = "New result available: Lipid Panel",
-                    onClick = onNavigateToResults
+                    onClick = onNavigateToResults,
                 )
             }
 
@@ -171,14 +185,14 @@ fun PatientDashboardScreen(
 fun VitalsCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Latest Vitals", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text("BP: 118/74 mmHg")
                 Text("HR: 68 bpm")
@@ -194,25 +208,25 @@ fun DashboardActionCard(
     title: String,
     icon: ImageVector,
     summaryText: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -221,10 +235,27 @@ fun DashboardActionCard(
                 Text(text = summaryText, style = MaterialTheme.typography.bodyMedium, color = Color.DarkGray)
             }
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Go",
-                tint = Color.Gray
+                tint = Color.Gray,
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PatientDashboardScreenPreview() {
+    MaterialTheme {
+        PatientDashboardScreen(
+            patientName = "Test Patient",
+            onNavigateToMedications = {},
+            onNavigateToAppointments = {},
+            onNavigateToResults = {},
+            onNavigateToMessages = {},
+            onNavigateToNewMeasurement = {},
+            onNavigateToReportSymptom = {},
+            onTriggerSOS = {},
+        ) { }
     }
 }

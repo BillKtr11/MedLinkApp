@@ -33,6 +33,11 @@ import com.example.medlinkapp.ui.medication.AddMedicationScreen
 import com.example.medlinkapp.ui.medication.IntakeScreen
 import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
+import com.example.medlinkapp.ui.patient.ReportSymptomScreen
+import com.example.medlinkapp.ui.patient.SideEffectViewModel
+import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
+import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
+import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.report.ReportScreen
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
 import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
@@ -174,7 +179,7 @@ fun AppNavigation() {
                         popUpTo(0) { inclusive = true }
                     }
                 }
-            )
+            }
         }
 
         composable("add_appointment_screen") {
@@ -212,7 +217,7 @@ fun AppNavigation() {
                 },
                 onBackClick = {
                     navController.popBackStack()
-                }
+                },
             )
         }
 
@@ -234,9 +239,10 @@ fun AppNavigation() {
                 patientName = patientName,
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
-                onNavigateToResults = { /* Removed for Patient as per UC10 */ },
-                onNavigateToMessages = { /* Navigate to messages */ },
+                onNavigateToResults = { },
+                onNavigateToMessages = { },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },
+                onNavigateToReportSymptom = { navController.navigate(Screen.ReportSymptom.route) },                
                 onNavigateToTakeMedication = { medId ->
                     navController.navigate("intake_screen/$medId")
                 },
@@ -248,7 +254,7 @@ fun AppNavigation() {
                     navController.navigate("login_screen") {
                         popUpTo(0) { inclusive = true }
                     }
-                }
+                },
             )
         }
 
@@ -328,6 +334,14 @@ fun AppNavigation() {
             MeasurementHistoryScreen(
                 viewModel = measurementViewModel,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.ReportSymptom.route) {
+            val sideEffectViewModel: SideEffectViewModel = viewModel()
+            ReportSymptomScreen(
+                viewModel = sideEffectViewModel,
+                onNavigateBack = { navController.popBackStack() },
             )
         }
 

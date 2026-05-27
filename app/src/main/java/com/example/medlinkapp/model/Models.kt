@@ -40,6 +40,17 @@ data class DeviceData(
     val measurementValue: Int,
     val measurementType: String,
     val timestamp: LocalDateTime,
+)
+
+data class SideEffectReport(
+    val id: String,
+    val medicationId: String,
+    val medicationName: String,
+    val symptom: String,
+    val duration: String,
+    val intensity: Int,
+    val timestamp: LocalDateTime,
+)
     val patientAmka: String
 )
 
