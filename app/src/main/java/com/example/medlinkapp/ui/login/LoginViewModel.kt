@@ -3,6 +3,8 @@ package com.example.medlinkapp.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.AuthRepository
+import com.example.medlinkapp.data.DBManager
+import com.example.medlinkapp.model.UserData
 import com.example.medlinkapp.model.LoginState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,18 +16,44 @@ class LoginViewModel(private val repository: AuthRepository = AuthRepository()) 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
 
-    fun login(email: String, password: String) {
+    fun login(email: String, password: String, keepSignedIn: Boolean = false) {
         _loginState.value = LoginState.Loading
 
         viewModelScope.launch {
             val result = repository.authenticateUser(email, password)
 
-            result.onSuccess { role ->
-                _loginState.value = LoginState.Success(role, "mock_jwt_token_123")
+            result.onSuccess { user ->
+                DBManager.setCurrentUser(user.amka, keepSignedIn)
+                _loginState.value = LoginState.Success(user.role, "mock_token", user.amka)
             }.onFailure { exception ->
                 _loginState.value = LoginState.Error(exception.message ?: "An unknown error occurred")
             }
         }
     }
 
+    fun register(userData: UserData) {
+        _loginState.value = LoginState.Loading
+        viewModelScope.launch {
+            val result = repository.registerUser(userData)
+            result.onSuccess {
+                DBManager.setCurrentUser(userData.amka, false)
+                _loginState.value = LoginState.Success(userData.role, "mock_token", userData.amka)
+            }.onFailure { exception ->
+                _loginState.value = LoginState.Error(exception.message ?: "Registration failed")
+            }
+        }
+    }
+
+    fun autoLogin(user: UserData) {
+        _loginState.value = LoginState.Success(user.role, "mock_token", user.amka)
+    }
+
+    fun resetState() {
+        _loginState.value = LoginState.Idle
+    }
+
+    fun logout() {
+        DBManager.clearSession()
+        _loginState.value = LoginState.Idle
+    }
 }

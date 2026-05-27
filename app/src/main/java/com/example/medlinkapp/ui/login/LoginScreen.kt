@@ -19,10 +19,12 @@ import com.example.medlinkapp.model.UserRole
 @Composable
 fun LoginScreen(
     onLoginSuccess: (UserRole) -> Unit,
+    onNavigateToRegister: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var keepSignedIn by remember { mutableStateOf(false) }
     val loginState by viewModel.loginState.collectAsState()
 
     LaunchedEffect(loginState) {
@@ -73,6 +75,23 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = keepSignedIn,
+                onCheckedChange = { keepSignedIn = it }
+            )
+            Text(
+                text = "Keep me signed in (30 days)",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
 
         if (loginState is LoginState.Error) {
@@ -87,12 +106,18 @@ fun LoginScreen(
             CircularProgressIndicator()
         } else {
             Button(
-                onClick = { viewModel.login(email, password) },
+                onClick = { viewModel.login(email, password, keepSignedIn) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
                 Text("Login")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(onClick = onNavigateToRegister) {
+                Text("Don't have an account? Register")
             }
         }
     }

@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.model.DeviceData
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -22,6 +20,11 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
     private val _uiState = MutableStateFlow<MeasurementState>(MeasurementState.Idle)
     val uiState: StateFlow<MeasurementState> = _uiState.asStateFlow()
 
+    // Filter measurements by current user
+    val measurements: StateFlow<List<DeviceData>> = combine(dbManager.measurements, dbManager.currentUserAmka) { list, amka ->
+        list.filter { it.patientAmka == amka }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     fun submitMeasurement(type: String, valueStr: String, method: String) {
         val value = valueStr.toIntOrNull()
         if (value == null) {
@@ -29,28 +32,27 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
             return
         }
 
+        val amka = dbManager.getCurrentUserAmka() ?: return
+
         viewModelScope.launch {
             _uiState.value = MeasurementState.Loading
-
-            if (!isWithinNormalLimits(type, value)) {
-                _uiState.value = MeasurementState.Error(
-                    message = "Προειδοποίηση: Η τιμή $value βρίσκεται εκτός των φυσιολογικών ορίων για $type. Παρακαλώ ακολουθήστε τις οδηγίες του ιατρού σας.",
-                    isOutOfBounds = true
-                )
-                return@launch
-            }
 
             val deviceData = DeviceData(
                 deviceId = if (method == "Bluetooth") "BT_DEVICE_01" else "MANUAL_ENTRY",
                 measurementValue = value,
                 measurementType = type,
-                timestamp = LocalDateTime.now()
+                timestamp = LocalDateTime.now(),
+                patientAmka = amka
             )
 
             val result = dbManager.saveMeasurement(deviceData)
 
             result.onSuccess {
-                _uiState.value = MeasurementState.Success("Η μέτρηση καταγράφηκε επιτυχώς.")
+                if (!isWithinNormalLimits(type, value)) {
+                    _uiState.value = MeasurementState.Success("Η μέτρηση καταγράφηκε, αλλά η τιμή είναι εκτός ορίων! Ειδοποιήθηκε ο γιατρός σας.")
+                } else {
+                    _uiState.value = MeasurementState.Success("Η μέτρηση καταγράφηκε επιτυχώς.")
+                }
             }.onFailure {
                 _uiState.value = MeasurementState.Error("Υπήρξε πρόβλημα κατά την αποθήκευση.")
             }

@@ -11,6 +11,8 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,21 +21,43 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medlinkapp.R
+import com.example.medlinkapp.data.DBManager
+import com.example.medlinkapp.ui.medication.MedicationViewModel
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientDashboardScreen(
     patientName: String = "Alex Johnson",
+    medViewModel: MedicationViewModel = viewModel(),
     onNavigateToMedications: () -> Unit,
     onNavigateToAppointments: () -> Unit,
     onNavigateToResults: () -> Unit,
     onNavigateToMessages: () -> Unit,
     onNavigateToNewMeasurement: () -> Unit,
     onNavigateToReportSymptom: () -> Unit,
+    onNavigateToTakeMedication: (String) -> Unit,
     onTriggerSOS: () -> Unit,
     onLogout: () -> Unit,
 ) {
+    val medications by medViewModel.medications.collectAsState()
+    val appointments by DBManager.appointments.collectAsState()
+    val messages by DBManager.messages.collectAsState()
+    val userAmka = DBManager.getCurrentUserAmka()
+    
+    val myAppointments = appointments.filter { it.patientId == userAmka }.sortedBy { it.date }
+    val myMessages = messages.filter { it.patientAmka == userAmka }
+    val unreadMessagesCount = myMessages.count { !it.isRead }
+
+    // Find the next medication to take
+    val nextMed = medications.filter { it.intakeTimes.isNotEmpty() }
+        .mapNotNull { med -> 
+            med.getNextIntakeTime()?.let { time -> med to time }
+        }
+        .minByOrNull { it.second }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -49,19 +73,27 @@ fun PatientDashboardScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onLogout) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
+                    IconButton(onClick = {
+                        // Test Notification logic simulation: open intake screen for the next med
+                        if (nextMed != null) {
+                            onNavigateToTakeMedication(nextMed.first.id)
+                        }
+                    }) {
+                        Icon(Icons.Default.Notifications, contentDescription = "Test Notification", tint = MaterialTheme.colorScheme.primary)
                     }
                     Button(
                         onClick = onTriggerSOS,
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
                         Icon(Icons.Default.Warning, contentDescription = "SOS", modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("SOS")
                     }
-                },
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
+                    }
+                }
             )
         },
     ) { paddingValues ->
@@ -97,20 +129,31 @@ fun PatientDashboardScreen(
             }
 
             item {
+                val nextAppt = myAppointments.firstOrNull()
+                val apptText = if (nextAppt != null) {
+                    "Next: ${nextAppt.date.format(DateTimeFormatter.ofPattern("dd/MM HH:mm"))} with ${nextAppt.doctorName}"
+                } else {
+                    "No upcoming appointments"
+                }
                 DashboardActionCard(
                     title = "Upcoming Appointments",
                     icon = Icons.Default.DateRange,
-                    summaryText = "Dental Clean - June 1st, 9:00 AM",
-                    onClick = onNavigateToAppointments,
+                    summaryText = apptText,
+                    onClick = onNavigateToAppointments
                 )
             }
 
             item {
+                val medText = if (nextMed != null) {
+                    "Next: ${nextMed.first.name} at ${nextMed.second}"
+                } else {
+                    "No active prescriptions"
+                }
                 DashboardActionCard(
                     title = "My Medications",
                     icon = Icons.Default.Info,
-                    summaryText = "3 Active Prescriptions (Next: Lisinopril at 8 AM)",
-                    onClick = onNavigateToMedications,
+                    summaryText = "$medText (${medications.size} Total)",
+                    onClick = onNavigateToMedications
                 )
             }
 
@@ -125,11 +168,12 @@ fun PatientDashboardScreen(
 
 
             item {
+                val msgText = if (unreadMessagesCount > 0) "$unreadMessagesCount unread messages" else "No new messages"
                 DashboardActionCard(
                     title = "Messages",
                     icon = Icons.Default.Email,
-                    summaryText = "2 Unread Messages from Dr. Lee",
-                    onClick = onNavigateToMessages,
+                    summaryText = msgText,
+                    onClick = onNavigateToMessages
                 )
             }
         }
