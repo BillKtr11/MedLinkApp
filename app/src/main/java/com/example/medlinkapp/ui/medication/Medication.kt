@@ -35,19 +35,16 @@ data class MedicationUiModel(
 class MedicationViewModel : ViewModel() {
 
     // Fetching data from the persistent singleton DBManager, filtered by user
-    val medications: StateFlow<List<MedicationUiModel>> = DBManager.medications
-        .map { list ->
-            val amka = DBManager.getCurrentUserAmka()
-            list.filter { it.patientAmka == amka }
-                .map { 
-                    MedicationUiModel(it.id, it.name, it.dosage, it.stockCount, it.lowStockThreshold, it.intakeTimes)
-                }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    val medications: StateFlow<List<MedicationUiModel>> = combine(DBManager.medications, DBManager.currentUserAmka) { list, amka ->
+        list.filter { it.patientAmka == amka }
+            .map { 
+                MedicationUiModel(it.id, it.name, it.dosage, it.stockCount, it.lowStockThreshold, it.intakeTimes ?: emptyList())
+            }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     fun confirmIntake(medId: String) {
         val currentMed = medications.value.find { it.id == medId }

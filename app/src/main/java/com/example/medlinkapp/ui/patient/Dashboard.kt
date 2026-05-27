@@ -76,20 +76,16 @@ fun PatientDashboardScreen(
                     }) {
                         Icon(Icons.Default.Notifications, contentDescription = "Test Notification", tint = MaterialTheme.colorScheme.primary)
                     }
-                    IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
-                    }
                     Button(
                         onClick = onTriggerSOS,
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
                         Icon(Icons.Default.Warning, contentDescription = "SOS", modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("SOS")
                     }
-                    // LOGOUT BUTTON
-                    IconButton(onClick = onLogout){
+                    IconButton(onClick = onLogout) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
                     }
                 }

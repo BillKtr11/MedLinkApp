@@ -39,7 +39,8 @@ data class DeviceData(
     val deviceId: String,
     val measurementValue: Int,
     val measurementType: String,
-    val timestamp: LocalDateTime
+    val timestamp: LocalDateTime,
+    val patientAmka: String
 )
 
 data class SideEffect(
@@ -66,8 +67,7 @@ data class EmergencyAlert(
     val value:Int,
     val timestamp:LocalDateTime,
     var status:String = "PENDING",
-    var doctorInstructions:String = ""
-    val timestamp: LocalDateTime,
+    var doctorInstructions:String = "",
     val patientAmka: String
 )
 

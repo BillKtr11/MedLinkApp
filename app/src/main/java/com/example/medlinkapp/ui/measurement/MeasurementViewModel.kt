@@ -21,12 +21,9 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
     val uiState: StateFlow<MeasurementState> = _uiState.asStateFlow()
 
     // Filter measurements by current user
-    val measurements: StateFlow<List<DeviceData>> = dbManager.measurements
-        .map { list -> 
-            val amka = dbManager.getCurrentUserAmka()
-            list.filter { it.patientAmka == amka }
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val measurements: StateFlow<List<DeviceData>> = combine(dbManager.measurements, dbManager.currentUserAmka) { list, amka ->
+        list.filter { it.patientAmka == amka }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun submitMeasurement(type: String, valueStr: String, method: String) {
         val value = valueStr.toIntOrNull()
@@ -40,14 +37,6 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
         viewModelScope.launch {
             _uiState.value = MeasurementState.Loading
 
-            if (!isWithinNormalLimits(type, value)) {
-                _uiState.value = MeasurementState.Error(
-                    message = "Προειδοποίηση: Η τιμή $value βρίσκεται εκτός των φυσιολογικών ορίων για $type. Παρακαλώ ακολουθήστε τις οδηγίες του ιατρού σας.",
-                    isOutOfBounds = true
-                )
-                return@launch
-            }
-
             val deviceData = DeviceData(
                 deviceId = if (method == "Bluetooth") "BT_DEVICE_01" else "MANUAL_ENTRY",
                 measurementValue = value,
@@ -59,7 +48,11 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
             val result = dbManager.saveMeasurement(deviceData)
 
             result.onSuccess {
-                _uiState.value = MeasurementState.Success("Η μέτρηση καταγράφηκε επιτυχώς.")
+                if (!isWithinNormalLimits(type, value)) {
+                    _uiState.value = MeasurementState.Success("Η μέτρηση καταγράφηκε, αλλά η τιμή είναι εκτός ορίων! Ειδοποιήθηκε ο γιατρός σας.")
+                } else {
+                    _uiState.value = MeasurementState.Success("Η μέτρηση καταγράφηκε επιτυχώς.")
+                }
             }.onFailure {
                 _uiState.value = MeasurementState.Error("Υπήρξε πρόβλημα κατά την αποθήκευση.")
             }

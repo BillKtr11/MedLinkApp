@@ -11,26 +11,25 @@ import java.time.LocalDateTime
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.lang.reflect.Type
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object DBManager {
 
-    val activeAlerts:StateFlow<List<EmergencyAlert>>
+    private val _activeAlerts = MutableStateFlow<List<EmergencyAlert>>(emptyList())
+    val activeAlerts: StateFlow<List<EmergencyAlert>> = _activeAlerts.asStateFlow()
 
     // Patient Management
-    suspend fun getPatientInformation(patientId: String): Result<Patient>
-    suspend fun searchPatientHistory(patientId: String): Result<List<String>>
+
     private const val PREFS_NAME = "medlink_prefs"
     private const val KEY_MEDICATIONS = "medications"
     private const val KEY_MEASUREMENTS = "measurements"
     private const val KEY_USERS = "users"
     private const val KEY_INTAKES = "intake_records"
     private const val KEY_APPOINTMENTS = "appointments"
+    private const val KEY_SIDE_EFFECTS = "side_effects"
     private const val KEY_MESSAGES = "messages"
     private const val KEY_SESSION_EXPIRY = "session_expiry"
     private const val KEY_CURRENT_USER_AMKA_PERSISTENT = "current_user_amka_persistent"
@@ -47,16 +46,6 @@ object DBManager {
 
     private var prefs: SharedPreferences? = null
 
-    // Emergency & Measurements (Using Flow to observe real-time data)
-    fun requestDeviceData(deviceId: String): Flow<DeviceData>
-    suspend fun saveMeasurement(data: DeviceData): Result<Unit>
-    suspend fun triggerEmergencySOS(patientId: String, data: String): Result<String>
-    fun respondToAlert(alertId:String,instructions:String)
-
-    // Health Report Generation (UC10)
-    suspend fun getPatientMeasurements(patientId: String, start: LocalDateTime, end: LocalDateTime): Result<List<DeviceData>>
-    suspend fun getPatientSideEffects(patientId: String, start: LocalDateTime, end: LocalDateTime): Result<List<SideEffect>>
-    suspend fun getPatientPrescriptions(patientId: String): Result<List<Prescription>>
     // --- State ---
     private val _medications = MutableStateFlow<List<MedicationData>>(emptyList())
     val medications: StateFlow<List<MedicationData>> = _medications.asStateFlow()
@@ -73,6 +62,9 @@ object DBManager {
     private val _appointments = MutableStateFlow<List<Appointment>>(emptyList())
     val appointments: StateFlow<List<Appointment>> = _appointments.asStateFlow()
 
+    private val _sideEffects = MutableStateFlow<List<SideEffect>>(emptyList())
+    val sideEffects: StateFlow<List<SideEffect>> = _sideEffects.asStateFlow()
+
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages.asStateFlow()
 
@@ -88,6 +80,7 @@ object DBManager {
             loadMeasurements()
             loadIntakeRecords()
             loadAppointments()
+            loadSideEffects()
             loadMessages()
             checkPersistentSession()
         }
@@ -152,7 +145,7 @@ object DBManager {
             try {
                 val type = object : TypeToken<List<UserData>>() {}.type
                 _users.value = gson.fromJson(json, type)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _users.value = emptyList()
             }
         }
@@ -219,7 +212,7 @@ object DBManager {
             try {
                 val type = object : TypeToken<List<MedicationData>>() {}.type
                 _medications.value = gson.fromJson(json, type)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _medications.value = emptyList()
             }
         }
@@ -267,7 +260,7 @@ object DBManager {
             try {
                 val type = object : TypeToken<List<IntakeRecord>>() {}.type
                 _intakeRecords.value = gson.fromJson(json, type)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _intakeRecords.value = emptyList()
             }
         }
@@ -301,7 +294,7 @@ object DBManager {
             try {
                 val type = object : TypeToken<List<Appointment>>() {}.type
                 _appointments.value = gson.fromJson(json, type)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _appointments.value = emptyList()
             }
         }
@@ -338,6 +331,35 @@ object DBManager {
         saveMessages()
     }
 
+    // --- Side Effects ---
+    private fun loadSideEffects() {
+        val json = prefs?.getString(KEY_SIDE_EFFECTS, null)
+        if (json != null) {
+            try {
+                val type = object : TypeToken<List<SideEffect>>() {}.type
+                _sideEffects.value = gson.fromJson(json, type)
+            } catch (_: Exception) {
+                _sideEffects.value = emptyList()
+            }
+        }
+
+        if (_sideEffects.value.none { it.patientId == "000000" }) {
+            val defaultSideEffect = SideEffect("000000", "Zάλη το πρωί", "Low", LocalDateTime.now().minusDays(2))
+            _sideEffects.update { it + defaultSideEffect }
+            saveSideEffects()
+        }
+    }
+
+    private fun saveSideEffects() {
+        val json = gson.toJson(_sideEffects.value)
+        prefs?.edit()?.putString(KEY_SIDE_EFFECTS, json)?.apply()
+    }
+
+    fun addSideEffect(sideEffect: SideEffect) {
+        _sideEffects.update { it + sideEffect }
+        saveSideEffects()
+    }
+
     // --- Messages ---
     private fun loadMessages() {
         val json = prefs?.getString(KEY_MESSAGES, null)
@@ -345,7 +367,7 @@ object DBManager {
             try {
                 val type = object : TypeToken<List<Message>>() {}.type
                 _messages.value = gson.fromJson(json, type)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _messages.value = emptyList()
             }
         }
@@ -379,7 +401,7 @@ object DBManager {
             try {
                 val type = object : TypeToken<List<DeviceData>>() {}.type
                 _measurements.value = gson.fromJson(json, type)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _measurements.value = emptyList()
             }
         }
@@ -409,26 +431,94 @@ object DBManager {
         delay(500)
         _measurements.update { it + data }
         saveMeasurements()
+
+        // SOS Logic: Triggered when value is outside normal limits
+        val limits = getNormalLimits(data.measurementType)
+        
+        // Trigger SOS if value is above the high limit (as requested) or below the low limit
+        val isCritical = data.measurementValue !in limits
+
+        if (isCritical) {
+            val patient = _users.value.find { it.amka == data.patientAmka }
+            val newAlert = EmergencyAlert(
+                id = System.currentTimeMillis().toString(),
+                patientId = data.patientAmka,
+                patientName = "${patient?.name ?: "Unknown"} ${patient?.surname ?: "Patient"}",
+                measurementType = data.measurementType,
+                value = data.measurementValue,
+                timestamp = LocalDateTime.now(),
+                patientAmka = data.patientAmka
+            )
+            _activeAlerts.update { it + newAlert }
+        }
+
         return Result.success(Unit)
     }
 
     fun getNormalLimits(type: String): IntRange {
-        return when (type) {
-            "Σάκχαρο" -> 70..140
-            "Οξυγόνο" -> 95..100
-            "Βάρος" -> 40..150
-            "Πίεση" -> 90..140
+        return when (type.lowercase()) {
+            "σάκχαρο", "blood glucose", "glucose" -> 70..140
+            "οξυγόνο", "oxygen saturation", "oxygen", "spo2" -> 95..100
+            "βάρος", "weight" -> 40..150
+            "πίεση", "systolic blood pressure", "pressure", "bp" -> 90..140
             else -> 0..1000
         }
     }
 
-    // --- Mocks ---
-    suspend fun getPatientInformation(patientId: String) = Unit
+    // --- Mocks & Additional Logic ---
+    fun getPatientInformation(patientId: String): Result<Patient> {
+        val user = _users.value.find { it.amka == patientId }
+        return if (user != null) {
+            Result.success(Patient(user.amka, user.name + " " + user.surname, "2000-01-01", emptyList()))
+        } else {
+            Result.failure(Exception("Patient not found"))
+        }
+    }
     suspend fun searchPatientHistory(patientId: String): Result<List<String>> = Result.success(listOf("Ιστορικό 1", "Ιστορικό 2"))
     suspend fun validatePrescription(prescription: Prescription): Boolean = true
     suspend fun checkStock(drugName: String): Int = 10
     suspend fun addDrug(prescription: Prescription): Result<Unit> = Result.success(Unit)
     suspend fun saveAppointment(appointment: Appointment): Result<Unit> = Result.success(Unit)
-    fun requestDeviceData(deviceId: String): Flow<DeviceData> = flow { delay(1000) }
-    suspend fun triggerEmergencySOS(patientId: String, data: String): Result<String> = Result.success("SOS Στάλθηκε")
+    
+    fun requestDeviceData(deviceId: String): Flow<DeviceData> = flow { 
+        while(true) {
+            delay(5000)
+            emit(DeviceData(deviceId, (60..100).random(), "Σφύξεις", LocalDateTime.now(), "000000"))
+        }
+    }
+
+    suspend fun triggerEmergencySOS(patientId: String, data: String): Result<String> {
+        val patient = _users.value.find { it.amka == patientId }
+        val newAlert = EmergencyAlert(
+            id = System.currentTimeMillis().toString(),
+            patientId = patientId,
+            patientName = "${patient?.name ?: "Unknown"} ${patient?.surname ?: "Patient"}",
+            measurementType = "SOS",
+            value = 0,
+            timestamp = LocalDateTime.now(),
+            patientAmka = patientId
+        )
+        _activeAlerts.update { it + newAlert }
+        return Result.success("SOS Στάλθηκε")
+    }
+
+    fun respondToAlert(alertId: String, instructions: String) {
+        _activeAlerts.update { list ->
+            list.map { if (it.id == alertId) it.copy(status = "RESOLVED", doctorInstructions = instructions) else it }
+        }
+    }
+
+    suspend fun getPatientMeasurements(patientId: String, start: LocalDateTime, end: LocalDateTime): Result<List<DeviceData>> {
+        return Result.success(_measurements.value.filter { it.patientAmka == patientId && it.timestamp.isAfter(start) && it.timestamp.isBefore(end) })
+    }
+
+    suspend fun getPatientSideEffects(patientId: String, start: LocalDateTime, end: LocalDateTime): Result<List<SideEffect>> {
+        return Result.success(_sideEffects.value.filter { it.patientId == patientId && it.timestamp.isAfter(start) && it.timestamp.isBefore(end) })
+    }
+
+    suspend fun getPatientPrescriptions(patientId: String): Result<List<Prescription>> {
+        val meds = _medications.value.filter { it.patientAmka == patientId }
+        val prescriptions = meds.map { Prescription(it.name, it.dosage.filter { c -> c.isDigit() }.toIntOrNull() ?: 0, it.frequency, 30, it.stockCount) }
+        return Result.success(prescriptions)
+    }
 }

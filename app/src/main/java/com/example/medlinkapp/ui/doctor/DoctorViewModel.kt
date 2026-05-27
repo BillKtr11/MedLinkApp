@@ -8,10 +8,10 @@ import java.time.LocalDate
 import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.model.Appointment
+import com.example.medlinkapp.model.EmergencyAlert
 import com.example.medlinkapp.model.UserData
 import com.example.medlinkapp.model.UserRole
 import kotlinx.coroutines.flow.*
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class Patient(
@@ -29,6 +29,18 @@ data class MedicalRecord(
 
 class DoctorViewModel : ViewModel() {
     
+    // Emergency Alerts
+    val activeAlerts: StateFlow<List<EmergencyAlert>> = DBManager.activeAlerts
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList()
+        )
+
+    fun respondToAlert(alertId: String, instructions: String) {
+        DBManager.respondToAlert(alertId, instructions)
+    }
+
     // Live list of ALL patients in the system (for assignment)
     val allPatients: StateFlow<List<UserData>> = DBManager.users
         .map { users -> users.filter { it.role == UserRole.PATIENT } }

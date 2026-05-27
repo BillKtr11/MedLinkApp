@@ -34,17 +34,12 @@ import com.example.medlinkapp.ui.medication.IntakeScreen
 import com.example.medlinkapp.ui.medication.MedicationViewModel
 import com.example.medlinkapp.ui.patient.PatientDashboardScreen
 import com.example.medlinkapp.ui.report.ReportScreen
-import com.example.medlinkapp.data.MockDBManager
 import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
 import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
 import com.example.medlinkapp.ui.doctor.DoctorViewModel
 import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
 import com.example.medlinkapp.ui.patient.PatientAppointmentsScreen
 import com.example.medlinkapp.ui.patient.PatientMessagesScreen
-import com.example.medlinkapp.ui.doctor.DoctorSearchScreen
-import com.example.medlinkapp.ui.doctor.PatientHistoryScreen
-import com.example.medlinkapp.ui.doctor.DoctorViewModel
-import com.example.medlinkapp.ui.doctor.DoctorDashboardScreen
 import com.example.medlinkapp.ui.doctor.AddAppointmentScreen
 import com.example.medlinkapp.ui.doctor.AssignPatientScreen
 import com.example.medlinkapp.ui.doctor.ScheduledAppointmentsScreen
@@ -71,7 +66,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation() {
-    val dbManager = remember { MockDBManager() }
     // This controller manages which screen is currently visible
     val navController = rememberNavController()
     val loginViewModel: LoginViewModel = viewModel()
