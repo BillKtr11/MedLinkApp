@@ -21,18 +21,18 @@ fun ManageMeasurementRecording(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val measurementTypes = listOf("Πίεση", "Σάκχαρο", "Βάρος", "Οξυγόνο")
+    val measurementTypes = listOf("Blood Pressure", "Glucose", "Weight", "Oxygen")
     var selectedType by remember { mutableStateOf(measurementTypes[0]) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
-    val methods = listOf("Χειροκίνητη εισαγωγή", "Σύνδεση συσκευής (Bluetooth)")
+    val methods = listOf("Manual entry", "Connect device (Bluetooth)")
     var selectedMethod by remember { mutableStateOf(methods[0]) }
     var measurementValue by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Νέα Μέτρηση") },
+                title = { Text("New Measurement") },
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.resetState()
@@ -43,7 +43,7 @@ fun ManageMeasurementRecording(
                 },
                 actions = {
                     TextButton(onClick = onNavigateToHistory) {
-                        Text("Ιστορικό", color = MaterialTheme.colorScheme.primary)
+                        Text("History", color = MaterialTheme.colorScheme.primary)
                     }
                 }
             )
@@ -56,7 +56,7 @@ fun ManageMeasurementRecording(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Επιλέξτε Τύπο Μέτρησης", style = MaterialTheme.typography.titleMedium)
+            Text("Select Measurement Type", style = MaterialTheme.typography.titleMedium)
             ExposedDropdownMenuBox(
                 expanded = isDropdownExpanded,
                 onExpandedChange = { isDropdownExpanded = !isDropdownExpanded }
@@ -86,7 +86,7 @@ fun ManageMeasurementRecording(
                 }
             }
 
-            Text("Τρόπος Εισαγωγής", style = MaterialTheme.typography.titleMedium)
+            Text("Input Method", style = MaterialTheme.typography.titleMedium)
             Column {
                 methods.forEach { method ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -103,7 +103,7 @@ fun ManageMeasurementRecording(
                 }
             }
 
-            if (selectedMethod == "Σύνδεση συσκευής (Bluetooth)") {
+            if (selectedMethod == "Connect device (Bluetooth)") {
                 Button(
                     onClick = {
                         viewModel.fetchBluetoothData(selectedType) { fetchedValue ->
@@ -112,17 +112,17 @@ fun ManageMeasurementRecording(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Αναζήτηση Συσκευής & Λήψη Δεδομένων")
+                    Text("Search Device & Receive Data")
                 }
             }
 
             OutlinedTextField(
                 value = measurementValue,
                 onValueChange = { measurementValue = it },
-                label = { Text("Τιμή Μέτρησης (π.χ. 90 mg/dL)") },
+                label = { Text("Measurement Value (e.g. 90 mg/dL)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
-                enabled = selectedMethod != "Σύνδεση συσκευής (Bluetooth)"
+                enabled = selectedMethod != "Connect device (Bluetooth)"
             )
 
             when (val state = uiState) {
@@ -148,7 +148,7 @@ fun ManageMeasurementRecording(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Νέα Καταχώρηση")
+                        Text("New Entry")
                     }
                 }
                 is MeasurementState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -162,7 +162,7 @@ fun ManageMeasurementRecording(
                     onClick = { viewModel.submitMeasurement(selectedType, measurementValue, selectedMethod) },
                     modifier = Modifier.fillMaxWidth().height(50.dp)
                 ) {
-                    Text("Καταγραφή Μέτρησης")
+                    Text("Record Measurement")
                 }
             }
         }

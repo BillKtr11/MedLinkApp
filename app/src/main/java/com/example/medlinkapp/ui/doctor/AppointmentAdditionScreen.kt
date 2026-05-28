@@ -50,7 +50,7 @@ fun AppointmentAdditionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Προσθήκη Ραντεβού") },
+                title = { Text("Add Appointment") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -82,7 +82,7 @@ fun AppointmentAdditionScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = if (selectedPatient == null) "Επιλογή Ασθενή" else "Ασθενής: ${selectedPatient?.name} ${selectedPatient?.surname}",
+                                text = if (selectedPatient == null) "Select Patient" else "Patient: ${selectedPatient?.name} ${selectedPatient?.surname}",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             if (selectedPatient != null) {
@@ -90,7 +90,7 @@ fun AppointmentAdditionScreen(
                             }
                         }
                         TextButton(onClick = { showPatientPicker = true }) {
-                            Text("Αλλαγή")
+                            Text("Change")
                         }
                     }
                 }
@@ -106,7 +106,7 @@ fun AppointmentAdditionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (selectedDate == null) "Επιλογή Ημερομηνίας" else "Ημερομηνία: ${selectedDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
+                            text = if (selectedDate == null) "Select Date" else "Date: ${selectedDate?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}",
                             modifier = Modifier.weight(1f)
                         )
                         Icon(Icons.Default.DateRange, contentDescription = null)
@@ -124,7 +124,7 @@ fun AppointmentAdditionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (selectedTime == null) "Επιλογή Ώρας" else "Ώρα: ${selectedTime?.format(DateTimeFormatter.ofPattern("HH:mm"))}",
+                            text = if (selectedTime == null) "Select Time" else "Time: ${selectedTime?.format(DateTimeFormatter.ofPattern("HH:mm"))}",
                             modifier = Modifier.weight(1f)
                         )
                         Icon(Icons.Default.Notifications, contentDescription = null) // Using notifications icon for time
@@ -134,14 +134,14 @@ fun AppointmentAdditionScreen(
                 OutlinedTextField(
                     value = reason,
                     onValueChange = { reason = it; showError = false },
-                    label = { Text("Αιτία επίσκεψης") },
+                    label = { Text("Reason for visit") },
                     modifier = Modifier.fillMaxWidth(),
                     isError = showError && reason.isBlank()
                 )
 
                 if (showError) {
                     Text(
-                        text = errorMessage.ifEmpty { "Παρακαλώ συμπληρώστε όλα τα πεδία." },
+                        text = errorMessage.ifEmpty { "Please fill in all fields." },
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -154,10 +154,10 @@ fun AppointmentAdditionScreen(
                         if (selectedDate == null || selectedTime == null || reason.isBlank() || selectedPatient == null) {
                             showError = true
                             errorMessage = when {
-                                selectedPatient == null -> "Παρακαλώ επιλέξτε ασθενή."
-                                selectedDate == null -> "Παρακαλώ επιλέξτε ημερομηνία."
-                                selectedTime == null -> "Παρακαλώ επιλέξτε ώρα."
-                                else -> "Όλα τα πεδία είναι υποχρεωτικά."
+                                selectedPatient == null -> "Please select a patient."
+                                selectedDate == null -> "Please select a date."
+                                selectedTime == null -> "Please select a time."
+                                else -> "All fields are required."
                             }
                         } else {
                             val dateTime = LocalDateTime.of(selectedDate, selectedTime)
@@ -166,31 +166,31 @@ fun AppointmentAdditionScreen(
                                 showSuccess = true
                             } else {
                                 showError = true
-                                errorMessage = result.exceptionOrNull()?.message ?: "Σφάλμα κατά την αποθήκευση."
+                                errorMessage = result.exceptionOrNull()?.message ?: "Error during saving."
                             }
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp)
                 ) {
-                    Text("Επιβεβαίωση Καταχώρησης")
+                    Text("Confirm Registration")
                 }
             } else {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Επιτυχής Καταχώρηση!",
+                            text = "Successful Registration!",
                             style = MaterialTheme.typography.headlineSmall,
                             color = Color(0xFF4CAF50)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Οι υπενθυμίσεις (24ω και 1ω πριν) έχουν προγραμματιστεί.",
+                            text = "Reminders (24h and 1h before) have been scheduled.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.DarkGray
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(onClick = onNavigateHome) {
-                            Text("Επιστροφή στην Αρχική")
+                            Text("Back to Home")
                         }
                     }
                 }
@@ -241,11 +241,11 @@ fun AppointmentAdditionScreen(
     if (showPatientPicker) {
         AlertDialog(
             onDismissRequest = { showPatientPicker = false },
-            title = { Text("Επιλογή Ασθενή (Δικοί σας Ασθενείς)") },
+            title = { Text("Select Patient (Your Patients)") },
             text = {
                 Box(modifier = Modifier.heightIn(max = 400.dp)) {
                     if (myPatients.isEmpty()) {
-                        Text("Δεν έχετε ακόμη συνδεδεμένους ασθενείς. Χρησιμοποιήστε την 'Σύνδεση Ασθενή' από το μενού.")
+                        Text("You don't have connected patients yet. Use 'Connect Patient' from the menu.")
                     } else {
                         LazyColumn {
                             items(myPatients) { patient ->
@@ -264,7 +264,7 @@ fun AppointmentAdditionScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showPatientPicker = false }) {
-                    Text("Κλείσιμο")
+                    Text("Close")
                 }
             }
         )

@@ -27,14 +27,14 @@ fun MedicationAdherenceItem(med: Medication) {
             ) {
                 Column {
                     Text(med.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                    Text("Δοσολογία: ${med.dosage}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Dosage: ${med.dosage}", style = MaterialTheme.typography.bodyMedium)
                 }
                 Surface(
                     color = if (med.stockCount > 0) Color(0xFF4CAF50) else Color(0xFFF44336),
                     shape = MaterialTheme.shapes.small
                 ) {
                     Text(
-                        text = if (med.stockCount > 0) "Ενεργό" else "Χαμηλό Απόθεμα",
+                        text = if (med.stockCount > 0) "Active" else "Low Stock",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         color = Color.White,
                         style = MaterialTheme.typography.labelSmall
@@ -42,7 +42,7 @@ fun MedicationAdherenceItem(med: Medication) {
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Πρόγραμμα: ${med.intakeTimes.joinToString(", ")}", style = MaterialTheme.typography.bodySmall)
+            Text("Schedule: ${med.intakeTimes.joinToString(", ")}", style = MaterialTheme.typography.bodySmall)
         }
     }
 }
@@ -94,7 +94,7 @@ fun IntakeRecordItem(record: IntakeRecord) {
                 )
             }
             Text(
-                if (record.status == "Confirmed") "Επιβεβαιώθηκε" else "Παραλείφθηκε",
+                if (record.status == "Confirmed") "Confirmed" else "Skipped",
                 color = if (record.status == "Confirmed") Color(0xFF4CAF50) else Color(0xFFF44336),
                 fontWeight = FontWeight.Bold
             )

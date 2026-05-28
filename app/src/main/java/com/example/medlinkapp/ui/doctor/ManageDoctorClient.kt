@@ -35,7 +35,7 @@ fun ManageDoctorClient(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Σύνδεση Ασθενή") },
+                title = { Text("Connect Patient") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -53,14 +53,14 @@ fun ManageDoctorClient(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Αναζήτηση Ασθενή (Όνομα ή AMKA)") },
+                label = { Text("Search Patient (Name or AMKA)") },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Επιλέξτε ασθενή για εγγραφή στο ιστορικό σας:", style = MaterialTheme.typography.titleSmall)
+            Text("Select patient to register in your list:", style = MaterialTheme.typography.titleSmall)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -92,7 +92,7 @@ fun ManageDoctorClient(
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 enabled = selectedPatient != null
             ) {
-                Text("Επιβεβαίωση Εγγραφής")
+                Text("Confirm Registration")
             }
         }
     }

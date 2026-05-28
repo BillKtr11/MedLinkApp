@@ -34,7 +34,6 @@ fun PatientScreen(
     medViewModel: MedicationViewModel = viewModel(),
     onNavigateToMedications: () -> Unit,
     onNavigateToAppointments: () -> Unit,
-    onNavigateToResults: () -> Unit,
     onNavigateToMessages: () -> Unit,
     onNavigateToNewMeasurement: () -> Unit,
     onNavigateToReportSymptom: () -> Unit,
@@ -160,22 +159,12 @@ fun PatientScreen(
 
             item {
                 DashboardActionCard(
-                    title = "Ιστορικό Συνταγών",
+                    title = "Prescription History",
                     icon = Icons.AutoMirrored.Filled.List,
-                    summaryText = "Προβολή όλων των συνταγών που έχουν εκδοθεί για εσάς",
+                    summaryText = "View all prescriptions issued for you",
                     onClick = onNavigateToPrescriptionHistory,
                 )
             }
-
-            item {
-                DashboardActionCard(
-                    title = "Test Results & Records",
-                    icon = Icons.AutoMirrored.Filled.List,
-                    summaryText = "New result available: Lipid Panel",
-                    onClick = onNavigateToResults,
-                )
-            }
-
 
             item {
                 val msgText = if (unreadMessagesCount > 0) "$unreadMessagesCount unread messages" else "No new messages"
@@ -261,7 +250,6 @@ fun PatientScreenPreview() {
             patientName = "Test Patient",
             onNavigateToMedications = {},
             onNavigateToAppointments = {},
-            onNavigateToResults = {},
             onNavigateToMessages = {},
             onNavigateToNewMeasurement = {},
             onNavigateToReportSymptom = {},

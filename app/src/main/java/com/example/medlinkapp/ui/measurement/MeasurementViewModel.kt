@@ -28,7 +28,7 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
     fun submitMeasurement(type: String, valueStr: String, method: String) {
         val value = valueStr.toIntOrNull()
         if (value == null) {
-            _uiState.value = MeasurementState.Error("Παρακαλώ εισάγετε μια έγκυρη τιμή.")
+            _uiState.value = MeasurementState.Error("Please enter a valid value.")
             return
         }
 
@@ -38,7 +38,7 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
             _uiState.value = MeasurementState.Loading
 
             val measurementData = Measurement(
-                deviceId = if (method == "Bluetooth") "BT_DEVICE_01" else "MANUAL_ENTRY",
+                deviceId = if (method == "Connect device (Bluetooth)") "BT_DEVICE_01" else "MANUAL_ENTRY",
                 measurementValue = value,
                 measurementType = type,
                 timestamp = LocalDateTime.now(),
@@ -49,22 +49,22 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
 
             result.onSuccess {
                 if (!isWithinNormalLimits(type, value)) {
-                    _uiState.value = MeasurementState.Success("Η μέτρηση καταγράφηκε, αλλά η τιμή είναι εκτός ορίων! Ειδοποιήθηκε ο γιατρός σας.")
+                    _uiState.value = MeasurementState.Success("Measurement recorded, but the value is out of limits! Your doctor has been notified.")
                 } else {
-                    _uiState.value = MeasurementState.Success("Η μέτρηση καταγράφηκε επιτυχώς.")
+                    _uiState.value = MeasurementState.Success("Measurement recorded successfully.")
                 }
             }.onFailure {
-                _uiState.value = MeasurementState.Error("Υπήρξε πρόβλημα κατά την αποθήκευση.")
+                _uiState.value = MeasurementState.Error("There was a problem during saving.")
             }
         }
     }
 
     fun fetchBluetoothData(type: String, onDataReceived: (String) -> Unit) {
         val simulatedValue = when(type) {
-            "Πίεση" -> "120"
-            "Σάκχαρο" -> "95"
-            "Βάρος" -> "75"
-            "Οξυγόνο" -> "98"
+            "Blood Pressure" -> "120"
+            "Glucose" -> "95"
+            "Weight" -> "75"
+            "Oxygen" -> "98"
             else -> "0"
         }
         onDataReceived(simulatedValue)

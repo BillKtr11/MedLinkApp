@@ -63,10 +63,10 @@ class DoctorViewModel : ViewModel() {
     )
 
     private val allRecords = listOf(
-        MedicalRecord("r1", "1", LocalDate.of(2023, 5, 10), "Φάρμακο", "Depon 500mg, 2 φορές/μέρα"),
-        MedicalRecord("r2", "1", LocalDate.of(2023, 8, 15), "Μέτρηση", "Πίεση 12/8"),
-        MedicalRecord("r3", "1", LocalDate.of(2024, 1, 20), "Διάγνωση", "Ελαφριά ίωση"),
-        MedicalRecord("r4", "2", LocalDate.of(2024, 2, 5), "Φάρμακο", "Amoxil")
+        MedicalRecord("r1", "1", LocalDate.of(2023, 5, 10), "Medication", "Depon 500mg, 2 times/day"),
+        MedicalRecord("r2", "1", LocalDate.of(2023, 8, 15), "Measurement", "Blood Pressure 12/8"),
+        MedicalRecord("r3", "1", LocalDate.of(2024, 1, 20), "Diagnosis", "Mild virus"),
+        MedicalRecord("r4", "2", LocalDate.of(2024, 2, 5), "Medication", "Amoxil")
     )
 
     private val _searchResults = MutableStateFlow<List<User>>(emptyList())
@@ -137,10 +137,10 @@ class DoctorViewModel : ViewModel() {
     ): String? {
 
         // ΒΗΜΑ 2: Έλεγχος εγκυρότητας στοιχείων
-        if (medication.isBlank()) return "Το όνομα του φαρμάκου δεν μπορεί να είναι κενό."
-        if (dosage.isBlank()) return "Η δοσολογία δεν μπορεί να είναι κενή."
-        if (frequency.isBlank()) return "Η συχνότητα δεν μπορεί να είναι κενή."
-        if (duration.isBlank()) return "Η διάρκεια δεν μπορεί να είναι κενή."
+        if (medication.isBlank()) return "Medication name cannot be empty."
+        if (dosage.isBlank()) return "Dosage cannot be empty."
+        if (frequency.isBlank()) return "Frequency cannot be empty."
+        if (duration.isBlank()) return "Duration cannot be empty."
 
         // ΒΗΜΑ 4: Αποθήκευση της συνταγής στο σύστημα
         val dosageInt = dosage.filter { it.isDigit() }.toIntOrNull() ?: 0
@@ -165,8 +165,8 @@ class DoctorViewModel : ViewModel() {
             id = "rec_${System.currentTimeMillis()}",
             patientId = patientId,
             date = LocalDate.now(),
-            type = "Συνταγογράφηση", // Εμφανίζεται με μπλε/primary χρώμα στην κάρτα
-            description = "Φάρμακο: $medication\nΔοσολογία: $dosage\nΣυχνότητα: $frequency\nΔιάρκεια: $duration"
+            type = "Prescription", // Shows with blue/primary color on card
+            description = "Medication: $medication\nDosage: $dosage\nFrequency: $frequency\nDuration: $duration"
         )
 
         // Ενημερώνουμε τη λίστα του ιστορικού.
@@ -190,7 +190,7 @@ class DoctorViewModel : ViewModel() {
         val doctorName = if (doctor != null) "${doctor.name} ${doctor.surname}" else "Doctor"
 
         if (!DBManager.isSlotAvailable(date)) {
-            return Result.failure(Exception("Η επιλεγμένη ώρα δεν είναι διαθέσιμη. Παρακαλώ επιλέξτε άλλη ώρα."))
+            return Result.failure(Exception("The selected time is not available. Please choose another time."))
         }
 
         val newAppointment = Appointment(

@@ -122,11 +122,11 @@ class CaregiverViewModel : ViewModel() {
 
     fun setDateRange(start: LocalDate, end: LocalDate) {
         if (start.isAfter(end)) {
-            _dateRangeError.value = "Η ημερομηνία έναρξης δεν μπορεί να είναι μετά την ημερομηνία λήξης."
+            _dateRangeError.value = "Start date cannot be after end date."
             return
         }
         if (end.isAfter(LocalDate.now())) {
-            _dateRangeError.value = "Η ημερομηνία λήξης δεν μπορεί να είναι στο μέλλον."
+            _dateRangeError.value = "End date cannot be in the future."
             return
         }
         
