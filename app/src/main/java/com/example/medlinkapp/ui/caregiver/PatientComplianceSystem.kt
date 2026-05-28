@@ -34,7 +34,7 @@ fun PatientComplianceSystem(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Στατιστικά: ${patient?.name ?: ""}") },
+                title = { Text("Statistics: ${patient?.name ?: ""}") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -55,22 +55,22 @@ fun PatientComplianceSystem(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Επιλογή Χρονικής Περιόδου", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("Select Time Period", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Από: ${startDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}")
-                        Text("Έως: ${endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}")
+                        Text("From: ${startDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}")
+                        Text("To: ${endDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))}")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = { showDatePicker = true },
                         modifier = Modifier.align(Alignment.End)
                     ) {
-                        Text("Αλλαγή Περιόδου")
+                        Text("Change Period")
                     }
                 }
             }
@@ -96,12 +96,12 @@ fun PatientComplianceSystem(
                         }
 
                         item {
-                            Text("Ιστορικό Συμμόρφωσης Φαρμάκων", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text("Medication Compliance History", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         }
 
                         if (stats!!.intakeHistory.isEmpty()) {
                             item {
-                                Text("Δεν βρέθηκαν εγγραφές για αυτή την περίοδο.", color = Color.Gray)
+                                Text("No records found for this period.", color = Color.Gray)
                             }
                         } else {
                             items(stats!!.intakeHistory) { record ->
@@ -111,12 +111,12 @@ fun PatientComplianceSystem(
 
                         item {
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("Ιστορικό Μετρήσεων (Vitals)", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            Text("Measurement History (Vitals)", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         }
 
                         if (stats!!.measurementHistory.isEmpty()) {
                             item {
-                                Text("Δεν υπάρχουν ιστορικά δεδομένα μετρήσεων.", color = Color.Gray)
+                                Text("No historical measurement data available.", color = Color.Gray)
                             }
                         } else {
                             items(stats!!.measurementHistory) { measurement ->
@@ -133,7 +133,7 @@ fun PatientComplianceSystem(
     if (dateRangeError != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearDateRangeError() },
-            title = { Text("Σφάλμα Επιλογής") },
+            title = { Text("Selection Error") },
             text = { Text(dateRangeError!!) },
             confirmButton = {
                 Button(onClick = { 
@@ -149,25 +149,25 @@ fun PatientComplianceSystem(
     if (showDatePicker) {
         AlertDialog(
             onDismissRequest = { showDatePicker = false },
-            title = { Text("Επιλογή Εύρους") },
+            title = { Text("Select Range") },
             text = {
                 Column {
                     Button(onClick = {
                         viewModel.setDateRange(LocalDate.now().minusDays(30), LocalDate.now())
                         showDatePicker = false
-                    }, modifier = Modifier.fillMaxWidth()) { Text("Τελευταίες 30 Ημέρες") }
+                    }, modifier = Modifier.fillMaxWidth()) { Text("Last 30 Days") }
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(onClick = {
                         viewModel.setDateRange(LocalDate.now().minusDays(7), LocalDate.now())
                         showDatePicker = false
-                    }, modifier = Modifier.fillMaxWidth()) { Text("Τελευταία Εβδομάδα") }
+                    }, modifier = Modifier.fillMaxWidth()) { Text("Last Week") }
                     Spacer(modifier = Modifier.height(8.dp))
                     // Option to trigger "Insufficient Data" (Flow 3) by choosing a range with no data
                     Button(onClick = {
                         viewModel.setDateRange(LocalDate.now().minusYears(2), LocalDate.now().minusYears(2).plusDays(1))
                         showDatePicker = false
                     }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)) { 
-                        Text("Επιλογή Περιόδου χωρίς δεδομένα (Flow 3)") 
+                        Text("Select period without data (Flow 3)") 
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     // Simulation of an invalid selection (Flow 2)
@@ -175,12 +175,12 @@ fun PatientComplianceSystem(
                         viewModel.setDateRange(LocalDate.now().plusDays(1), LocalDate.now())
                         showDatePicker = false
                     }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)) { 
-                        Text("Επιλογή Μελλοντικής Ημ/νίας (Σφάλμα)") 
+                        Text("Select future date (Error)") 
                     }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Κλείσιμο") }
+                TextButton(onClick = { showDatePicker = false }) { Text("Close") }
             }
         )
     }
@@ -203,14 +203,14 @@ fun InsufficientDataMessage() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Ανεπαρκή Δεδομένα",
+            text = "Insufficient Data",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Τα διαθέσιμα δεδομένα για την επιλεγμένη χρονική περίοδο δεν επαρκούν για τη δημιουργία στατιστικών.",
+            text = "The available data for the selected time period is not sufficient to generate statistics.",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -225,7 +225,7 @@ fun ComplianceOverviewCard(stats: AdherenceStats) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Συνολική Συμμόρφωση", style = MaterialTheme.typography.titleMedium)
+            Text("Total Compliance", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 "${stats.adherencePercentage.toInt()}%",
@@ -234,7 +234,7 @@ fun ComplianceOverviewCard(stats: AdherenceStats) {
                 color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Λήψεις: ${stats.totalTaken} / Προγραμματισμένες: ${stats.totalExpected}", style = MaterialTheme.typography.bodyMedium)
+            Text("Doses taken: ${stats.totalTaken} / Scheduled: ${stats.totalExpected}", style = MaterialTheme.typography.bodyMedium)
             
             LinearProgressIndicator(
                 progress = { stats.adherencePercentage / 100f },

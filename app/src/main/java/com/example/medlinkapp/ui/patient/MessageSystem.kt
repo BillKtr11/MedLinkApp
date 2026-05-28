@@ -42,7 +42,7 @@ fun MessageSystem(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Μηνύματα") },
+                title = { Text("Messages") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -53,7 +53,7 @@ fun MessageSystem(
     ) { paddingValues ->
         if (myMessages.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                Text("Δεν έχετε νέα μηνύματα.")
+                Text("You have no new messages.")
             }
         } else {
             LazyColumn(

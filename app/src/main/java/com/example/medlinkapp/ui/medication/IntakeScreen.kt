@@ -28,7 +28,7 @@ fun IntakeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Καταγραφή Λήψης") },
+                title = { Text("Intake Logging") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -39,7 +39,7 @@ fun IntakeScreen(
     ) { padding ->
         if (med == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Το φάρμακο δεν βρέθηκε")
+                Text("Medication not found")
             }
         } else {
             Column(
@@ -56,7 +56,7 @@ fun IntakeScreen(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Δόση: ${med.dosage}",
+                    text = "Dosage: ${med.dosage}",
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.Gray
                 )
@@ -68,20 +68,20 @@ fun IntakeScreen(
                         viewModel.confirmIntake(med.id)
                         val newStock = med.stockCount - 1
                         if (newStock == 0) {
-                            resultMessage = "ΕΠΕΙΓΟΝ: Το απόθεμα είναι 0! Η επόμενη δόση δεν μπορεί να καλυφθεί. Ειδοποίηση στάλθηκε στον φροντιστή."
+                            resultMessage = "URGENT: Stock is 0! Next dose cannot be covered. Notification sent to caregiver."
                             isUrgent = true
                         } else if (newStock <= med.lowStockThreshold) {
-                            resultMessage = "Χαμηλό απόθεμα για το ${med.name}. Απομένουν $newStock δόσεις."
+                            resultMessage = "Low stock for ${med.name}. $newStock doses remaining."
                             isUrgent = false
                         } else {
-                            resultMessage = "Το απόθεμα του φαρμάκου ${med.name} είναι πλέον $newStock."
+                            resultMessage = "The stock of medication ${med.name} is now $newStock."
                             isUrgent = false
                         }
                         showResultDialog = true
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 ) {
-                    Text("Επιβεβαίωση", style = MaterialTheme.typography.titleMedium)
+                    Text("Confirm", style = MaterialTheme.typography.titleMedium)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -90,7 +90,7 @@ fun IntakeScreen(
                     onClick = { /* Αναβολή 10' logic would go here */ },
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 ) {
-                    Text("Αναβολή 10'", style = MaterialTheme.typography.titleMedium)
+                    Text("Snooze 10'", style = MaterialTheme.typography.titleMedium)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -102,7 +102,7 @@ fun IntakeScreen(
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 ) {
-                    Text("Παράλειψη", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
+                    Text("Skip", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -113,14 +113,14 @@ fun IntakeScreen(
                     showResultDialog = false
                     onNavigateBack()
                 },
-                title = { Text(if (isUrgent) "Επείγουσα Ειδοποίηση" else "Ενημέρωση Αποθέματος") },
+                title = { Text(if (isUrgent) "Urgent Notification" else "Stock Update") },
                 text = { Text(resultMessage) },
                 confirmButton = {
                     TextButton(onClick = {
                         showResultDialog = false
                         onNavigateBack()
                     }) {
-                        Text("ΟΚ")
+                        Text("OK")
                     }
                 }
             )

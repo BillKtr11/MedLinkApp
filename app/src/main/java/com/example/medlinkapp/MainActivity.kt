@@ -263,7 +263,6 @@ fun AppNavigation() {
                 patientName = patientName,
                 onNavigateToMedications = { navController.navigate("medications_screen") },
                 onNavigateToAppointments = { navController.navigate("appointments_screen") },
-                onNavigateToResults = { },
                 onNavigateToMessages = { navController.navigate("messages_screen") },
                 onNavigateToPrescriptionHistory = { navController.navigate("prescription_history_patient") },
                 onNavigateToNewMeasurement = { navController.navigate(Screen.NewMeasurement.route) },

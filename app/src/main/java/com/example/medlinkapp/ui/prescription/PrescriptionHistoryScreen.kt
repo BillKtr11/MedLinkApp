@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun PrescriptionHistoryScreen(
     prescriptions: List<Prescription>,
-    title: String = "Ιστορικό Συνταγών",
+    title: String = "Prescription History",
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -39,7 +39,7 @@ fun PrescriptionHistoryScreen(
                     .padding(paddingValues),
                 contentAlignment = androidx.compose.ui.Alignment.Center
             ) {
-                Text("Δεν βρέθηκαν συνταγές.")
+                Text("No prescriptions found.")
             }
         } else {
             LazyColumn(
@@ -79,10 +79,10 @@ fun PrescriptionHistoryItem(prescription: Prescription) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Δοσολογία: ${prescription.drugDosage}mg")
-            Text("Συχνότητα: ${prescription.drugFreq} φορές/ημέρα")
-            Text("Διάρκεια: ${prescription.drugDuration} ημέρες")
-            Text("Συνολικό Απόθεμα: ${prescription.drugStock} μονάδες")
+            Text("Dosage: ${prescription.drugDosage}mg")
+            Text("Frequency: ${prescription.drugFreq} times/day")
+            Text("Duration: ${prescription.drugDuration} days")
+            Text("Total Stock: ${prescription.drugStock} units")
         }
     }
 }

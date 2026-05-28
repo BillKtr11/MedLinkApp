@@ -28,7 +28,7 @@ fun ManageSensorData(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Πίνακας Μετρήσεων") },
+                title = { Text("Measurement Table") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -51,19 +51,19 @@ fun ManageSensorData(
                     .padding(8.dp)
             ) {
                 Text(
-                    text = "Τύπος",
+                    text = "Type",
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Τιμή",
+                    text = "Value",
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Ημερομηνία",
+                    text = "Date",
                     modifier = Modifier.weight(1.5f),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
@@ -102,7 +102,7 @@ fun ManageSensorData(
 
             if (measurements.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                    Text("Δεν υπάρχουν καταγεγραμμένες μετρήσεις.")
+                    Text("No recorded measurements found.")
                 }
             }
         }

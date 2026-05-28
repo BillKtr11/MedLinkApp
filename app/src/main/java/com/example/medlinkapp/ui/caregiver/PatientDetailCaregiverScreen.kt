@@ -31,7 +31,7 @@ fun PatientDetailCaregiverScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(patient?.let { "${it.name} ${it.surname}" } ?: "Λεπτομέρειες Ασθενή") },
+                title = { Text(patient?.let { "${it.name} ${it.surname}" } ?: "Patient Details") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -41,7 +41,7 @@ fun PatientDetailCaregiverScreen(
                     Button(onClick = onNavigateToStats) {
                         Icon(Icons.Default.DateRange, contentDescription = null)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Στατιστικά")
+                        Text("Statistics")
                     }
                 }
             )
@@ -49,7 +49,7 @@ fun PatientDetailCaregiverScreen(
     ) { padding ->
         if (patient == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Δεν έχει επιλεγεί ασθενής")
+                Text("No patient selected")
             }
         } else {
             Column(modifier = Modifier.padding(padding)) {
@@ -64,11 +64,11 @@ fun PatientDetailCaregiverScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     item {
-                        Text("Παρακολούθηση Συμμόρφωσης Φαρμάκων", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("Medication Compliance Monitoring", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
 
                     if (medications.isEmpty()) {
-                        item { Text("Δεν υπάρχουν συνταγογραφημένα φάρμακα.", color = Color.Gray) }
+                        item { Text("No prescribed medications found.", color = Color.Gray) }
                     } else {
                         items(medications) { med ->
                             MedicationAdherenceItem(med)
@@ -77,11 +77,11 @@ fun PatientDetailCaregiverScreen(
 
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Πρόσφατες Μετρήσεις (Τελευταία Γνωστά Δεδομένα)", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text("Recent Measurements (Latest Known Data)", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
 
                     if (measurements.isEmpty()) {
-                        item { Text("Δεν βρέθηκαν δεδομένα από τη συσκευή.", color = Color.Gray) }
+                        item { Text("No device data found.", color = Color.Gray) }
                     } else {
                         items(measurements.sortedByDescending { it.timestamp }.take(10)) { measurement ->
                             MeasurementItem(measurement)
@@ -96,7 +96,7 @@ fun PatientDetailCaregiverScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(if (isError) "Εξομοίωση Αποκατάστασης Σύνδεσης" else "Εξομοίωση Σφάλματος Επικοινωνίας")
+                            Text(if (isError) "Simulate Connection Recovery" else "Simulate Communication Error")
                         }
                     }
                 }
@@ -119,25 +119,25 @@ fun CommunicationErrorWarning(onRetry: () -> Unit) {
         ) {
             Icon(
                 Icons.Default.Warning,
-                contentDescription = "Σφάλμα",
+                contentDescription = "Error",
                 tint = MaterialTheme.colorScheme.error
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Σφάλμα Επικοινωνίας",
+                    "Communication Error",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "Δεν ήταν δυνατή η σύνδεση με τη συσκευή του ασθενούς. Εμφανίζονται τα τελευταία διαθέσιμα δεδομένα.",
+                    "Could not connect to the patient's device. Showing last available data.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )
             }
             TextButton(onClick = onRetry) {
-                Text("Δοκιμή")
+                Text("Retry")
             }
         }
     }

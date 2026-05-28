@@ -24,7 +24,7 @@ fun AppointmentList(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Πρόγραμμα Ραντεβού") },
+                title = { Text("Appointment Schedule") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -35,7 +35,7 @@ fun AppointmentList(
     ) { paddingValues ->
         if (appointments.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                Text("Δεν υπάρχουν προγραμματισμένα ραντεβού.")
+                Text("There are no scheduled appointments.")
             }
         } else {
             LazyColumn(
@@ -85,8 +85,8 @@ fun AppointmentListItem(appointment: Appointment, onCancel: () -> Unit) {
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Ασθενής (AMKA): ${appointment.patientId}", style = MaterialTheme.typography.bodyLarge)
-            Text(text = "Αιτία: ${appointment.reason}", style = MaterialTheme.typography.bodyMedium, color = androidx.compose.ui.graphics.Color.Gray)
+            Text(text = "Patient (AMKA): ${appointment.patientId}", style = MaterialTheme.typography.bodyLarge)
+            Text(text = "Reason: ${appointment.reason}", style = MaterialTheme.typography.bodyMedium, color = androidx.compose.ui.graphics.Color.Gray)
         }
     }
 }

@@ -30,10 +30,10 @@ fun PrescriptionSystem(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Νέα Συνταγή") },
+                title = { Text("New Prescription") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Πίσω")
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -47,7 +47,7 @@ fun PrescriptionSystem(
                 .verticalScroll(rememberScrollState()) // Για να μην κρύβεται πίσω από το πληκτρολόγιο
         ) {
             Text(
-                text = "Συνταγογράφηση για: ${patient?.name ?: "Άγνωστος"}",
+                text = "Prescribing for: ${patient?.name ?: "Unknown"}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -58,7 +58,7 @@ fun PrescriptionSystem(
             OutlinedTextField(
                 value = medication,
                 onValueChange = { medication = it },
-                label = { Text("Φάρμακο (e.g. Amoxil)") },
+                label = { Text("Medication (e.g. Amoxil)") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -66,7 +66,7 @@ fun PrescriptionSystem(
             OutlinedTextField(
                 value = dosage,
                 onValueChange = { dosage = it },
-                label = { Text("Δοσολογία (e.g. 500mg)") },
+                label = { Text("Dosage (e.g. 500mg)") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -74,7 +74,7 @@ fun PrescriptionSystem(
             OutlinedTextField(
                 value = frequency,
                 onValueChange = { frequency = it },
-                label = { Text("Συχνότητα (e.g. 3 φορές την ημέρα)") },
+                label = { Text("Frequency (e.g. 3 times per day)") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -82,7 +82,7 @@ fun PrescriptionSystem(
             OutlinedTextField(
                 value = duration,
                 onValueChange = { duration = it },
-                label = { Text("Διάρκεια (e.g. 7 ημέρες)") },
+                label = { Text("Duration (e.g. 7 days)") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -117,7 +117,7 @@ fun PrescriptionSystem(
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp)
             ) {
-                Text("Επιβεβαίωση & Έκδοση (Enter)")
+                Text("Confirm & Issue (Enter)")
             }
         }
     }
@@ -126,9 +126,9 @@ fun PrescriptionSystem(
     if (showSuccessDialog) {
         AlertDialog(
             onDismissRequest = { /* Δεν επιτρέπουμε κλείσιμο χωρίς πάτημα */ },
-            title = { Text("Επιτυχής Καταχώριση") },
+            title = { Text("Successful Registration") },
             text = {
-                Text("Η συνταγή αποθηκεύτηκε επιτυχώς!\n\n• Το πρόγραμμα του ασθενή ενημερώθηκε αυτόματα.\n• Η ειδοποίηση στάλθηκε στη συσκευή του.")
+                Text("The prescription was saved successfully!\n\n• The patient's schedule was updated automatically.\n• The notification was sent to their device.")
             },
             confirmButton = {
                 Button(

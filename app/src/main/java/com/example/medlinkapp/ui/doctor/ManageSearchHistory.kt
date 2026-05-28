@@ -42,12 +42,12 @@ fun ManageSearchHistory(
         topBar = {
             // ΔΙΟΡΘΩΣΗ: Προσθήκη και ενεργοποίηση του TopAppBar με το βέλος "Πίσω"
             TopAppBar(
-                title = { Text("Ιατρικό Ιστορικό") },
+                title = { Text("Medical History") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Επιστροφή"
+                            contentDescription = "Back"
                         )
                     }
                 },
@@ -65,7 +65,7 @@ fun ManageSearchHistory(
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Έκδοση Συνταγής")
+                Text("Issue Prescription")
             }
         }
     ) { paddingValues ->
@@ -77,7 +77,7 @@ fun ManageSearchHistory(
         ) {
             // Στοιχεία Ασθενή
             patient?.let {
-                Text("Ασθενής: ${it.name}", style = MaterialTheme.typography.headlineSmall)
+                Text("Patient: ${it.name}", style = MaterialTheme.typography.headlineSmall)
                 Text("ΑΜΚΑ: ${it.amka}", style = MaterialTheme.typography.bodyMedium)
             }
 
@@ -92,14 +92,14 @@ fun ManageSearchHistory(
                         onClick = { isFilterExpanded = !isFilterExpanded },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(if (isFilterExpanded) "Απόκρυψη Φίλτρων" else "Φίλτρο Ημερομηνίας")
+                        Text(if (isFilterExpanded) "Hide Filters" else "Date Filter")
                     }
 
                     if (isFilterExpanded) {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         DateRow(
-                            label = "ΑΠΟ:",
+                            label = "FROM:",
                             day = fromDay, month = fromMonth, year = fromYear,
                             onDayChange = { fromDay = it },
                             onMonthChange = { fromMonth = it },
@@ -109,7 +109,7 @@ fun ManageSearchHistory(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         DateRow(
-                            label = "ΕΩΣ:",
+                            label = "TO:",
                             day = toDay, month = toMonth, year = toYear,
                             onDayChange = { toDay = it },
                             onMonthChange = { toMonth = it },
@@ -133,20 +133,20 @@ fun ManageSearchHistory(
                                     val endDate = LocalDate.of(toYear, toMonth, toDay)
 
                                     if (startDate.isAfter(endDate)) {
-                                        errorMessage = "Σφάλμα: Η ημερομηνία 'Από' πρέπει να είναι πριν την 'Έως'."
+                                        errorMessage = "Error: 'From' date must be before 'To' date."
                                     } else {
                                         errorMessage = null
                                         viewModel.filterHistoryByDate(startDate, endDate)
                                         isFilterExpanded = false
                                     }
                                 } catch (e: DateTimeException) {
-                                    errorMessage = "Λάθος στην ημερομηνία! Ελέγξτε αν οι μέρες αντιστοιχούν σωστά στον μήνα (π.χ. ο Φεβρουάριος δεν έχει 30)."
+                                    errorMessage = "Invalid date! Please check if the days correspond correctly to the month (e.g., February doesn't have 30 days)."
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Εφαρμογή (Enter)")
+                            Text("Apply (Enter)")
                         }
                     }
                 }

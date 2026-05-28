@@ -103,63 +103,63 @@ fun DoctorScreen(
 
             item {
                 DoctorActionCard(
-                    title = "Προσθήκη Ραντεβού",
+                    title = "Add Appointment",
                     icon = Icons.Default.DateRange,
-                    summaryText = "Προγραμματισμός νέας επίσκεψη για τους ασθενείς σας",
+                    summaryText = "Schedule a new visit for your patients",
                     onClick = onNavigateToAddAppointment
                 )
             }
 
             item {
                 DoctorActionCard(
-                    title = "Πρόγραμμα Ραντεβού",
+                    title = "Appointment Schedule",
                     icon = Icons.Default.List,
-                    summaryText = "Προβολή όλων των προγραμματισμένων ραντεβού σας",
+                    summaryText = "View all your scheduled appointments",
                     onClick = onNavigateToAppointments
                 )
             }
 
             item {
                 DoctorActionCard(
-                    title = "Σύνδεση Ασθενή",
+                    title = "Connect Patient",
                     icon = Icons.Default.Person,
-                    summaryText = "Προσθήκη υπάρχοντος χρήστη στην λίστα ασθενών σας",
+                    summaryText = "Add an existing user to your patient list",
                     onClick = onNavigateToRegisterPatient
                 )
             }
 
             item {
                 DoctorActionCard(
-                    title = "Αναζήτηση Ασθενή",
+                    title = "Patient Search",
                     icon = Icons.Default.Search,
-                    summaryText = "Αναζήτηση ιστορικού για τους εγγεγραμμένους ασθενείς σας",
+                    summaryText = "Search history for your registered patients",
                     onClick = onNavigateToSearch
                 )
             }
 
             item {
                 DoctorActionCard(
-                    title = "Ιστορικό Συνταγογράφησης",
+                    title = "Prescription History",
                     icon = Icons.Default.List,
-                    summaryText = "Προβολή όλων των συνταγών που έχετε εκδώσει",
+                    summaryText = "View all prescriptions you have issued",
                     onClick = onNavigateToPrescriptionHistory
                 )
             }
 
             item {
                 DoctorActionCard(
-                    title = "Αναφορά Υγείας",
+                    title = "Health Report",
                     icon = Icons.Default.Info,
-                    summaryText = "Δημιουργία αναφοράς (PDF) για συγκεκριμένο ασθενή και χρονικό διάστημα",
+                    summaryText = "Create a health report (PDF) for a specific patient and time period",
                     onClick = onNavigateToReport
                 )
             }
 
             item {
                 DoctorActionCard(
-                    title = "Μηνύματα",
+                    title = "Messages",
                     icon = Icons.Default.Email,
-                    summaryText = "Επικοινωνία με τους ασθενείς σας",
+                    summaryText = "Communicate with your patients",
                     onClick = onNavigateToMessages
                 )
             }

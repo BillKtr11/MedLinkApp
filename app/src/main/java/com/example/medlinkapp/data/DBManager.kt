@@ -332,8 +332,8 @@ object DBManager {
             Message(
                 id = System.currentTimeMillis().toString(),
                 patientAmka = appointment.patientId,
-                title = "Νέο Ραντεβού",
-                content = "Έχετε ένα νέο ραντεβού με τον/την ${appointment.doctorName} στις ${appointment.date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}.",
+                title = "New Appointment",
+                content = "You have a new appointment with ${appointment.doctorName} on ${appointment.date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}.",
                 timestamp = LocalDateTime.now()
             )
         )
@@ -366,8 +366,8 @@ object DBManager {
             Message(
                 id = System.currentTimeMillis().toString(),
                 patientAmka = prescription.patientAmka,
-                title = "Νέα Συνταγογράφηση",
-                content = "Ο γιατρός σας εξέδωσε νέα συνταγή για το φάρμακο ${prescription.drugName}.",
+                title = "New Prescription",
+                content = "Your doctor has issued a new prescription for the medication ${prescription.drugName}.",
                 timestamp = LocalDateTime.now()
             )
         )
@@ -396,7 +396,7 @@ object DBManager {
         }
 
         if (_sideEffects.value.none { it.patientId == "000000" }) {
-            val defaultSideEffect = SideEffect("000000", "Zάλη το πρωί", "Low", LocalDateTime.now().minusDays(2))
+            val defaultSideEffect = SideEffect("000000", "Morning dizziness", "Low", LocalDateTime.now().minusDays(2))
             _sideEffects.update { it + defaultSideEffect }
             saveSideEffects()
         }
@@ -461,9 +461,9 @@ object DBManager {
         if (_measurements.value.none { it.patientAmka == "000000" }) {
             _measurements.update { current ->
                 current + listOf(
-                    Measurement("d1", 120, "Πίεση", LocalDateTime.now().minusHours(2), "000000"),
-                    Measurement("d2", 72, "Σφύξεις", LocalDateTime.now().minusHours(2), "000000"),
-                    Measurement("d3", 98, "Οξυγόνο", LocalDateTime.now().minusDays(1), "000000")
+                    Measurement("d1", 120, "Blood Pressure", LocalDateTime.now().minusHours(2), "000000"),
+                    Measurement("d2", 72, "Heart Rate", LocalDateTime.now().minusHours(2), "000000"),
+                    Measurement("d3", 98, "Oxygen", LocalDateTime.now().minusDays(1), "000000")
                 )
             }
             saveMeasurements()
@@ -552,7 +552,7 @@ object DBManager {
             Result.failure(Exception("Patient not found"))
         }
     }
-    suspend fun searchPatientHistory(patientId: String): Result<List<String>> = Result.success(listOf("Ιστορικό 1", "Ιστορικό 2"))
+    suspend fun searchPatientHistory(patientId: String): Result<List<String>> = Result.success(listOf("History 1", "History 2"))
     suspend fun validatePrescription(prescription: Prescription): Boolean = true
     suspend fun checkStock(drugName: String): Int = 10
     suspend fun addDrug(prescription: Prescription): Result<Unit> = Result.success(Unit)
@@ -577,7 +577,7 @@ object DBManager {
             patientAmka = patientId
         )
         _activeAlerts.update { it + newAlert }
-        return Result.success("SOS Στάλθηκε")
+        return Result.success("SOS Sent")
     }
 
     fun respondToAlert(alertId: String, instructions: String) {

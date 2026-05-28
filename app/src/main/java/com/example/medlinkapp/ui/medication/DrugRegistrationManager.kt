@@ -53,7 +53,7 @@ fun DrugRegistrationManager(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Προσθήκη Φαρμάκου") },
+                title = { Text("Add Medication") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -73,7 +73,7 @@ fun DrugRegistrationManager(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it; showError = false },
-                    label = { Text("Όνομα Φαρμάκου") },
+                    label = { Text("Medication Name") },
                     modifier = Modifier.fillMaxWidth(),
                     isError = showError && name.isBlank()
                 )
@@ -81,7 +81,7 @@ fun DrugRegistrationManager(
                 OutlinedTextField(
                     value = dosage,
                     onValueChange = { dosage = it; showError = false },
-                    label = { Text("Δοσολογία (π.χ. 500mg)") },
+                    label = { Text("Dosage (e.g., 500mg)") },
                     modifier = Modifier.fillMaxWidth(),
                     isError = showError && dosage.isBlank()
                 )
@@ -89,7 +89,7 @@ fun DrugRegistrationManager(
                 OutlinedTextField(
                     value = frequency,
                     onValueChange = { frequency = it; showError = false },
-                    label = { Text("Συχνότητα (λήψεις ανά ημέρα)") },
+                    label = { Text("Frequency (doses per day)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                     isError = showError && frequency.toIntOrNull() == null
@@ -98,7 +98,7 @@ fun DrugRegistrationManager(
                 OutlinedTextField(
                     value = duration,
                     onValueChange = { duration = it; showError = false },
-                    label = { Text("Διάρκεια (ημέρες)") },
+                    label = { Text("Duration (days)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                     isError = showError && duration.toIntOrNull() == null
@@ -107,14 +107,14 @@ fun DrugRegistrationManager(
                 OutlinedTextField(
                     value = stock,
                     onValueChange = { stock = it; showError = false },
-                    label = { Text("Τρέχον Απόθεμα (τεμάχια)") },
+                    label = { Text("Current Stock (units)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                     isError = showError && stock.toIntOrNull() == null
                 )
 
                 if (intakeTimes.isNotEmpty()) {
-                    Text("Ώρες Λήψης:", style = MaterialTheme.typography.titleSmall)
+                    Text("Intake Times:", style = MaterialTheme.typography.titleSmall)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -136,7 +136,7 @@ fun DrugRegistrationManager(
 
                 if (showError) {
                     Text(
-                        text = "Παρακαλώ συμπληρώστε όλα τα πεδία σωστά.",
+                        text = "Please fill in all fields correctly.",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -167,19 +167,19 @@ fun DrugRegistrationManager(
                     },
                     modifier = Modifier.fillMaxWidth().height(50.dp)
                 ) {
-                    Text("Επιβεβαίωση Καταχώρησης")
+                    Text("Confirm Registration")
                 }
             } else {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Επιτυχής Καταχώρηση!",
+                            text = "Successful Registration!",
                             style = MaterialTheme.typography.headlineSmall,
                             color = Color(0xFF4CAF50)
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(onClick = onNavigateHome) {
-                            Text("Επιστροφή στην Αρχική")
+                            Text("Back to Home")
                         }
                     }
                 }
@@ -189,9 +189,9 @@ fun DrugRegistrationManager(
         if (showStockWarning) {
             AlertDialog(
                 onDismissRequest = { showStockWarning = false },
-                title = { Text("Χαμηλό Απόθεμα") },
+                title = { Text("Low Stock") },
                 text = {
-                    Text("Το απόθεμα θα εξαντληθεί στις $stockExhaustionDate. Θέλετε υπενθύμιση για αγορά φαρμάκου 2 ημέρες πριν;")
+                    Text("Stock will run out on $stockExhaustionDate. Do you want a reminder to buy medication 2 days before?")
                 },
                 confirmButton = {
                     TextButton(onClick = {
@@ -199,7 +199,7 @@ fun DrugRegistrationManager(
                         viewModel.addMedication(name, dosage, stock.toInt(), frequency.toInt(), intakeTimes.toList())
                         showSuccess = true
                     }) {
-                        Text("Ναι")
+                        Text("Yes")
                     }
                 },
                 dismissButton = {
@@ -208,7 +208,7 @@ fun DrugRegistrationManager(
                         viewModel.addMedication(name, dosage, stock.toInt(), frequency.toInt(), intakeTimes.toList())
                         showSuccess = true
                     }) {
-                        Text("Όχι")
+                        Text("No")
                     }
                 }
             )

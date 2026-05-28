@@ -34,7 +34,7 @@ fun ManageCaregiverClient(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Σύνδεση με Ασθενή") },
+                title = { Text("Connect with Patient") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -52,14 +52,14 @@ fun ManageCaregiverClient(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Αναζήτηση Ασθενή (Όνομα ή AMKA)") },
+                label = { Text("Search Patient (Name or AMKA)") },
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Επιλέξτε ασθενή για παρακολούθηση:", style = MaterialTheme.typography.titleSmall)
+            Text("Select patient for monitoring:", style = MaterialTheme.typography.titleSmall)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -91,7 +91,7 @@ fun ManageCaregiverClient(
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 enabled = selectedPatient != null
             ) {
-                Text("Επιβεβαίωση Σύνδεσης")
+                Text("Confirm Connection")
             }
         }
     }

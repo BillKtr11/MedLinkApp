@@ -25,12 +25,12 @@ fun DoctorSearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Αναζήτηση Ασθενή") },
+                title = { Text("Patient Search") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Επιστροφή"
+                            contentDescription = "Back"
                         )
                     }
                 },
@@ -53,7 +53,7 @@ fun DoctorSearchScreen(
                     searchQuery = it
                     viewModel.searchPatient(it)
                 },
-                label = { Text("Όνομα ή ΑΜΚΑ") },
+                label = { Text("Name or AMKA") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -73,7 +73,7 @@ fun DoctorSearchScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(text = "${patient.name} ${patient.surname}", style = MaterialTheme.typography.titleMedium)
-                            Text(text = "ΑΜΚΑ: ${patient.amka}", style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "AMKA: ${patient.amka}", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }

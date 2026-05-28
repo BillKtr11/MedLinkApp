@@ -98,10 +98,10 @@ fun ManageMedicationIntake(
         if (showRestockDialog) {
             AlertDialog(
                 onDismissRequest = { showRestockDialog = false },
-                title = { Text("Ανανέωση Αποθέματος") },
+                title = { Text("Restock Medication") },
                 text = {
                     Column {
-                        Text("Εισάγετε τον αριθμό των νέων δόσεων:")
+                        Text("Enter the number of new doses:")
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = restockAmount,
@@ -118,12 +118,12 @@ fun ManageMedicationIntake(
                         showRestockDialog = false
                         restockAmount = ""
                     }) {
-                        Text("Προσθήκη")
+                        Text("Add")
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showRestockDialog = false }) {
-                        Text("Ακύρωση")
+                        Text("Cancel")
                     }
                 }
             )
