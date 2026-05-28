@@ -57,14 +57,14 @@ object DBManager {
     private var prefs: SharedPreferences? = null
 
     // --- State ---
-    private val _medications = MutableStateFlow<List<MedicationData>>(emptyList())
-    val medications: StateFlow<List<MedicationData>> = _medications.asStateFlow()
+    private val _medications = MutableStateFlow<List<Medication>>(emptyList())
+    val medications: StateFlow<List<Medication>> = _medications.asStateFlow()
 
-    private val _measurements = MutableStateFlow<List<DeviceData>>(emptyList())
-    val measurements: StateFlow<List<DeviceData>> = _measurements.asStateFlow()
+    private val _measurements = MutableStateFlow<List<Measurement>>(emptyList())
+    val measurements: StateFlow<List<Measurement>> = _measurements.asStateFlow()
 
-    private val _users = MutableStateFlow<List<UserData>>(emptyList())
-    val users: StateFlow<List<UserData>> = _users.asStateFlow()
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users: StateFlow<List<User>> = _users.asStateFlow()
 
     private val _intakeRecords = MutableStateFlow<List<IntakeRecord>>(emptyList())
     val intakeRecords: StateFlow<List<IntakeRecord>> = _intakeRecords.asStateFlow()
@@ -151,14 +151,14 @@ object DBManager {
 
     fun getCurrentUserAmka(): String? = _currentUserAmka.value
 
-    fun getCurrentUser(): UserData? = _users.value.find { it.amka == _currentUserAmka.value }
+    fun getCurrentUser(): User? = _users.value.find { it.amka == _currentUserAmka.value }
 
     // --- Users ---
     private fun loadUsers() {
         val json = prefs?.getString(KEY_USERS, null)
         if (json != null) {
             try {
-                val type = object : TypeToken<List<UserData>>() {}.type
+                val type = object : TypeToken<List<User>>() {}.type
                 _users.value = gson.fromJson(json, type)
             } catch (_: Exception) {
                 _users.value = emptyList()
@@ -168,21 +168,21 @@ object DBManager {
         var changed = false
         // Add a default doctor
         if (_users.value.none { it.role == UserRole.DOCTOR }) {
-            val defaultDoctor = UserData("Dr. Lee", "George", "111111", "doctor", "123", UserRole.DOCTOR)
+            val defaultDoctor = User("Dr. Lee", "George", "111111", "doctor", "123", UserRole.DOCTOR)
             _users.update { it + defaultDoctor }
             changed = true
         }
         
         // Add a default caregiver
         if (_users.value.none { it.role == UserRole.CAREGIVER }) {
-            val defaultCaregiver = UserData("Anna", "Caregiver", "222222", "caregiver", "123", UserRole.CAREGIVER)
+            val defaultCaregiver = User("Anna", "Caregiver", "222222", "caregiver", "123", UserRole.CAREGIVER)
             _users.update { it + defaultCaregiver }
             changed = true
         }
 
         // Add a default patient linked to the caregiver
         if (_users.value.none { it.email == "patient" }) {
-            val defaultPatient = UserData("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT, assignedCaregiverAmka = "222222")
+            val defaultPatient = User("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT, assignedCaregiverAmka = "222222")
             _users.update { it + defaultPatient }
             changed = true
         }
@@ -197,7 +197,7 @@ object DBManager {
         prefs?.edit()?.putString(KEY_USERS, json)?.apply()
     }
 
-    fun registerUser(userData: UserData) {
+    fun registerUser(userData: User) {
         _users.update { it + userData }
         saveUsers()
     }
@@ -225,7 +225,7 @@ object DBManager {
         val json = prefs?.getString(KEY_MEDICATIONS, null)
         if (json != null) {
             try {
-                val type = object : TypeToken<List<MedicationData>>() {}.type
+                val type = object : TypeToken<List<Medication>>() {}.type
                 _medications.value = gson.fromJson(json, type)
             } catch (_: Exception) {
                 _medications.value = emptyList()
@@ -243,12 +243,12 @@ object DBManager {
         prefs?.edit { putString(KEY_MEDICATIONS, json) }
     }
 
-    fun getMedicationsForUser(amka: String): List<MedicationData> {
+    fun getMedicationsForUser(amka: String): List<Medication> {
         return _medications.value.filter { it.patientAmka == amka }
     }
 
     fun addMedication(name: String, dosage: String, stock: Int, amka: String, intakeTimes: List<String> = emptyList(), frequency: Int = 1) {
-        val newMed = MedicationData(
+        val newMed = Medication(
             id = System.currentTimeMillis().toString(),
             name = name,
             dosage = dosage,
@@ -451,7 +451,7 @@ object DBManager {
         val json = prefs?.getString(KEY_MEASUREMENTS, null)
         if (json != null) {
             try {
-                val type = object : TypeToken<List<DeviceData>>() {}.type
+                val type = object : TypeToken<List<Measurement>>() {}.type
                 _measurements.value = gson.fromJson(json, type)
             } catch (_: Exception) {
                 _measurements.value = emptyList()
@@ -461,9 +461,9 @@ object DBManager {
         if (_measurements.value.none { it.patientAmka == "000000" }) {
             _measurements.update { current ->
                 current + listOf(
-                    DeviceData("d1", 120, "Πίεση", LocalDateTime.now().minusHours(2), "000000"),
-                    DeviceData("d2", 72, "Σφύξεις", LocalDateTime.now().minusHours(2), "000000"),
-                    DeviceData("d3", 98, "Οξυγόνο", LocalDateTime.now().minusDays(1), "000000")
+                    Measurement("d1", 120, "Πίεση", LocalDateTime.now().minusHours(2), "000000"),
+                    Measurement("d2", 72, "Σφύξεις", LocalDateTime.now().minusHours(2), "000000"),
+                    Measurement("d3", 98, "Οξυγόνο", LocalDateTime.now().minusDays(1), "000000")
                 )
             }
             saveMeasurements()
@@ -493,11 +493,11 @@ object DBManager {
         prefs?.edit { putString(KEY_SIDE_EFFECTS, json) }
     }
 
-    fun getMeasurementsForUser(amka: String): List<DeviceData> {
+    fun getMeasurementsForUser(amka: String): List<Measurement> {
         return _measurements.value.filter { it.patientAmka == amka }
     }
 
-    suspend fun saveMeasurement(data: DeviceData): Result<Unit> {
+    suspend fun saveMeasurement(data: Measurement): Result<Unit> {
         delay(500)
         _measurements.update { it + data }
         saveMeasurements()
@@ -558,10 +558,10 @@ object DBManager {
     suspend fun addDrug(prescription: Prescription): Result<Unit> = Result.success(Unit)
     suspend fun saveAppointment(appointment: Appointment): Result<Unit> = Result.success(Unit)
     
-    fun requestDeviceData(deviceId: String): Flow<DeviceData> = flow { 
+    fun requestDeviceData(deviceId: String): Flow<Measurement> = flow { 
         while(true) {
             delay(5000)
-            emit(DeviceData(deviceId, (60..100).random(), "Σφύξεις", LocalDateTime.now(), "000000"))
+            emit(Measurement(deviceId, (60..100).random(), "Σφύξεις", LocalDateTime.now(), "000000"))
         }
     }
 
@@ -586,7 +586,7 @@ object DBManager {
         }
     }
 
-    suspend fun getPatientMeasurements(patientId: String, start: LocalDateTime, end: LocalDateTime): Result<List<DeviceData>> {
+    suspend fun getPatientMeasurements(patientId: String, start: LocalDateTime, end: LocalDateTime): Result<List<Measurement>> {
         return Result.success(_measurements.value.filter { it.patientAmka == patientId && it.timestamp.isAfter(start) && it.timestamp.isBefore(end) })
     }
 

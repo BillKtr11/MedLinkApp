@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PatientDashboardScreen(
+fun PatientScreen(
     patientName: String = "Alex Johnson",
     medViewModel: MedicationViewModel = viewModel(),
     onNavigateToMedications: () -> Unit,
@@ -255,9 +255,9 @@ fun DashboardActionCard(
 
 @Preview(showBackground = true)
 @Composable
-fun PatientDashboardScreenPreview() {
+fun PatientScreenPreview() {
     MaterialTheme {
-        PatientDashboardScreen(
+        PatientScreen(
             patientName = "Test Patient",
             onNavigateToMedications = {},
             onNavigateToAppointments = {},

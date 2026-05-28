@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.medlinkapp.model.UserData
+import com.example.medlinkapp.model.User
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddAppointmentScreen(
+fun AppointmentAdditionScreen(
     viewModel: DoctorViewModel,
     onNavigateBack: () -> Unit,
     onNavigateHome: () -> Unit
@@ -33,7 +33,7 @@ fun AddAppointmentScreen(
     var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
     var reason by remember { mutableStateOf("") }
     
-    var selectedPatient by remember { mutableStateOf<UserData?>(null) }
+    var selectedPatient by remember { mutableStateOf<User?>(null) }
     var showPatientPicker by remember { mutableStateOf(false) }
     val myPatients by viewModel.myPatients.collectAsState()
 

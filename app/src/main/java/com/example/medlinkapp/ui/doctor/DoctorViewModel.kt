@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.medlinkapp.data.DBManager
 import com.example.medlinkapp.model.Appointment
 import com.example.medlinkapp.model.EmergencyAlert
-import com.example.medlinkapp.model.UserData
+import com.example.medlinkapp.model.User
 import com.example.medlinkapp.model.UserRole
 import kotlinx.coroutines.flow.*
 import java.time.LocalDateTime
@@ -44,7 +44,7 @@ class DoctorViewModel : ViewModel() {
     }
 
     // Live list of ALL patients in the system (for assignment)
-    val allPatients: StateFlow<List<UserData>> = DBManager.users
+    val allPatients: StateFlow<List<User>> = DBManager.users
         .map { users -> users.filter { it.role == UserRole.PATIENT } }
         .stateIn(
             scope = viewModelScope,
@@ -54,7 +54,7 @@ class DoctorViewModel : ViewModel() {
 
     // Patients specifically assigned to this doctor (for search and appointments)
     // Uses combine to react to both user list changes and current doctor changes
-    val myPatients: StateFlow<List<UserData>> = combine(DBManager.users, DBManager.currentUserAmka) { users, doctorAmka ->
+    val myPatients: StateFlow<List<User>> = combine(DBManager.users, DBManager.currentUserAmka) { users, doctorAmka ->
         users.filter { it.role == UserRole.PATIENT && it.assignedDoctorAmka == doctorAmka }
     }.stateIn(
         scope = viewModelScope,
@@ -69,10 +69,10 @@ class DoctorViewModel : ViewModel() {
         MedicalRecord("r4", "2", LocalDate.of(2024, 2, 5), "Φάρμακο", "Amoxil")
     )
 
-    private val _searchResults = MutableStateFlow<List<UserData>>(emptyList())
-    val searchResults: StateFlow<List<UserData>> = _searchResults.asStateFlow()
+    private val _searchResults = MutableStateFlow<List<User>>(emptyList())
+    val searchResults: StateFlow<List<User>> = _searchResults.asStateFlow()
 
-    private val _selectedPatient = MutableStateFlow<UserData?>(null)
+    private val _selectedPatient = MutableStateFlow<User?>(null)
     val selectedPatient = _selectedPatient.asStateFlow()
 
     private val _patientHistory = MutableStateFlow<List<MedicalRecord>>(emptyList())
@@ -107,7 +107,7 @@ class DoctorViewModel : ViewModel() {
         DBManager.assignPatientToDoctor(patientAmka, doctorAmka)
     }
 
-    fun selectPatient(patient: UserData) {
+    fun selectPatient(patient: User) {
         _selectedPatient.value = patient
         _patientHistory.value = allRecords.filter { it.patientId == patient.amka }.sortedByDescending { it.date }
     }

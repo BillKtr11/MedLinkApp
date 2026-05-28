@@ -20,7 +20,7 @@ import com.example.medlinkapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoctorDashboardScreen(
+fun DoctorScreen(
     doctorName: String = "Dr. Smith",
     viewModel: DoctorViewModel = viewModel(),
     onNavigateToSearch: () -> Unit,

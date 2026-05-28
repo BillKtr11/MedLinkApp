@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MeasurementHistoryScreen(
+fun ManageSensorData(
     viewModel: MeasurementViewModel,
     onNavigateBack: () -> Unit
 ) {

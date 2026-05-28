@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.medlinkapp.model.MedicationData
+import com.example.medlinkapp.model.Medication
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportSymptomScreen(
+fun SideEffectReportManager(
     viewModel: SideEffectViewModel,
     onNavigateBack: () -> Unit,
 ) {
@@ -22,7 +22,7 @@ fun ReportSymptomScreen(
     val isSubmitting by viewModel.isSubmitting.collectAsState()
     val submissionSuccess by viewModel.submissionSuccess.collectAsState(initial = null)
 
-    var selectedMedication by remember { mutableStateOf<MedicationData?>(null) }
+    var selectedMedication by remember { mutableStateOf<Medication?>(null) }
     var symptom by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf("") }
     var intensity by remember { mutableFloatStateOf(3f) }
@@ -72,7 +72,7 @@ fun ReportSymptomScreen(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                 ) {
-                    medications.forEach { medication: MedicationData ->
+                    medications.forEach { medication: Medication ->
                         DropdownMenuItem(
                             text = { Text(medication.name) },
                             onClick = {
@@ -154,9 +154,9 @@ fun ReportSymptomScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun ReportSymptomScreenPreview() {
+fun SideEffectReportManagerPreview() {
     MaterialTheme {
-        ReportSymptomScreen(
+        SideEffectReportManager(
             viewModel = viewModel(),
         ) { }
     }

@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.doctor
+package com.example.medlinkapp.ui.caregiver
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,31 +11,30 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.medlinkapp.model.UserData
+import com.example.medlinkapp.model.User
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssignPatientScreen(
-    viewModel: DoctorViewModel,
+fun ManageCaregiverClient(
+    viewModel: CaregiverViewModel,
     onNavigateBack: () -> Unit,
     onNavigateHome: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val allPatients by viewModel.allPatients.collectAsState()
     
-    // Filter patients locally for real-time responsiveness in this picker
     val filteredPatients = allPatients.filter {
         it.name.contains(searchQuery, ignoreCase = true) || 
         it.surname.contains(searchQuery, ignoreCase = true) || 
         it.amka.contains(searchQuery)
     }
 
-    var selectedPatient by remember { mutableStateOf<UserData?>(null) }
+    var selectedPatient by remember { mutableStateOf<User?>(null) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Σύνδεση Ασθενή") },
+                title = { Text("Σύνδεση με Ασθενή") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -60,7 +59,7 @@ fun AssignPatientScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Επιλέξτε ασθενή για εγγραφή στο ιστορικό σας:", style = MaterialTheme.typography.titleSmall)
+            Text("Επιλέξτε ασθενή για παρακολούθηση:", style = MaterialTheme.typography.titleSmall)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -85,14 +84,14 @@ fun AssignPatientScreen(
             Button(
                 onClick = {
                     selectedPatient?.let {
-                        viewModel.assignPatient(it.amka)
+                        viewModel.assignPatientToMe(it.amka)
                         onNavigateHome()
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 enabled = selectedPatient != null
             ) {
-                Text("Επιβεβαίωση Εγγραφής")
+                Text("Επιβεβαίωση Σύνδεσης")
             }
         }
     }

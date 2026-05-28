@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CaregiverStatsScreen(
+fun PatientComplianceSystem(
     viewModel: CaregiverViewModel,
     onNavigateBack: () -> Unit
 ) {

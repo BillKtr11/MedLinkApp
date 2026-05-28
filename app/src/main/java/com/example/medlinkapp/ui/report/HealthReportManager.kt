@@ -29,10 +29,10 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportScreen(
+fun HealthReportManager(
     onBackClick:()->Unit,
     viewModel: ReportViewModel = viewModel(),
-    assignedPatients: List<UserData> = emptyList()
+    assignedPatients: List<User> = emptyList()
 ){
     val uiState by viewModel.uiState.collectAsState(ReportUiState.Idle)
     val context = LocalContext.current
@@ -179,7 +179,7 @@ fun StepNode(stepNumber:Int,label:String,isActive:Boolean){
 @Composable
 fun PatientSearchSection(
     onSearch:(String)->Unit,
-    assignedPatients: List<UserData> = emptyList()
+    assignedPatients: List<User> = emptyList()
 ){
     var patientId by remember{mutableStateOf("")}
     var isExpanded by remember { mutableStateOf(false) }

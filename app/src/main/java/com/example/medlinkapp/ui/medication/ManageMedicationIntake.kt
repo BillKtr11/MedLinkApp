@@ -19,7 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MedicationManagerScreen(
+fun ManageMedicationIntake(
     viewModel: MedicationViewModel = viewModel(),
     onBackClick: () -> Unit,
     onNavigateToAddMedication: () -> Unit,

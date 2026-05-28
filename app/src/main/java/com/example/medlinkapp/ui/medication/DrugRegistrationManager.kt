@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddMedicationScreen(
+fun DrugRegistrationManager(
     viewModel: MedicationViewModel,
     onNavigateBack: () -> Unit,
     onNavigateHome: () -> Unit

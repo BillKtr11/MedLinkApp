@@ -18,11 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.medlinkapp.R
-import com.example.medlinkapp.model.UserData
+import com.example.medlinkapp.model.User
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CaregiverDashboardScreen(
+fun CaregiverScreen(
     caregiverName: String = "Caregiver",
     viewModel: CaregiverViewModel = viewModel(),
     onNavigateToAssignPatient: () -> Unit,
@@ -160,7 +160,7 @@ fun CaregiverActionCard(
 }
 
 @Composable
-fun PatientListItem(patient: UserData, onClick: () -> Unit) {
+fun PatientListItem(patient: User, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

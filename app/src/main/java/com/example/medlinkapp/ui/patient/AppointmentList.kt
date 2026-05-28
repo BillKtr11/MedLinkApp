@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PatientAppointmentsScreen(
+fun AppointmentList(
     onBackClick: () -> Unit
 ) {
     val appointments by DBManager.appointments.collectAsState()

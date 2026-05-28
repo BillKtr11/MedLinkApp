@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewMeasurementScreen(
+fun ManageMeasurementRecording(
     viewModel: MeasurementViewModel,
     onNavigateToHistory: () -> Unit,
     onNavigateHome: () -> Unit

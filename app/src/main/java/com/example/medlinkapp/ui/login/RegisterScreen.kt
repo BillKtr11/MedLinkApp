@@ -12,13 +12,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.medlinkapp.model.UserData
+import com.example.medlinkapp.model.User
 import com.example.medlinkapp.model.LoginState
 import com.example.medlinkapp.model.UserRole
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(
+fun SystemAdministratorManager(
     onRegisterSuccess: () -> Unit,
     onBackToLogin: () -> Unit,
     viewModel: LoginViewModel = viewModel()
@@ -178,7 +178,7 @@ fun RegisterScreen(
                     } else {
                         errorMessage = null
                         viewModel.register(
-                            UserData(
+                            User(
                                 name = name,
                                 surname = surname,
                                 amka = amka,

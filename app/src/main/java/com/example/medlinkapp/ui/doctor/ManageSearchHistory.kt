@@ -15,7 +15,7 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PatientHistoryScreen(
+fun ManageSearchHistory(
     viewModel: DoctorViewModel,
     onBackClick: () -> Unit,
     onNavigateToPrescription: () -> Unit
