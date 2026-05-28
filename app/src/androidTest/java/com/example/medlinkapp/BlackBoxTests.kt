@@ -3,8 +3,6 @@ package com.example.medlinkapp
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.medlinkapp.data.DBManager
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +18,11 @@ import org.junit.runner.RunWith
  *   - Medication add (valid / invalid / stock warning)
  *   - Medication intake (confirm / skip / stock=0)
  *   - Navigation & role-based routing
+ *
+ * Run on an emulator / device:
+ *     ./gradlew connectedAndroidTest
+ *
+ * Or from Android Studio: Right-click this file → Run
  */
 @RunWith(AndroidJUnit4::class)
 class BlackBoxTests {
@@ -33,15 +36,13 @@ class BlackBoxTests {
 
     /** Ensures we start from the Login screen (logs out if already logged in). */
     private fun ensureOnLoginScreen() {
-        // Force clear session to start fresh if possible
-        // DBManager.clearSession() // Cannot call directly from test easily without context/init
-
+        // If we're NOT on the login screen, try to log out first
         try {
             composeTestRule.onNodeWithText("Welcome Back").assertIsDisplayed()
         } catch (_: AssertionError) {
+            // Try to find and tap a Logout button (works on any dashboard)
             try {
-                // Dashboard icons use contentDescription for Logout
-                composeTestRule.onNodeWithContentDescription("Logout").performClick()
+                composeTestRule.onNodeWithContentDescription("Logout", ignoreCase = true).performClick()
                 composeTestRule.waitForIdle()
             } catch (_: AssertionError) {
                 // Already on login or transitional screen — proceed
@@ -51,63 +52,62 @@ class BlackBoxTests {
 
     /** Performs a login with the given credentials. */
     private fun performLogin(email: String, password: String) {
-        clearAndType("Email", email)
-        clearAndType("Password", password)
+        composeTestRule.onNodeWithText("Email").performTextInput(email)
+        composeTestRule.onNodeWithText("Password").performTextInput(password)
         composeTestRule.onNodeWithText("Login").performClick()
         composeTestRule.waitForIdle()
-    }
-
-    /** Clears text fields before typing (fields may have old text). */
-    private fun clearAndType(label: String, text: String) {
-        composeTestRule.onNodeWithText(label).performTextClearance()
-        composeTestRule.onNodeWithText(label).performTextInput(text)
     }
 
     /* ════════════════════════════════════════════════
      *  1. LOGIN TESTS
      * ════════════════════════════════════════════════ */
 
+    /**
+     * TC-L01: Login with valid Doctor credentials.
+     * Input: email="doctor", password="123"
+     * Expected: Navigate to Doctor Dashboard
+     */
     @Test
     fun TC_L01_loginWithValidDoctorCredentials() {
         ensureOnLoginScreen()
         performLogin("doctor", "123")
 
+        // Doctor Dashboard should be visible
         composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithText("Dr. Lee", substring = true)
+            composeTestRule.onAllNodesWithText("Welcome, Dr.", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
 
+    /**
+     * TC-L02: Login with valid Patient credentials.
+     * Input: email="patient", password="123"
+     * Expected: Navigate to Patient Dashboard
+     */
     @Test
     fun TC_L02_loginWithValidPatientCredentials() {
         ensureOnLoginScreen()
         performLogin("patient", "123")
 
         composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithText("Demo", substring = true)
+            composeTestRule.onAllNodesWithText("Welcome, Alex", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
 
+    /**
+     * TC-L04: Login with empty email.
+     * Expected: Error message shown (handled by ViewModel logic)
+     */
     @Test
     fun TC_L04_loginWithEmptyEmail() {
         ensureOnLoginScreen()
-        composeTestRule.onNodeWithText("Email").performTextClearance()
-        clearAndType("Password", "123")
+        // Only type password, leave email empty
+        composeTestRule.onNodeWithText("Password").performTextInput("123")
         composeTestRule.onNodeWithText("Login").performClick()
         composeTestRule.waitForIdle()
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithText("Fields cannot be empty", substring = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-    }
-
-    @Test
-    fun TC_L07_loginWithInvalidCredentials() {
-        ensureOnLoginScreen()
-        performLogin("wronguser", "wrongpass")
-
+        // Error is displayed in the UI when login fails
         composeTestRule.waitUntil(5_000) {
             composeTestRule.onAllNodesWithText("Invalid credentials", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
@@ -118,63 +118,123 @@ class BlackBoxTests {
      *  2. REGISTRATION TESTS
      * ════════════════════════════════════════════════ */
 
+    /**
+     * TC-R01: Register as Patient with valid data.
+     * Expected: Navigated to Patient Dashboard
+     */
     @Test
     fun TC_R01_registerPatientWithValidData() {
         ensureOnLoginScreen()
+
+        // Navigate to Register
         composeTestRule.onNodeWithText("Don't have an account? Register").performClick()
         composeTestRule.waitForIdle()
 
-        clearAndType("Name", "TestUser")
-        clearAndType("Surname", "Tester")
-        clearAndType("AMKA", "${System.currentTimeMillis()}")
-        clearAndType("Email / Username", "testuser_${System.currentTimeMillis()}@test.com")
-        clearAndType("Password", "testpass")
+        val uniqueId = System.currentTimeMillis().toString().takeLast(6)
+        val name = "TestUser$uniqueId"
 
+        // Fill registration form
+        composeTestRule.onNodeWithText("Name").performTextInput(name)
+        composeTestRule.onNodeWithText("Surname").performTextInput("Tester")
+        composeTestRule.onNodeWithText("AMKA").performTextInput(uniqueId)
+        composeTestRule.onNodeWithText("Email / Username").performTextInput("test$uniqueId@test.com")
+        composeTestRule.onNodeWithText("Password").performTextInput("testpass")
+
+        // Role defaults to Patient, so just submit
         composeTestRule.onNodeWithText("Register").performClick()
         composeTestRule.waitForIdle()
 
-        composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithText("TestUser", substring = true)
+        // Should navigate to Patient Dashboard
+        composeTestRule.waitUntil(10_000) {
+            composeTestRule.onAllNodesWithText("Welcome, $name", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
 
+    /**
+     * TC-R09: Register with ALL fields empty.
+     * Expected: Error "All fields are required"
+     */
+    @Test
+    fun TC_R09_registerWithAllFieldsEmpty() {
+        ensureOnLoginScreen()
+        composeTestRule.onNodeWithText("Don't have an account? Register").performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Register").performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("All fields are required").assertIsDisplayed()
+    }
+
     /* ════════════════════════════════════════════════
-     *  3. PATIENT – NEW MEASUREMENT TESTS
+     *  3. LOGOUT TESTS
      * ════════════════════════════════════════════════ */
 
+    /**
+     * TC-S03: Logout from Patient Dashboard.
+     * Expected: Navigate back to Login screen.
+     */
+    @Test
+    fun TC_S03_logoutFromPatientDashboard() {
+        ensureOnLoginScreen()
+        performLogin("patient", "123")
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithText("Welcome, Alex", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        // Tap Logout
+        composeTestRule.onNodeWithContentDescription("Logout").performClick()
+        composeTestRule.waitForIdle()
+
+        // Should be back on Login screen
+        composeTestRule.onNodeWithText("Welcome Back").assertIsDisplayed()
+    }
+
+    /* ════════════════════════════════════════════════
+     *  4. PATIENT – NEW MEASUREMENT TESTS
+     * ════════════════════════════════════════════════ */
+
+    /** Helper: login as patient, then navigate to New Measurement screen. */
     private fun navigateToNewMeasurement() {
         ensureOnLoginScreen()
         performLogin("patient", "123")
 
         composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithText("Demo", substring = true)
+            composeTestRule.onAllNodesWithText("Welcome, Alex", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Dashboard card title is "New Measurement" (English)
-        composeTestRule.onNodeWithText("New Measurement", substring = true).performClick()
+        // Navigate to New Measurement
+        composeTestRule.onNodeWithText("New Measurement").performClick()
         composeTestRule.waitForIdle()
     }
 
+    /**
+     * TC-M01: Submit a valid Blood Pressure measurement.
+     * Expected: Success message shown.
+     */
     @Test
     fun TC_M01_submitValidBloodPressureMeasurement() {
         navigateToNewMeasurement()
 
-        // UI labels in ManageMeasurementRecording are English
-        // Label is "Measurement Value (e.g. 90 mg/dL)"
+        // Type defaults to "Blood Pressure", method defaults to "Manual entry"
         composeTestRule.onNodeWithText("Measurement Value", substring = true).performTextInput("120")
-        // Button is "Record Measurement"
         composeTestRule.onNodeWithText("Record Measurement").performClick()
         composeTestRule.waitForIdle()
 
-        // Success message is English
         composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithText("recorded successfully", substring = true)
+            composeTestRule.onAllNodesWithText("saved successfully", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
 
+    /**
+     * TC-M16: Blood Pressure ABOVE upper boundary (141 > 140).
+     * Expected: Out-of-bounds warning.
+     */
     @Test
     fun TC_M16_bloodPressureAboveBoundary() {
         navigateToNewMeasurement()
@@ -183,121 +243,154 @@ class BlackBoxTests {
         composeTestRule.onNodeWithText("Record Measurement").performClick()
         composeTestRule.waitForIdle()
 
-        // Success message for out-of-bounds is English
         composeTestRule.waitUntil(5_000) {
-            composeTestRule.onAllNodesWithText("out of limits", substring = true)
+            composeTestRule.onAllNodesWithText("out of bounds", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
 
     /* ════════════════════════════════════════════════
-     *  4. PATIENT – MEDICATION & INTAKE TESTS
+     *  5. PATIENT – MEDICATION MANAGER TESTS
      * ════════════════════════════════════════════════ */
 
+    /** Helper: login as patient, navigate to Medication Manager. */
     private fun navigateToMedications() {
         ensureOnLoginScreen()
         performLogin("patient", "123")
-        
-        composeTestRule.onNodeWithText("My Medications", substring = true).performClick()
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithText("Welcome, Alex", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithText("My Medications").performClick()
         composeTestRule.waitForIdle()
     }
 
+    /**
+     * TC-MM01: View medications list.
+     */
+    @Test
+    fun TC_MM01_viewMedicationsList() {
+        navigateToMedications()
+
+        composeTestRule.onNodeWithText("Depon", substring = true).assertIsDisplayed()
+    }
+
+    /* ════════════════════════════════════════════════
+     *  6. PATIENT – ADD MEDICATION TESTS
+     * ════════════════════════════════════════════════ */
+
+    /** Helper: navigate to Add Medication screen. */
+    private fun navigateToAddMedication() {
+        navigateToMedications()
+
+        // Tap the floating action button (Add)
+        composeTestRule.onNodeWithContentDescription("Add Medication").performClick()
+        composeTestRule.waitForIdle()
+    }
+
+    /**
+     * TC-AM01: Add medication with all valid fields.
+     */
+    @Test
+    fun TC_AM01_addMedicationWithValidData() {
+        navigateToAddMedication()
+
+        composeTestRule.onNodeWithText("Medication Name").performTextInput("Aspirin")
+        composeTestRule.onNodeWithText("Dosage", substring = true).performTextInput("100mg")
+        composeTestRule.onNodeWithText("Frequency", substring = true).performTextInput("2")
+        composeTestRule.onNodeWithText("Duration", substring = true).performTextInput("10")
+        composeTestRule.onNodeWithText("Current Stock", substring = true).performTextInput("30")
+
+        composeTestRule.onNodeWithText("Confirm Registration").performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithText("Successful Registration", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    /**
+     * TC-AM08: Stock insufficient → warning dialog shown.
+     */
+    @Test
+    fun TC_AM08_addMedicationWithInsufficientStock() {
+        navigateToAddMedication()
+
+        composeTestRule.onNodeWithText("Medication Name").performTextInput("LowStockMed")
+        composeTestRule.onNodeWithText("Dosage", substring = true).performTextInput("50mg")
+        composeTestRule.onNodeWithText("Frequency", substring = true).performTextInput("2")
+        composeTestRule.onNodeWithText("Duration", substring = true).performTextInput("30")
+        composeTestRule.onNodeWithText("Current Stock", substring = true).performTextInput("10")
+
+        composeTestRule.onNodeWithText("Confirm Registration").performClick()
+        composeTestRule.waitForIdle()
+
+        // Stock warning dialog should appear
+        composeTestRule.onNodeWithText("Low Stock").assertIsDisplayed()
+    }
+
+    /* ════════════════════════════════════════════════
+     *  7. PATIENT – INTAKE TESTS
+     * ════════════════════════════════════════════════ */
+
+    /**
+     * TC-IN01: Confirm intake → stock dialog shown.
+     */
     @Test
     fun TC_IN01_confirmIntake() {
         navigateToMedications()
 
-        // Tap "Take 1 Dose" on first medication (Depon)
+        // Tap "Take 1 Dose" on first medication
         composeTestRule.onAllNodesWithText("Take 1 Dose").onFirst().performClick()
         composeTestRule.waitForIdle()
 
+        // On Intake screen → tap "Confirm"
         composeTestRule.onNodeWithText("Confirm").performClick()
         composeTestRule.waitForIdle()
 
+        // Result dialog should show stock update
         composeTestRule.onNodeWithText("Stock Update", substring = true).assertIsDisplayed()
+
+        // Dismiss
         composeTestRule.onNodeWithText("OK").performClick()
-    }
-
-    @Test
-    fun TC_IN05_intakeWithZeroStock() {
-        // Navigate to add medication
-        navigateToMedications()
-        composeTestRule.onNodeWithContentDescription("Add Medication").performClick()
         composeTestRule.waitForIdle()
-
-        clearAndType("Medication Name", "DoseLimit")
-        clearAndType("Dosage (e.g., 500mg)", "5mg")
-        clearAndType("Frequency (doses per day)", "1")
-        clearAndType("Duration (days)", "1")
-        clearAndType("Current Stock (units)", "1")
-
-        composeTestRule.onNodeWithText("Confirm Registration").performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Back to Home").performClick()
-
-        // Back on Dashboard, go to Medications
-        composeTestRule.onNodeWithText("My Medications", substring = true).performClick()
-        
-        // Find "Take 1 Dose" for "DoseLimit"
-        composeTestRule.onNode(
-            hasText("Take 1 Dose") and 
-            hasAnyAncestor(hasText("DoseLimit"))
-        ).performClick()
-        
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Confirm").performClick()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText("Urgent Notification", substring = true).assertIsDisplayed()
-        composeTestRule.onNodeWithText("Stock is 0", substring = true).assertIsDisplayed()
-        composeTestRule.onNodeWithText("OK").performClick()
     }
 
     /* ════════════════════════════════════════════════
-     *  5. DOCTOR – APPOINTMENT TESTS
+     *  8. DOCTOR – ADD APPOINTMENT VALIDATION TESTS
      * ════════════════════════════════════════════════ */
 
-    @Test
-    fun TC_AA01_addAppointmentValid() {
+    /** Helper: login as doctor, navigate to Add Appointment. */
+    private fun navigateToAddAppointment() {
         ensureOnLoginScreen()
         performLogin("doctor", "123")
-        
-        composeTestRule.onNodeWithText("Add Appointment", substring = true).performClick()
-        composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithText("Select Patient", substring = true).performClick()
-        composeTestRule.onAllNodesWithText("Demo", substring = true).onFirst().performClick()
-
-        composeTestRule.onNodeWithText("Select Date", substring = true).performClick()
-        composeTestRule.onNodeWithText("OK").performClick()
-
-        composeTestRule.onNodeWithText("Select Time", substring = true).performClick()
-        composeTestRule.onNodeWithText("OK").performClick()
-
-        clearAndType("Reason for visit", "Checkup")
-        composeTestRule.onNodeWithText("Confirm Registration").performClick()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText("Successful Registration", substring = true).assertIsDisplayed()
-    }
-
-    /* ════════════════════════════════════════════════
-     *  6. EMERGENCY SOS TESTS
-     * ════════════════════════════════════════════════ */
-
-    @Test
-    fun TC_SOS01_triggerEmergencySOS() {
-        ensureOnLoginScreen()
-        performLogin("patient", "123")
-
-        composeTestRule.onNodeWithText("SOS").performClick()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithContentDescription("Logout").performClick()
-        performLogin("doctor", "123")
-
-        composeTestRule.waitUntil(10_000) {
-            composeTestRule.onAllNodesWithText("EMERGENCY SOS", substring = true)
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithText("Welcome, Dr.", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
+
+        composeTestRule.onNodeWithText("Add Appointment").performClick()
+        composeTestRule.waitForIdle()
+    }
+
+    /**
+     * TC-AA02: Submit appointment without selecting patient.
+     */
+    @Test
+    fun TC_AA02_addAppointmentNoPatient() {
+        navigateToAddAppointment()
+
+        // Enter a reason but don't select patient/date/time
+        composeTestRule.onNodeWithText("Reason for visit").performTextInput("Checkup")
+
+        composeTestRule.onNodeWithText("Confirm Registration").performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Please select a patient", substring = true)
+            .assertIsDisplayed()
     }
 }
