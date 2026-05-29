@@ -1,4 +1,4 @@
-package com.example.medlinkapp.data
+﻿package com.example.medlinkapp.data
 
 import com.example.medlinkapp.model.*
 import java.time.LocalDateTime
@@ -36,7 +36,8 @@ class ReportRepository(private val dbManager: DBManager = DBManager) {
             endDate = endDate
         )
 
-        // Logic to "create PDF" would go here. For now we return the report object.
+        
         return Result.success(report)
     }
 }
+

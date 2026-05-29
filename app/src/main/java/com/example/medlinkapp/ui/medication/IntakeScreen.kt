@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.medication
+﻿package com.example.medlinkapp.ui.medication
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -87,7 +87,7 @@ fun IntakeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedButton(
-                    onClick = { /* Αναβολή 10' logic would go here */ },
+                    onClick = {  },
                     modifier = Modifier.fillMaxWidth().height(56.dp)
                 ) {
                     Text("Snooze 10'", style = MaterialTheme.typography.titleMedium)
@@ -127,3 +127,4 @@ fun IntakeScreen(
         }
     }
 }
+

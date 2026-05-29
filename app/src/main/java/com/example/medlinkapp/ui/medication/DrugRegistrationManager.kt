@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.medication
+﻿package com.example.medlinkapp.ui.medication
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,7 +29,7 @@ fun DrugRegistrationManager(
     var duration by remember { mutableStateOf("") }
     var stock by remember { mutableStateOf("") }
     
-    // Intake Times
+    
     val intakeTimes = remember { mutableStateListOf<String>() }
 
     var showError by remember { mutableStateOf(false) }
@@ -37,14 +37,14 @@ fun DrugRegistrationManager(
     var showSuccess by remember { mutableStateOf(false) }
     var stockExhaustionDate by remember { mutableStateOf("") }
 
-    // Update intake times when frequency changes
+    
     LaunchedEffect(frequency) {
         val freqInt = frequency.toIntOrNull() ?: 0
         intakeTimes.clear()
         if (freqInt > 0) {
             val interval = 24 / freqInt
             for (i in 0 until freqInt) {
-                val hour = (8 + i * interval) % 24 // Start at 8 AM
+                val hour = (8 + i * interval) % 24 
                 intakeTimes.add(String.format("%02d:00", hour))
             }
         }
@@ -215,3 +215,4 @@ fun DrugRegistrationManager(
         }
     }
 }
+

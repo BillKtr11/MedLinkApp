@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.caregiver
+﻿package com.example.medlinkapp.ui.caregiver
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -182,3 +182,4 @@ fun PatientListItem(patient: User, onClick: () -> Unit) {
         }
     }
 }
+

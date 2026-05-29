@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.report
+﻿package com.example.medlinkapp.ui.report
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -71,3 +71,4 @@ class ReportViewModel(private val repository: ReportRepository = ReportRepositor
         }
     }
 }
+

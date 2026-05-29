@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.medication
+﻿package com.example.medlinkapp.ui.medication
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,12 +24,12 @@ data class MedicationUiModel(
         val now = LocalTime.now()
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
         
-        // Find the first time that is after now
+        
         val nextTime = intakeTimes.map { LocalTime.parse(it, formatter) }
             .filter { it.isAfter(now) }
             .minOrNull()
         
-        // If no time today is after now, the next one is the first one tomorrow
+        
         return (nextTime ?: intakeTimes.map { LocalTime.parse(it, formatter) }.minOrNull())?.format(formatter)
     }
 }
@@ -37,7 +37,7 @@ data class MedicationUiModel(
 @OptIn(ExperimentalCoroutinesApi::class)
 class MedicationViewModel : ViewModel() {
 
-    // Fetching data from the persistent singleton DBManager, filtered by user
+    
     val medications: StateFlow<List<MedicationUiModel>> = combine(DBManager.medications, DBManager.currentUserAmka) { list, amka ->
         list.filter { it.patientAmka == amka }
             .map { 
@@ -49,7 +49,7 @@ class MedicationViewModel : ViewModel() {
         initialValue = emptyList()
     )
 
-    // New: Fetch prescriptions for the current patient
+    
     val prescriptions: StateFlow<List<com.example.medlinkapp.model.Prescription>> = DBManager.prescriptions.map { list ->
         val amka = DBManager.getCurrentUserAmka()
         list.filter { it.patientAmka == amka }
@@ -107,7 +107,7 @@ class MedicationViewModel : ViewModel() {
     fun addFromPrescription(prescription: com.example.medlinkapp.model.Prescription) {
         val amka = DBManager.getCurrentUserAmka() ?: return
         
-        // Create intake times based on frequency
+        
         val intakeTimes = mutableListOf<String>()
         val freq = prescription.drugFreq
         if (freq > 0) {
@@ -118,7 +118,7 @@ class MedicationViewModel : ViewModel() {
             }
         }
         
-        // Determine dosage string with unit (defaulting to mg if none specified, though model is Int)
+        
         val dosageStr = if (prescription.drugDosage > 0) "${prescription.drugDosage}mg" else "As directed"
 
         DBManager.addMedication(
@@ -131,3 +131,4 @@ class MedicationViewModel : ViewModel() {
         )
     }
 }
+

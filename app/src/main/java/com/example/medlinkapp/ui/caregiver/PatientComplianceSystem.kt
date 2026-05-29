@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.caregiver
+﻿package com.example.medlinkapp.ui.caregiver
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,7 +49,7 @@ fun PatientComplianceSystem(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            // Time Period Selection
+            
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -82,7 +82,7 @@ fun PatientComplianceSystem(
                     CircularProgressIndicator()
                 }
             } else {
-                // Alternative Flow 3: Detect insufficient data
+                
                 val isInsufficientData = stats!!.totalExpected == 0 && stats!!.measurementHistory.isEmpty() && stats!!.intakeHistory.isEmpty()
 
                 if (isInsufficientData) {
@@ -129,7 +129,7 @@ fun PatientComplianceSystem(
         }
     }
 
-    // Alternative Flow 2: Error Dialog for Invalid Date Range
+    
     if (dateRangeError != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearDateRangeError() },
@@ -138,7 +138,7 @@ fun PatientComplianceSystem(
             confirmButton = {
                 Button(onClick = { 
                     viewModel.clearDateRangeError()
-                    showDatePicker = true // Return to period selection
+                    showDatePicker = true 
                 }) {
                     Text("OK")
                 }
@@ -162,7 +162,7 @@ fun PatientComplianceSystem(
                         showDatePicker = false
                     }, modifier = Modifier.fillMaxWidth()) { Text("Last Week") }
                     Spacer(modifier = Modifier.height(8.dp))
-                    // Option to trigger "Insufficient Data" (Flow 3) by choosing a range with no data
+                    
                     Button(onClick = {
                         viewModel.setDateRange(LocalDate.now().minusYears(2), LocalDate.now().minusYears(2).plusDays(1))
                         showDatePicker = false
@@ -170,7 +170,7 @@ fun PatientComplianceSystem(
                         Text("Select period without data (Flow 3)") 
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    // Simulation of an invalid selection (Flow 2)
+                    
                     Button(onClick = {
                         viewModel.setDateRange(LocalDate.now().plusDays(1), LocalDate.now())
                         showDatePicker = false
@@ -248,3 +248,4 @@ fun ComplianceOverviewCard(stats: AdherenceStats) {
         }
     }
 }
+

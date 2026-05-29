@@ -1,4 +1,4 @@
-package com.example.medlinkapp.model
+﻿package com.example.medlinkapp.model
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -92,12 +92,12 @@ data class Medication(
     val stockCount: Int,
     val lowStockThreshold: Int = 10,
     val patientAmka: String,
-    val intakeTimes: List<String> = emptyList(), // e.g. ["08:00", "20:00"]
-    val frequency: Int = 1 // times per day
+    val intakeTimes: List<String> = emptyList(), 
+    val frequency: Int = 1 
 ) {
     fun getNextIntakeTime(): String? {
         if (intakeTimes == null || intakeTimes.isEmpty()) return null
-        // Simplistic logic for demonstration: return first intake time
+        
         return intakeTimes.first()
     }
 }
@@ -107,7 +107,7 @@ data class IntakeRecord(
     val medName: String,
     val timestamp: LocalDateTime,
     val patientAmka: String,
-    val status: String // "Confirmed", "Skipped"
+    val status: String 
 )
 
 data class User(
@@ -129,3 +129,4 @@ data class Message(
     val timestamp: LocalDateTime,
     val isRead: Boolean = false
 )
+

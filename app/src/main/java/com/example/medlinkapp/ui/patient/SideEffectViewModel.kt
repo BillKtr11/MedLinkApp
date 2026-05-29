@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.patient
+﻿package com.example.medlinkapp.ui.patient
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -79,3 +79,4 @@ class SideEffectViewModel : ViewModel() {
         }
     }
 }
+

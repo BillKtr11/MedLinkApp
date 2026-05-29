@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.report
+﻿package com.example.medlinkapp.ui.report
 
 import android.widget.Toast
 import androidx.compose.animation.*
@@ -135,7 +135,7 @@ fun HealthReportManager(
     }
 }
 
-//UI_COMPONENTS
+
 
 @Composable
 fun StepIndicator(currentStep:ReportStep){
@@ -508,7 +508,7 @@ fun ErrorSection(
     }
 }
 
-//HELPERS
+
 
 fun parseDate(dateStr:String,isEndOfDay:Boolean):LocalDateTime{
     return try {
@@ -518,3 +518,4 @@ fun parseDate(dateStr:String,isEndOfDay:Boolean):LocalDateTime{
         if(isEndOfDay) LocalDateTime.now() else LocalDateTime.now().minusDays(7)
     }
 }
+

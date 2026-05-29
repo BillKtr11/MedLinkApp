@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.doctor
+﻿package com.example.medlinkapp.ui.doctor
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,7 +25,7 @@ fun ManageSearchHistory(
 
     var isFilterExpanded by remember { mutableStateOf(false) }
 
-    // State για τις ημερομηνίες
+    
     val currentDate = LocalDate.now()
     var fromDay by remember { mutableStateOf(currentDate.dayOfMonth) }
     var fromMonth by remember { mutableStateOf(currentDate.monthValue) }
@@ -35,12 +35,12 @@ fun ManageSearchHistory(
     var toMonth by remember { mutableStateOf(currentDate.monthValue) }
     var toYear by remember { mutableStateOf(currentDate.year) }
 
-    // Μήνυμα λάθους
+    
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
-            // ΔΙΟΡΘΩΣΗ: Προσθήκη και ενεργοποίηση του TopAppBar με το βέλος "Πίσω"
+            
             TopAppBar(
                 title = { Text("Medical History") },
                 navigationIcon = {
@@ -75,10 +75,10 @@ fun ManageSearchHistory(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // Στοιχεία Ασθενή
+            
             patient?.let {
                 Text("Patient: ${it.name}", style = MaterialTheme.typography.headlineSmall)
-                Text("ΑΜΚΑ: ${it.amka}", style = MaterialTheme.typography.bodyMedium)
+                Text("Î‘ÎœÎšÎ‘: ${it.amka}", style = MaterialTheme.typography.bodyMedium)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -116,7 +116,7 @@ fun ManageSearchHistory(
                             onYearChange = { toYear = it }
                         )
 
-                        // Μηνύματος Λάθους
+                        
                         errorMessage?.let {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
@@ -124,11 +124,11 @@ fun ManageSearchHistory(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Enter
+                        
                         Button(
                             onClick = {
                                 try {
-                                    // Έλεγχος εγκυρότητας ημερομηνιών
+                                    
                                     val startDate = LocalDate.of(fromYear, fromMonth, fromDay)
                                     val endDate = LocalDate.of(toYear, toMonth, toDay)
 

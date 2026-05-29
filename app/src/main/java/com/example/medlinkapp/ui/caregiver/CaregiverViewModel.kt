@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.caregiver
+﻿package com.example.medlinkapp.ui.caregiver
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +19,7 @@ data class AdherenceStats(
 @OptIn(ExperimentalCoroutinesApi::class)
 class CaregiverViewModel : ViewModel() {
 
-    // Patients specifically assigned to this caregiver
+    
     val myPatients: StateFlow<List<User>> = combine(DBManager.users, DBManager.currentUserAmka) { users, caregiverAmka ->
         users.filter { it.role == UserRole.PATIENT && it.assignedCaregiverAmka == caregiverAmka }
     }.stateIn(
@@ -28,7 +28,7 @@ class CaregiverViewModel : ViewModel() {
         initialValue = emptyList()
     )
 
-    // All patients (to allow assignment)
+    
     val allPatients: StateFlow<List<User>> = DBManager.users
         .map { users -> users.filter { it.role == UserRole.PATIENT } }
         .stateIn(
@@ -40,11 +40,11 @@ class CaregiverViewModel : ViewModel() {
     private val _selectedPatient = MutableStateFlow<User?>(null)
     val selectedPatient = _selectedPatient.asStateFlow()
 
-    // Communication status
+    
     private val _isCommunicationError = MutableStateFlow(false)
     val isCommunicationError = _isCommunicationError.asStateFlow()
 
-    // Real-time monitoring data
+    
     val patientMedications: StateFlow<List<Medication>> = _selectedPatient.flatMapLatest { patient ->
         if (patient == null) flowOf(emptyList())
         else DBManager.medications.map { meds -> meds.filter { it.patientAmka == patient.amka } }
@@ -60,18 +60,18 @@ class CaregiverViewModel : ViewModel() {
         else DBManager.intakeRecords.map { records -> records.filter { it.patientAmka == patient.amka } }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    // Stats Range
+    
     private val _startDate = MutableStateFlow<LocalDate>(LocalDate.now().minusDays(7))
     val startDate = _startDate.asStateFlow()
 
     private val _endDate = MutableStateFlow<LocalDate>(LocalDate.now())
     val endDate = _endDate.asStateFlow()
 
-    // Validation Error State for Date Range
+    
     private val _dateRangeError = MutableStateFlow<String?>(null)
     val dateRangeError = _dateRangeError.asStateFlow()
 
-    // Combine flows to calculate stats
+    
     val adherenceStats: StateFlow<AdherenceStats?> = combine(
         listOf(_selectedPatient, patientIntakeRecords, patientMedications, patientMeasurements, startDate, endDate)
     ) { flows ->
@@ -144,3 +144,4 @@ class CaregiverViewModel : ViewModel() {
         DBManager.assignPatientToCaregiver(patientAmka, caregiverAmka)
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.caregiver
+﻿package com.example.medlinkapp.ui.caregiver
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -96,3 +96,4 @@ fun ManageCaregiverClient(
         }
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.patient
+﻿package com.example.medlinkapp.ui.patient
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,11 +29,11 @@ fun MessageSystem(
     val myMessages = remember(messages, users, userAmka) {
         messages.filter { 
             if (currentUser?.role == com.example.medlinkapp.model.UserRole.DOCTOR) {
-                // Doctors see messages where they are the assigned doctor of the patient
+                
                 val patient = users.find { u -> u.amka == it.patientAmka }
                 patient?.assignedDoctorAmka == userAmka
             } else {
-                // Patients see their own messages
+                
                 it.patientAmka == userAmka 
             }
         }.sortedByDescending { it.timestamp }

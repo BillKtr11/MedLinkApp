@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.login
+﻿package com.example.medlinkapp.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -57,3 +57,4 @@ class LoginViewModel(private val repository: AuthRepository = AuthRepository()) 
         _loginState.value = LoginState.Idle
     }
 }
+

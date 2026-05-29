@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.patient
+﻿package com.example.medlinkapp.ui.patient
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -161,3 +161,4 @@ fun SideEffectReportManagerPreview() {
         ) { }
     }
 }
+

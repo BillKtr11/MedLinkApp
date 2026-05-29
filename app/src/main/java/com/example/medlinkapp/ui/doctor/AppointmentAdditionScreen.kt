@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.doctor
+﻿package com.example.medlinkapp.ui.doctor
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -67,7 +67,7 @@ fun AppointmentAdditionScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (!showSuccess) {
-                // Patient Selection
+                
                 OutlinedCard(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -95,7 +95,7 @@ fun AppointmentAdditionScreen(
                     }
                 }
 
-                // Date Selection
+                
                 OutlinedCard(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -113,7 +113,7 @@ fun AppointmentAdditionScreen(
                     }
                 }
 
-                // Time Selection
+                
                 OutlinedCard(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -127,7 +127,7 @@ fun AppointmentAdditionScreen(
                             text = if (selectedTime == null) "Select Time" else "Time: ${selectedTime?.format(DateTimeFormatter.ofPattern("HH:mm"))}",
                             modifier = Modifier.weight(1f)
                         )
-                        Icon(Icons.Default.Notifications, contentDescription = null) // Using notifications icon for time
+                        Icon(Icons.Default.Notifications, contentDescription = null) 
                     }
                 }
 
@@ -198,7 +198,7 @@ fun AppointmentAdditionScreen(
         }
     }
 
-    // Date Picker Dialog
+    
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -218,7 +218,7 @@ fun AppointmentAdditionScreen(
         }
     }
 
-    // Time Picker Dialog
+    
     if (showTimePicker) {
         AlertDialog(
             onDismissRequest = { showTimePicker = false },
@@ -237,7 +237,7 @@ fun AppointmentAdditionScreen(
         )
     }
 
-    // Patient Picker Dialog
+    
     if (showPatientPicker) {
         AlertDialog(
             onDismissRequest = { showPatientPicker = false },
@@ -270,3 +270,4 @@ fun AppointmentAdditionScreen(
         )
     }
 }
+

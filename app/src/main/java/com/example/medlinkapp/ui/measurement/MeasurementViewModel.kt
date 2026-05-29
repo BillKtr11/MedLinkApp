@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.measurement
+﻿package com.example.medlinkapp.ui.measurement
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,7 +20,7 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
     private val _uiState = MutableStateFlow<MeasurementState>(MeasurementState.Idle)
     val uiState: StateFlow<MeasurementState> = _uiState.asStateFlow()
 
-    // Filter measurements by current user
+    
     val measurements: StateFlow<List<Measurement>> = combine(dbManager.measurements, dbManager.currentUserAmka) { list, amka ->
         list.filter { it.patientAmka == amka }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -79,3 +79,4 @@ class MeasurementViewModel(private val dbManager: DBManager) : ViewModel() {
         _uiState.value = MeasurementState.Idle
     }
 }
+

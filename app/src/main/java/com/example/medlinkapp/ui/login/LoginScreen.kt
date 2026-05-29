@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.login
+﻿package com.example.medlinkapp.ui.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -122,3 +122,4 @@ fun LoginScreen(
         }
     }
 }
+

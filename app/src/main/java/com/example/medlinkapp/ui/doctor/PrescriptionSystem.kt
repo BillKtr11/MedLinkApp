@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.doctor
+﻿package com.example.medlinkapp.ui.doctor
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +18,7 @@ fun PrescriptionSystem(
 ) {
     val patient by viewModel.selectedPatient.collectAsState()
 
-    // ΒΗΜΑ 1: State για τα στοιχεία της συνταγής
+    
     var medication by remember { mutableStateOf("") }
     var dosage by remember { mutableStateOf("") }
     var frequency by remember { mutableStateOf("") }
@@ -44,7 +44,7 @@ fun PrescriptionSystem(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()) // Για να μην κρύβεται πίσω από το πληκτρολόγιο
+                .verticalScroll(rememberScrollState()) 
         ) {
             Text(
                 text = "Prescribing for: ${patient?.name ?: "Unknown"}",
@@ -54,7 +54,7 @@ fun PrescriptionSystem(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Πεδία Εισαγωγής (ΒΗΜΑ 1)
+            
             OutlinedTextField(
                 value = medication,
                 onValueChange = { medication = it },
@@ -86,7 +86,7 @@ fun PrescriptionSystem(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // ΒΗΜΑ 2: Εμφάνιση σφάλματος αν αποτύχει το Validation
+            
             errorMessage?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
@@ -94,12 +94,12 @@ fun PrescriptionSystem(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // ΒΗΜΑ 3: Επιβεβαίωση ενέργειας (Κουμπί Enter / Αποθήκευση)
+            
             Button(
                 onClick = {
                     val patientAmka = patient?.amka ?: return@Button
 
-                    // Εκτέλεση ελέγχου και αποθήκευσης
+                    
                     val resultError = viewModel.issuePrescription(
                         patientId = patientAmka,
                         medication = medication,
@@ -109,10 +109,10 @@ fun PrescriptionSystem(
                     )
 
                     if (resultError != null) {
-                        errorMessage = resultError // Εμφάνιση του λάθους στο UI
+                        errorMessage = resultError 
                     } else {
                         errorMessage = null
-                        showSuccessDialog = true // Εμφάνιση επιτυχίας (Βήματα 4, 5, 6)
+                        showSuccessDialog = true 
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(50.dp)
@@ -122,19 +122,19 @@ fun PrescriptionSystem(
         }
     }
 
-    // Dialog Επιβεβαίωσης Επιτυχίας
+    
     if (showSuccessDialog) {
         AlertDialog(
-            onDismissRequest = { /* Δεν επιτρέπουμε κλείσιμο χωρίς πάτημα */ },
+            onDismissRequest = {  },
             title = { Text("Successful Registration") },
             text = {
-                Text("The prescription was saved successfully!\n\n• The patient's schedule was updated automatically.\n• The notification was sent to their device.")
+                Text("The prescription was saved successfully!\n\nâ€¢ The patient's schedule was updated automatically.\nâ€¢ The notification was sent to their device.")
             },
             confirmButton = {
                 Button(
                     onClick = {
                         showSuccessDialog = false
-                        onBackClick() // Επιστροφή στο ιστορικό
+                        onBackClick() 
                     }
                 ) {
                     Text("OK")

@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.doctor
+﻿package com.example.medlinkapp.ui.doctor
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -66,7 +66,7 @@ fun DoctorScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // SOS ALERT SECTION
+            
             if (pendingAlerts.isNotEmpty()) {
                 val latestAlert = pendingAlerts.last()
                 item {
@@ -228,3 +228,4 @@ fun DoctorActionCard(
         }
     }
 }
+

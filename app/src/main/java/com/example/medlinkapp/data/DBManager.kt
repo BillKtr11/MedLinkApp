@@ -1,4 +1,4 @@
-package com.example.medlinkapp.data
+﻿package com.example.medlinkapp.data
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -23,7 +23,7 @@ object DBManager {
     private val _activeAlerts = MutableStateFlow<List<EmergencyAlert>>(emptyList())
     val activeAlerts: StateFlow<List<EmergencyAlert>> = _activeAlerts.asStateFlow()
 
-    // Patient Management
+    
 
     private const val PREFS_NAME = "medlink_prefs"
     private const val KEY_MEDICATIONS = "medications"
@@ -56,7 +56,7 @@ object DBManager {
 
     private var prefs: SharedPreferences? = null
 
-    // --- State ---
+    
     private val _medications = MutableStateFlow<List<Medication>>(emptyList())
     val medications: StateFlow<List<Medication>> = _medications.asStateFlow()
 
@@ -81,7 +81,7 @@ object DBManager {
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages.asStateFlow()
 
-    // Current Session
+    
     private val _currentUserAmka = MutableStateFlow<String?>(null)
     val currentUserAmka: StateFlow<String?> = _currentUserAmka.asStateFlow()
 
@@ -153,7 +153,7 @@ object DBManager {
 
     fun getCurrentUser(): User? = _users.value.find { it.amka == _currentUserAmka.value }
 
-    // --- Users ---
+    
     private fun loadUsers() {
         val json = prefs?.getString(KEY_USERS, null)
         if (json != null) {
@@ -166,21 +166,21 @@ object DBManager {
         }
         
         var changed = false
-        // Add a default doctor
+        
         if (_users.value.none { it.role == UserRole.DOCTOR }) {
             val defaultDoctor = User("Dr. Lee", "George", "111111", "doctor", "123", UserRole.DOCTOR)
             _users.update { it + defaultDoctor }
             changed = true
         }
         
-        // Add a default caregiver
+        
         if (_users.value.none { it.role == UserRole.CAREGIVER }) {
             val defaultCaregiver = User("Anna", "Caregiver", "222222", "caregiver", "123", UserRole.CAREGIVER)
             _users.update { it + defaultCaregiver }
             changed = true
         }
 
-        // Add a default patient linked to the caregiver
+        
         if (_users.value.none { it.email == "patient" }) {
             val defaultPatient = User("Demo", "Patient", "000000", "patient", "123", UserRole.PATIENT, assignedCaregiverAmka = "222222")
             _users.update { it + defaultPatient }
@@ -220,7 +220,7 @@ object DBManager {
         saveUsers()
     }
 
-    // --- Medications ---
+    
     private fun loadMedications() {
         val json = prefs?.getString(KEY_MEDICATIONS, null)
         if (json != null) {
@@ -271,7 +271,7 @@ object DBManager {
     private val _sideEffectReports = MutableStateFlow<List<SideEffectReport>>(emptyList())
     val sideEffectReports: StateFlow<List<SideEffectReport>> = _sideEffectReports.asStateFlow()
 
-    // --- Intake Records ---
+    
     private fun loadIntakeRecords() {
         val json = prefs?.getString(KEY_INTAKES, null)
         if (json != null) {
@@ -305,7 +305,7 @@ object DBManager {
         saveIntakeRecords()
     }
 
-    // --- Appointments ---
+    
     private fun loadAppointments() {
         val json = prefs?.getString(KEY_APPOINTMENTS, null)
         if (json != null) {
@@ -327,7 +327,7 @@ object DBManager {
         _appointments.update { it + appointment }
         saveAppointments()
         
-        // Send a message to the patient
+        
         addMessage(
             Message(
                 id = System.currentTimeMillis().toString(),
@@ -339,7 +339,7 @@ object DBManager {
         )
     }
 
-    // --- Prescriptions ---
+    
     private fun loadPrescriptions() {
         val json = prefs?.getString(KEY_PRESCRIPTIONS, null)
         if (json != null) {
@@ -361,7 +361,7 @@ object DBManager {
         _prescriptions.update { it + prescription }
         savePrescriptions()
         
-        // Send a message to the patient
+        
         addMessage(
             Message(
                 id = System.currentTimeMillis().toString(),
@@ -383,7 +383,7 @@ object DBManager {
         saveMessages()
     }
 
-    // --- Side Effects ---
+    
     private fun loadSideEffects() {
         val json = prefs?.getString(KEY_SIDE_EFFECTS, null)
         if (json != null) {
@@ -412,7 +412,7 @@ object DBManager {
         saveSideEffects()
     }
 
-    // --- Messages ---
+    
     private fun loadMessages() {
         val json = prefs?.getString(KEY_MESSAGES, null)
         if (json != null) {
@@ -446,7 +446,7 @@ object DBManager {
         return _appointments.value.none { it.date == date }
     }
 
-    // --- Measurements ---
+    
     private fun loadMeasurements() {
         val json = prefs?.getString(KEY_MEASUREMENTS, null)
         if (json != null) {
@@ -502,10 +502,10 @@ object DBManager {
         _measurements.update { it + data }
         saveMeasurements()
 
-        // SOS Logic: Triggered when value is outside normal limits
+        
         val limits = getNormalLimits(data.measurementType)
         
-        // Trigger SOS if value is above the high limit (as requested) or below the low limit
+        
         val isCritical = data.measurementValue !in limits
 
         if (isCritical) {
@@ -535,15 +535,15 @@ object DBManager {
 
     fun getNormalLimits(type: String): IntRange {
         return when (type.lowercase()) {
-            "σάκχαρο", "blood glucose", "glucose" -> 70..140
-            "οξυγόνο", "oxygen saturation", "oxygen", "spo2" -> 95..100
-            "βάρος", "weight" -> 40..150
-            "πίεση", "systolic blood pressure", "pressure", "bp" -> 90..140
+            "ÏƒÎ¬ÎºÏ‡Î±ÏÎ¿", "blood glucose", "glucose" -> 70..140
+            "Î¿Î¾Ï…Î³ÏŒÎ½Î¿", "oxygen saturation", "oxygen", "spo2" -> 95..100
+            "Î²Î¬ÏÎ¿Ï‚", "weight" -> 40..150
+            "Ï€Î¯ÎµÏƒÎ·", "systolic blood pressure", "pressure", "bp" -> 90..140
             else -> 0..1000
         }
     }
 
-    // --- Mocks & Additional Logic ---
+    
     fun getPatientInformation(patientId: String): Result<Patient> {
         val user = _users.value.find { it.amka == patientId }
         return if (user != null) {
@@ -561,7 +561,7 @@ object DBManager {
     fun requestDeviceData(deviceId: String): Flow<Measurement> = flow { 
         while(true) {
             delay(5000)
-            emit(Measurement(deviceId, (60..100).random(), "Σφύξεις", LocalDateTime.now(), "000000"))
+            emit(Measurement(deviceId, (60..100).random(), "Î£Ï†ÏÎ¾ÎµÎ¹Ï‚", LocalDateTime.now(), "000000"))
         }
     }
 
@@ -598,3 +598,4 @@ object DBManager {
         return Result.success(_prescriptions.value.filter { it.patientAmka == patientId })
     }
 }
+

@@ -1,13 +1,13 @@
-package com.example.medlinkapp.data
+﻿package com.example.medlinkapp.data
 import com.example.medlinkapp.model.UserRole
 import com.example.medlinkapp.model.User
 import kotlinx.coroutines.delay
 
 class AuthRepository {
     suspend fun authenticateUser(email: String, password: String): Result<User> {
-        delay(500) // Simulating network delay
+        delay(500) 
 
-        // Check persistent users first
+        
         val users = DBManager.users.value
         val foundUser = users.find { it.email == email && it.password == password }
         
@@ -16,7 +16,7 @@ class AuthRepository {
             return Result.success(foundUser)
         }
 
-        // Check hardcoded defaults
+        
         return when {
             email.isEmpty() || password.isEmpty() -> {
                 Result.failure(Exception("Fields cannot be empty"))
@@ -45,7 +45,7 @@ class AuthRepository {
     suspend fun registerUser(userData: User): Result<Unit> {
         delay(500)
         
-        // Check if user already exists
+        
         val exists = DBManager.users.value.any { it.email == userData.email || it.amka == userData.amka }
         if (exists) {
             return Result.failure(Exception("User already exists with this Email or AMKA"))
@@ -56,3 +56,4 @@ class AuthRepository {
         return Result.success(Unit)
     }
 }
+

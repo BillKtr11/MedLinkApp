@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.prescription
+﻿package com.example.medlinkapp.ui.prescription
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -86,3 +86,4 @@ fun PrescriptionHistoryItem(prescription: Prescription) {
         }
     }
 }
+

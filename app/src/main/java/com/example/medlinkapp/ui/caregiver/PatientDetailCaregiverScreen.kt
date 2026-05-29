@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.caregiver
+﻿package com.example.medlinkapp.ui.caregiver
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -88,7 +88,7 @@ fun PatientDetailCaregiverScreen(
                         }
                     }
 
-                    // Demo simulation button
+                    
                     item {
                         Spacer(modifier = Modifier.height(32.dp))
                         Button(
@@ -142,3 +142,4 @@ fun CommunicationErrorWarning(onRetry: () -> Unit) {
         }
     }
 }
+

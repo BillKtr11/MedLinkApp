@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.doctor
+﻿package com.example.medlinkapp.ui.doctor
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,7 +23,7 @@ fun ManageDoctorClient(
     var searchQuery by remember { mutableStateOf("") }
     val allPatients by viewModel.allPatients.collectAsState()
     
-    // Filter patients locally for real-time responsiveness in this picker
+    
     val filteredPatients = allPatients.filter {
         it.name.contains(searchQuery, ignoreCase = true) || 
         it.surname.contains(searchQuery, ignoreCase = true) || 

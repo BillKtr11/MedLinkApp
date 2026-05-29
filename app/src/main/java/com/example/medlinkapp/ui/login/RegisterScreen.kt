@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.login
+﻿package com.example.medlinkapp.ui.login
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -202,3 +202,4 @@ fun SystemAdministratorManager(
         }
     }
 }
+

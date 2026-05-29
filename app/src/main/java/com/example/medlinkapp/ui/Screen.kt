@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui
+﻿package com.example.medlinkapp.ui
 
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")

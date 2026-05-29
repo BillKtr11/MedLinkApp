@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.caregiver
+﻿package com.example.medlinkapp.ui.caregiver
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -101,3 +101,4 @@ fun IntakeRecordItem(record: IntakeRecord) {
         }
     }
 }
+

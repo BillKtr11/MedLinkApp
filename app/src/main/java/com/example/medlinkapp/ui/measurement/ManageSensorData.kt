@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.measurement
+﻿package com.example.medlinkapp.ui.measurement
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -43,7 +43,7 @@ fun ManageSensorData(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Table Header
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -72,7 +72,7 @@ fun ManageSensorData(
 
             HorizontalDivider()
 
-            // Table Rows
+            
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(measurements.asReversed()) { measurement ->
                     Row(
@@ -108,3 +108,4 @@ fun ManageSensorData(
         }
     }
 }
+

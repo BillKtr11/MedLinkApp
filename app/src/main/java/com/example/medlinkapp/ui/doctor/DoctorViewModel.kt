@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.doctor
+﻿package com.example.medlinkapp.ui.doctor
 
 import androidx.lifecycle.ViewModel
 import com.example.medlinkapp.model.Prescription
@@ -31,7 +31,7 @@ data class MedicalRecord(
 
 class DoctorViewModel : ViewModel() {
     
-    // Emergency Alerts
+    
     val activeAlerts: StateFlow<List<EmergencyAlert>> = DBManager.activeAlerts
         .stateIn(
             scope = viewModelScope,
@@ -43,7 +43,7 @@ class DoctorViewModel : ViewModel() {
         DBManager.respondToAlert(alertId, instructions)
     }
 
-    // Live list of ALL patients in the system (for assignment)
+    
     val allPatients: StateFlow<List<User>> = DBManager.users
         .map { users -> users.filter { it.role == UserRole.PATIENT } }
         .stateIn(
@@ -52,8 +52,8 @@ class DoctorViewModel : ViewModel() {
             initialValue = emptyList()
         )
 
-    // Patients specifically assigned to this doctor (for search and appointments)
-    // Uses combine to react to both user list changes and current doctor changes
+    
+    
     val myPatients: StateFlow<List<User>> = combine(DBManager.users, DBManager.currentUserAmka) { users, doctorAmka ->
         users.filter { it.role == UserRole.PATIENT && it.assignedDoctorAmka == doctorAmka }
     }.stateIn(
@@ -78,7 +78,7 @@ class DoctorViewModel : ViewModel() {
     private val _patientHistory = MutableStateFlow<List<MedicalRecord>>(emptyList())
     val patientHistory = _patientHistory.asStateFlow()
 
-    // Appointments for this doctor specifically
+    
     val appointments: StateFlow<List<Appointment>> = combine(DBManager.appointments, DBManager.currentUserAmka) { appointments, doctorAmka ->
         val doctor = DBManager.users.value.find { it.amka == doctorAmka }
         val doctorName = if (doctor != null) "${doctor.name} ${doctor.surname}" else "Doctor"
@@ -89,7 +89,7 @@ class DoctorViewModel : ViewModel() {
         initialValue = emptyList()
     )
 
-    // Search specifically within MY patients
+    
     fun searchPatient(query: String) {
         if (query.isBlank()) {
             _searchResults.value = emptyList()
@@ -120,14 +120,11 @@ class DoctorViewModel : ViewModel() {
                     !it.date.isAfter(endDate)
         }.sortedByDescending { it.date }
     }
-    // Λίστα με τις αποθηκευμένες συνταγές
+    
     private val _prescriptions = MutableStateFlow<List<Prescription>>(emptyList())
     val prescriptions = _prescriptions.asStateFlow()
 
-    /**
-     * Υλοποίηση Βημάτων 2, 4, 5 και 6
-     * Επιστρέφει null αν όλα είναι εντάξει, ή μήνυμα λάθους αν αποτύχει ο έλεγχος.
-     */
+    
     fun issuePrescription(
         patientId: String,
         medication: String,
@@ -136,13 +133,13 @@ class DoctorViewModel : ViewModel() {
         duration: String
     ): String? {
 
-        // ΒΗΜΑ 2: Έλεγχος εγκυρότητας στοιχείων
+        
         if (medication.isBlank()) return "Medication name cannot be empty."
         if (dosage.isBlank()) return "Dosage cannot be empty."
         if (frequency.isBlank()) return "Frequency cannot be empty."
         if (duration.isBlank()) return "Duration cannot be empty."
 
-        // ΒΗΜΑ 4: Αποθήκευση της συνταγής στο σύστημα
+        
         val dosageInt = dosage.filter { it.isDigit() }.toIntOrNull() ?: 0
         val freqInt = frequency.filter { it.isDigit() }.toIntOrNull() ?: 1
         val durInt = duration.filter { it.isDigit() }.toIntOrNull() ?: 30
@@ -154,32 +151,32 @@ class DoctorViewModel : ViewModel() {
             drugDosage = dosageInt,
             drugFreq = freqInt,
             drugDuration = durInt,
-            drugStock = freqInt * durInt, // Suggest enough stock for the whole duration
+            drugStock = freqInt * durInt, 
             dateIssued = LocalDate.now()
         )
         DBManager.addPrescription(newPrescription)
 
-        // --- ΠΡΟΣΘΗΚΗ: Αυτόματη εισαγωγή της συνταγής στο Ιατρικό Ιστορικό του Ασθενή ---
-        // Δημιουργούμε ένα record με τα στοιχεία που έγραψε ο γιατρός
+        
+        
         val newRecord = MedicalRecord(
             id = "rec_${System.currentTimeMillis()}",
             patientId = patientId,
             date = LocalDate.now(),
-            type = "Prescription", // Shows with blue/primary color on card
+            type = "Prescription", 
             description = "Medication: $medication\nDosage: $dosage\nFrequency: $frequency\nDuration: $duration"
         )
 
-        // Ενημερώνουμε τη λίστα του ιστορικού.
-        // Το προσθέτουμε στην αρχή της λίστας (newRecord + it) για να φαίνεται πρώτο-πρώτο πάνω στην οθόνη
+        
+        
         _patientHistory.update { listOf(newRecord) + it }
 
-        // ΒΗΜΑ 5: Αυτόματη ενημέρωση του προγράμματος φαρμάκων του ασθενή (Simulated)
-        println("SYSTEM: Το πρόγραμμα φαρμάκων του ασθενή $patientId ενημερώθηκε με το φάρμακο $medication.")
+        
+        println("SYSTEM: Î¤Î¿ Ï€ÏÏŒÎ³ÏÎ±Î¼Î¼Î± Ï†Î±ÏÎ¼Î¬ÎºÏ‰Î½ Ï„Î¿Ï… Î±ÏƒÎ¸ÎµÎ½Î® $patientId ÎµÎ½Î·Î¼ÎµÏÏŽÎ¸Î·ÎºÎµ Î¼Îµ Ï„Î¿ Ï†Î¬ÏÎ¼Î±ÎºÎ¿ $medication.")
 
-        // ΒΗΜΑ 6: Αποστολή ειδοποίησης στον ασθενή (Simulated)
-        println("SYSTEM: Εστάλη ειδοποίηση (Notification) στον ασθενή $patientId: 'Ο γιατρός σας εξέδωσε νέα συνταγή'.")
+        
+        println("SYSTEM: Î•ÏƒÏ„Î¬Î»Î· ÎµÎ¹Î´Î¿Ï€Î¿Î¯Î·ÏƒÎ· (Notification) ÏƒÏ„Î¿Î½ Î±ÏƒÎ¸ÎµÎ½Î® $patientId: 'ÎŸ Î³Î¹Î±Ï„ÏÏŒÏ‚ ÏƒÎ±Ï‚ ÎµÎ¾Î­Î´Ï‰ÏƒÎµ Î½Î­Î± ÏƒÏ…Î½Ï„Î±Î³Î®'.")
 
-        return null // Επιστροφή null σημαίνει επιτυχία χωρίς σφάλματα
+        return null 
     }
 
     fun addAppointment(date: LocalDateTime, reason: String, patientAmka: String): Result<Unit> {
@@ -208,3 +205,4 @@ class DoctorViewModel : ViewModel() {
         DBManager.deleteAppointment(appointmentId)
     }
 }
+

@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.medication
+﻿package com.example.medlinkapp.ui.medication
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -228,3 +228,4 @@ fun MedicationCard(
         }
     }
 }
+

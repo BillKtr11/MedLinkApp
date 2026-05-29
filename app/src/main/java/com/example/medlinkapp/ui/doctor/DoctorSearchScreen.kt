@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.doctor
+﻿package com.example.medlinkapp.ui.doctor
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -40,7 +40,7 @@ fun DoctorSearchScreen(
             )
         }
     ) { paddingValues ->
-        // Το περιεχόμενο της οθόνης με padding από το Scaffold
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()

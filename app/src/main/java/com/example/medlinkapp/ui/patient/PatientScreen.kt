@@ -1,4 +1,4 @@
-package com.example.medlinkapp.ui.patient
+﻿package com.example.medlinkapp.ui.patient
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -51,7 +51,7 @@ fun PatientScreen(
     val myMessages = messages.filter { it.patientAmka == userAmka }
     val unreadMessagesCount = myMessages.count { !it.isRead }
 
-    // Find the next medication to take
+    
     val nextMed = medications.filter { it.intakeTimes.isNotEmpty() }
         .mapNotNull { med -> 
             med.getNextIntakeTime()?.let { time -> med to time }
@@ -74,7 +74,7 @@ fun PatientScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        // Test Notification logic simulation: open intake screen for the next med
+                        
                         if (nextMed != null) {
                             onNavigateToTakeMedication(nextMed.first.id)
                         }
@@ -260,3 +260,4 @@ fun PatientScreenPreview() {
         )
     }
 }
+

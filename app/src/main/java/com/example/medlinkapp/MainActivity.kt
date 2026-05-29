@@ -1,4 +1,4 @@
-package com.example.medlinkapp
+﻿package com.example.medlinkapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation() {
-    // This controller manages which screen is currently visible
+    
     val navController = rememberNavController()
     val loginViewModel: LoginViewModel = viewModel()
     val doctorViewModel: DoctorViewModel = viewModel()
@@ -78,7 +78,7 @@ fun AppNavigation() {
     
     val loginState by loginViewModel.loginState.collectAsState()
 
-    // Auto-login logic
+    
     LaunchedEffect(Unit) {
         if (DBManager.isSessionValid()) {
             val user = DBManager.getCurrentUser()
@@ -190,7 +190,7 @@ fun AppNavigation() {
             val prescriptions by DBManager.prescriptions.collectAsState()
             PrescriptionHistoryScreen(
                 prescriptions = prescriptions,
-                title = "Ιστορικό Εκδοθέντων Συνταγών",
+                title = "Î™ÏƒÏ„Î¿ÏÎ¹ÎºÏŒ Î•ÎºÎ´Î¿Î¸Î­Î½Ï„Ï‰Î½ Î£Ï…Î½Ï„Î±Î³ÏŽÎ½",
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -239,13 +239,13 @@ fun AppNavigation() {
                 viewModel = doctorViewModel,
                 onBackClick = { navController.popBackStack() },
                 onNavigateToPrescription = {
-                    // Πλοήγηση στη νέα οθόνη της συνταγής
+                    
                     navController.navigate("prescription_screen")
                 }
             )
         }
 
-        // 2.3 ΝΕΑ ΟΘΟΝΗ: Καταχώριση Συνταγής
+        
         composable("prescription_screen") {
             PrescriptionSystem(
                 viewModel = doctorViewModel,
@@ -253,7 +253,7 @@ fun AppNavigation() {
             )
         }
 
-        // 3. Patient Dashboard
+        
         composable("patient_dashboard") {
             val patientName = (loginState as? LoginState.Success)?.let { success ->
                 DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
@@ -289,7 +289,7 @@ fun AppNavigation() {
             
             PrescriptionHistoryScreen(
                 prescriptions = myPrescriptions,
-                title = "Οι Συνταγές Μου",
+                title = "ÎŸÎ¹ Î£Ï…Î½Ï„Î±Î³Î­Ï‚ ÎœÎ¿Ï…",
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -389,7 +389,7 @@ fun AppNavigation() {
             )
         }
 
-        // 4. Caregiver Dashboard (Placeholder)
+        
         composable("caregiver_dashboard") {
             val caregiverName = (loginState as? LoginState.Success)?.let { success ->
                 DBManager.users.value.find { it.amka == success.userAmka }?.let { "${it.name} ${it.surname}" }
@@ -445,3 +445,4 @@ fun AppNavigation() {
         }
     }
 }
+
