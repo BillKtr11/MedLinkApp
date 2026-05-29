@@ -17,13 +17,12 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun PrescriptionHistoryScreen(
     prescriptions: List<Prescription>,
-    title: String = "Prescription History",
     onBackClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(title) },
+                title = { Text("Prescription History") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")

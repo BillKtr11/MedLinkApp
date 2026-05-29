@@ -76,7 +76,6 @@ object DBManager {
     val prescriptions: StateFlow<List<Prescription>> = _prescriptions.asStateFlow()
 
     private val _sideEffects = MutableStateFlow<List<SideEffect>>(emptyList())
-    val sideEffects: StateFlow<List<SideEffect>> = _sideEffects.asStateFlow()
 
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     val messages: StateFlow<List<Message>> = _messages.asStateFlow()
@@ -269,8 +268,6 @@ object DBManager {
     }
 
     private val _sideEffectReports = MutableStateFlow<List<SideEffectReport>>(emptyList())
-    val sideEffectReports: StateFlow<List<SideEffectReport>> = _sideEffectReports.asStateFlow()
-
     
     private fun loadIntakeRecords() {
         val json = prefs?.getString(KEY_INTAKES, null)

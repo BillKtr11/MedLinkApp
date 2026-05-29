@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 class ReportRepository(private val dbManager: DBManager = DBManager) {
 
-    suspend fun getPatient(patientId: String): Result<Patient> {
+    fun getPatient(patientId: String): Result<Patient> {
         return dbManager.getPatientInformation(patientId)
     }
 

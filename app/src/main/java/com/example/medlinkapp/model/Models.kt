@@ -94,13 +94,7 @@ data class Medication(
     val patientAmka: String,
     val intakeTimes: List<String> = emptyList(), 
     val frequency: Int = 1 
-) {
-    fun getNextIntakeTime(): String? {
-        if (intakeTimes == null || intakeTimes.isEmpty()) return null
-        
-        return intakeTimes.first()
-    }
-}
+)
 
 data class IntakeRecord(
     val medId: String,

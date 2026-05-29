@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -47,7 +49,7 @@ fun CaregiverScreen(
                 },
                 actions = {
                     IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
                     }
                 }
             )
@@ -151,7 +153,7 @@ fun CaregiverActionCard(
                 Text(text = summaryText, style = MaterialTheme.typography.bodyMedium, color = Color.DarkGray)
             }
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = "Go",
                 tint = Color.Gray
             )
@@ -178,7 +180,7 @@ fun PatientListItem(patient: User, onClick: () -> Unit) {
                 Text("${patient.name} ${patient.surname}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                 Text("AMKA: ${patient.amka}", style = MaterialTheme.typography.bodySmall)
             }
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Details")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Details")
         }
     }
 }
