@@ -39,7 +39,6 @@ fun PatientScreen(
     onNavigateToReportSymptom: () -> Unit,
     onNavigateToPrescriptionHistory: () -> Unit,
     onNavigateToTakeMedication: (String) -> Unit,
-    onTriggerSOS: () -> Unit,
     onLogout: () -> Unit,
 ) {
     val medications by medViewModel.medications.collectAsState()
@@ -80,15 +79,6 @@ fun PatientScreen(
                         }
                     }) {
                         Icon(Icons.Default.Notifications, contentDescription = "Test Notification", tint = MaterialTheme.colorScheme.primary)
-                    }
-                    Button(
-                        onClick = onTriggerSOS,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    ) {
-                        Icon(Icons.Default.Warning, contentDescription = "SOS", modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("SOS")
                     }
                     IconButton(onClick = onLogout) {
                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
@@ -255,7 +245,6 @@ fun PatientScreenPreview() {
             onNavigateToReportSymptom = {},
             onNavigateToPrescriptionHistory = {},
             onNavigateToTakeMedication = {},
-            onTriggerSOS = {},
             onLogout = {}
         )
     }

@@ -190,7 +190,6 @@ fun AppNavigation() {
             val prescriptions by DBManager.prescriptions.collectAsState()
             PrescriptionHistoryScreen(
                 prescriptions = prescriptions,
-                title = "Î™ÏƒÏ„Î¿ÏÎ¹ÎºÏŒ Î•ÎºÎ´Î¿Î¸Î­Î½Ï„Ï‰Î½ Î£Ï…Î½Ï„Î±Î³ÏŽÎ½",
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -270,9 +269,6 @@ fun AppNavigation() {
                 onNavigateToTakeMedication = { medId ->
                     navController.navigate("intake_screen/$medId")
                 },
-                onTriggerSOS = {
-                    println("SOS Triggered!")
-                },
                 onLogout = {
                     loginViewModel.logout()
                     navController.navigate("login_screen") {
@@ -289,7 +285,6 @@ fun AppNavigation() {
             
             PrescriptionHistoryScreen(
                 prescriptions = myPrescriptions,
-                title = "ÎŸÎ¹ Î£Ï…Î½Ï„Î±Î³Î­Ï‚ ÎœÎ¿Ï…",
                 onBackClick = { navController.popBackStack() }
             )
         }
